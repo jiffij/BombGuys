@@ -1,6 +1,6 @@
-import * as THREE from 'three'
-import { OrbitControls } from 'node_modules/three/examples/jsm/controls/OrbitControls'
-import { A, D, DIRECTIONS, S, W } from './utils'
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
+import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
+import { A, D, DIRECTIONS, S, W } from './utils.js'
 
 export class CharacterController {
     // state
@@ -45,26 +45,27 @@ export class CharacterController {
 
         var play = '';
         if (directionPressed && this.toggleRun) {
-            play = 'Run'
+            play = 'run'
         } else if (directionPressed) {
-            play = 'Walk'
+            play = 'walk'
         } else {
-            play = 'Idle'
+            play = 'idle'
         }
 
         if (this.currentAction != play) {
+            console.log(this.currentAction)
             const toPlay = this.animationsMap.get(play)
             const current = this.animationsMap.get(this.currentAction)
-
             current.fadeOut(this.fadeDuration)
             toPlay.reset().fadeIn(this.fadeDuration).play();
+            // toPlay.play()
 
             this.currentAction = play
         }
 
         this.mixer.update(delta)
 
-        if (this.currentAction == 'Run' || this.currentAction == 'Walk') {
+        if (this.currentAction == 'run' || this.currentAction == 'walk') {
             // calculate towards camera direction
             var angleYCameraDirection = Math.atan2(
                     (this.camera.position.x - this.model.position.x), 
@@ -83,7 +84,7 @@ export class CharacterController {
             this.walkDirection.applyAxisAngle(this.rotateAngle, directionOffset)
 
             // run/walk velocity
-            const velocity = this.currentAction == 'Run' ? this.runVelocity : this.walkVelocity
+            const velocity = this.currentAction == 'run' ? this.runVelocity : this.walkVelocity
 
             // move model & camera
             const moveX = this.walkDirection.x * velocity * delta

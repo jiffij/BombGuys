@@ -5,6 +5,10 @@ import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/j
 import { ModelLoader } from './ModelLoader.js';
 import { KeyDisplay } from './utils.js';
 
+
+// test switch action
+let play = ""
+
 // setup scene and camera
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -26,17 +30,20 @@ orbit.update()
 // mixers contain all animations
 let mixers = [];
 // load model and animation
-const mouseLoader = new ModelLoader("../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx"],[0.01,0.01,0.01])
-mouseLoader.load(mixers,scene)
+const mouseLoader = new ModelLoader("../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx"],[0.01,0.01,0.01], orbit, camera)
+mouseLoader.load(scene)
+
 
 
 // keyboard event listener
 const keysPressed = {}
 const keyDisplayQueue = new KeyDisplay()
 document.addEventListener("keydown", function(event){
-  keyDisplayQueue.down(event.key.toLowerCase())
+    keyDisplayQueue.down(event.key.toLowerCase())
     if (event.shiftKey){
         // run
+        play = 'walk'
+        mouseLoader.characterController.switchRunToggle();
     }
     else {
         // walk
@@ -46,8 +53,10 @@ document.addEventListener("keydown", function(event){
 
 document.addEventListener("keyup", function(event){
     keyDisplayQueue.up(event.key.toLowerCase())
-    if (event.shiftKey){
+    if (event.key == "Shift"){
         // run
+        play = "idle"
+        
     }
     else {
         // walk
@@ -59,8 +68,18 @@ document.addEventListener("keyup", function(event){
 scene.background = new THREE.Color(0xFFFFFF)
 const light = new THREE.HemisphereLight(0xffffff,0x000000,2)
 scene.add(light)
+
+
+// animation
+let clock = new THREE.Clock();
+
 function animate() {
-  renderer.render(scene, camera)
-  mixers.map(mixer => {mixer.update(0.02)})
+    let updateDelta = clock.getDelta();
+    if (mouseLoader.characterController){
+        mouseLoader.characterController.update(updateDelta, keysPressed)
+    }
+    orbit.update()
+    renderer.render(scene, camera)
+
 }
 renderer.setAnimationLoop(animate)
