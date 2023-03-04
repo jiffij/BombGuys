@@ -6,6 +6,8 @@ export class CharacterController {
     // state
     toggleRun = true
     currentAction
+    jump = false
+    finishJump = false
     
     // temporary data
     walkDirection = new THREE.Vector3()
@@ -17,6 +19,8 @@ export class CharacterController {
     fadeDuration = 0.2
     runVelocity = 5
     walkVelocity = 2
+    jumpVelocity = 0.5
+    vAngle = 0
 
     constructor(model,
         mixer, animationsMap,
@@ -43,7 +47,7 @@ export class CharacterController {
     update(delta, keysPressed) {
         const directionPressed = DIRECTIONS.some(key => keysPressed[key] == true)
         
-        var play = '';
+        var play = 'idle';
         if (directionPressed && this.toggleRun) {
             play = 'run'
         } else if (directionPressed) {
@@ -51,21 +55,31 @@ export class CharacterController {
         } else {
             play = 'idle'
         }
-        console.log(directionPressed)
-        if (keysPressed[SPACE]){
-            play = "jump"
-        }
 
+        const current = this.animationsMap.get(this.currentAction)
+        if (this.currentAction != play || keysPressed[SPACE] || this.finishJump) {
+            let toPlay;
+            let flag = false
 
-        if (this.currentAction != play) {
-            console.log(this.currentAction)
-            const toPlay = this.animationsMap.get(play)
-            const current = this.animationsMap.get(this.currentAction)
-            current.fadeOut(this.fadeDuration)
-            toPlay.reset().fadeIn(this.fadeDuration).play();
-            // toPlay.play()
-
-            this.currentAction = play
+            if (keysPressed[SPACE]){
+                toPlay = this.animationsMap.get("jump")
+                flag = true
+            }
+            else {
+                toPlay = this.animationsMap.get(play)
+            }
+            if (!this.jump){
+                current.fadeOut(this.fadeDuration)
+                toPlay.reset().fadeIn(this.fadeDuration).play();
+                this.currentAction = play
+                if (flag) {
+                    this.jump = true
+                }
+            }
+            else {
+                this.currentAction = play
+            }
+            this.finishJump = false
         }
 
         this.mixer.update(delta)
@@ -96,6 +110,11 @@ export class CharacterController {
             const moveZ = this.walkDirection.z * velocity * delta
             this.model.position.x -= moveX
             this.model.position.z -= moveZ
+            if (this.jump){
+                this.vAngle += this.jumpVelocity
+                const moveY = Math.sin(this.vAngle)
+                this.model.position.y += moveY
+            }
             this.updateCameraTarget(moveX, moveZ)
         }
     }

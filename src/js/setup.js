@@ -35,7 +35,7 @@ export class GameMap {
                     refractionRatio: 0.5
                 } );
                 const cube = new THREE.Mesh( geometry, material );
-                cube.position.set(posX, 0, posY)
+                cube.position.set(posX, -thickness, posY)
                 this.floorPieces.push(cube)
                 this.scene.add( cube );
             }
@@ -43,12 +43,9 @@ export class GameMap {
     }
 
     randomDelete(){
-        console.log("delete a piece")
         const length = this.floorPieces.length;
         const randomNum = Math.floor(Math.random()*length);
         const removedPiece = this.floorPieces.splice(randomNum,1)[0]
-        console.log(removedPiece)
-        console.log(randomNum)
         this.scene.remove(removedPiece)
     }
     

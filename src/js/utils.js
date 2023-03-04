@@ -4,7 +4,7 @@ export const S = 's'
 export const D = 'd'
 export const SPACE = " "
 export const SHIFT = 'shift'
-export const DIRECTIONS = [W, A, S, D, SPACE]
+export const DIRECTIONS = [W, A, S, D]
 
 export class KeyDisplay {
 

@@ -29,6 +29,15 @@ export class ModelLoader {
         loader.setPath(this.path)
         loader.load(this.file, function(fbx) {
             this.mixer = new THREE.AnimationMixer(fbx);
+            this.mixer.addEventListener("finished", ( /*event*/ ) => {
+                console.log("finish")
+                // current.fadeOut(this.fadeDuration)
+                let idleAction = this.animationMap.get("idle");
+                idleAction.reset().fadeIn(0.2).play();
+                this.characterController.finishJump = true
+                this.characterController.jump = false
+            
+            } )
             fbx.scale.set(this.scale[0],this.scale[1],this.scale[2])
             if (this.animations.length > 0){
                 for (let animation of this.animations){
@@ -36,7 +45,6 @@ export class ModelLoader {
                 }
             }
             scene.add(fbx)
-            this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle")
         }.bind(this))
     }
 
@@ -55,10 +63,18 @@ export class ModelLoader {
                 this.animationMap.set("run",action)
             }
             else if (animation == "jump.fbx"){
+                action.setLoop(THREE.LoopOnce);
+                action.clampWhenFinished = true;
+                action.enable = true;
+                
                 this.animationMap.set("jump",action)
             }
             else {
                 this.animationMap.set("walk",action)
+            }
+
+            if (this.animationMap.size == 4) {
+                this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle")
             }
 
         })
