@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
-import { A, D, DIRECTIONS, S, W } from './utils.js'
+import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js'
 
 export class CharacterController {
     // state
@@ -42,7 +42,7 @@ export class CharacterController {
 
     update(delta, keysPressed) {
         const directionPressed = DIRECTIONS.some(key => keysPressed[key] == true)
-
+        
         var play = '';
         if (directionPressed && this.toggleRun) {
             play = 'run'
@@ -51,6 +51,11 @@ export class CharacterController {
         } else {
             play = 'idle'
         }
+        console.log(directionPressed)
+        if (keysPressed[SPACE]){
+            play = "jump"
+        }
+
 
         if (this.currentAction != play) {
             console.log(this.currentAction)
@@ -65,7 +70,7 @@ export class CharacterController {
 
         this.mixer.update(delta)
 
-        if (this.currentAction == 'run' || this.currentAction == 'walk') {
+        if (this.currentAction !== 'idle') {
             // calculate towards camera direction
             var angleYCameraDirection = Math.atan2(
                     (this.camera.position.x - this.model.position.x), 
@@ -89,16 +94,16 @@ export class CharacterController {
             // move model & camera
             const moveX = this.walkDirection.x * velocity * delta
             const moveZ = this.walkDirection.z * velocity * delta
-            this.model.position.x += moveX
-            this.model.position.z += moveZ
+            this.model.position.x -= moveX
+            this.model.position.z -= moveZ
             this.updateCameraTarget(moveX, moveZ)
         }
     }
 
     updateCameraTarget(moveX, moveZ) {
         // move camera
-        this.camera.position.x += moveX
-        this.camera.position.z += moveZ
+        this.camera.position.x -= moveX
+        this.camera.position.z -= moveZ
 
         // update camera target
         this.cameraTarget.x = this.model.position.x
@@ -110,23 +115,23 @@ export class CharacterController {
     directionOffset(keysPressed) {
         var directionOffset = 0 // w
 
-        if (keysPressed[W]) {
-            if (keysPressed[A]) {
+        if (keysPressed[S]) {
+            if (keysPressed[D]) {
                 directionOffset = Math.PI / 4 // w+a
-            } else if (keysPressed[D]) {
+            } else if (keysPressed[A]) {
                 directionOffset = - Math.PI / 4 // w+d
             }
-        } else if (keysPressed[S]) {
-            if (keysPressed[A]) {
+        } else if (keysPressed[W]) {
+            if (keysPressed[D]) {
                 directionOffset = Math.PI / 4 + Math.PI / 2 // s+a
-            } else if (keysPressed[D]) {
+            } else if (keysPressed[A]) {
                 directionOffset = -Math.PI / 4 - Math.PI / 2 // s+d
             } else {
                 directionOffset = Math.PI // s
             }
-        } else if (keysPressed[A]) {
-            directionOffset = Math.PI / 2 // a
         } else if (keysPressed[D]) {
+            directionOffset = Math.PI / 2 // a
+        } else if (keysPressed[A]) {
             directionOffset = - Math.PI / 2 // d
         }
 

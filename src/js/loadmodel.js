@@ -4,6 +4,7 @@ import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
 import { ModelLoader } from './ModelLoader.js';
 import { KeyDisplay } from './utils.js';
+import { GameMap } from './setup.js';
 
 
 // test switch action
@@ -27,12 +28,14 @@ const orbit = new OrbitControls(camera, renderer.domElement)
 orbit.update()
 
 
-// mixers contain all animations
-let mixers = [];
+
 // load model and animation
-const mouseLoader = new ModelLoader("../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx"],[0.01,0.01,0.01], orbit, camera)
+const mouseLoader = new ModelLoader("../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"],[0.01,0.01,0.01], orbit, camera)
 mouseLoader.load(scene)
 
+// create map
+const gameMap = new GameMap(scene)
+gameMap.setup()
 
 
 // keyboard event listener
@@ -53,6 +56,9 @@ document.addEventListener("keydown", function(event){
 
 document.addEventListener("keyup", function(event){
     keyDisplayQueue.up(event.key.toLowerCase())
+    if (event.key == " ") {
+        gameMap.randomDelete()
+    }
     if (event.key == "Shift"){
         // run
         play = "idle"
@@ -65,6 +71,7 @@ document.addEventListener("keyup", function(event){
 }, false)
 
 
+// add light
 scene.background = new THREE.Color(0xFFFFFF)
 const light = new THREE.HemisphereLight(0xffffff,0x000000,2)
 scene.add(light)

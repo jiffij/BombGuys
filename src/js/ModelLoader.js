@@ -54,6 +54,9 @@ export class ModelLoader {
             else if (animation == "run.fbx"){
                 this.animationMap.set("run",action)
             }
+            else if (animation == "jump.fbx"){
+                this.animationMap.set("jump",action)
+            }
             else {
                 this.animationMap.set("walk",action)
             }
