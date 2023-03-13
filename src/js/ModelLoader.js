@@ -32,8 +32,8 @@ export class ModelLoader {
             this.mixer.addEventListener("finished", ( /*event*/ ) => {
                 console.log("finish")
                 // current.fadeOut(this.fadeDuration)
-                let idleAction = this.animationMap.get("idle");
-                idleAction.reset().fadeIn(0.2).play();
+                // let idleAction = this.animationMap.get("idle");
+                // idleAction.reset().fadeIn(0.2).play();
                 this.characterController.finishJump = true
                 this.characterController.jump = false
             

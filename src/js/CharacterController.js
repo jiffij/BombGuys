@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
+import { Bomb } from './Bomb.js';
 import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js'
 
 export class CharacterController {
@@ -17,7 +18,7 @@ export class CharacterController {
     
     // constants
     fadeDuration = 0.2
-    runVelocity = 5
+    runVelocity = 4
     walkVelocity = 2
     jumpVelocity = 0.5
     vAngle = 0
@@ -42,6 +43,11 @@ export class CharacterController {
 
     switchRunToggle() {
         this.toggleRun = !this.toggleRun
+    }
+
+    plantBomb(scene){
+        const position = this.model.position
+        const bomb = new Bomb(scene, position)
     }
 
     update(delta, keysPressed) {
@@ -69,9 +75,11 @@ export class CharacterController {
                 toPlay = this.animationsMap.get(play)
             }
             if (!this.jump){
+                console.log(current)
                 current.fadeOut(this.fadeDuration)
                 toPlay.reset().fadeIn(this.fadeDuration).play();
                 this.currentAction = play
+                console.log(play)
                 if (flag) {
                     this.jump = true
                 }
@@ -110,11 +118,11 @@ export class CharacterController {
             const moveZ = this.walkDirection.z * velocity * delta
             this.model.position.x -= moveX
             this.model.position.z -= moveZ
-            if (this.jump){
-                this.vAngle += this.jumpVelocity
-                const moveY = Math.sin(this.vAngle)
-                this.model.position.y += moveY
-            }
+            // if (this.jump){
+            //     this.vAngle += this.jumpVelocity
+            //     const moveY = Math.sin(this.vAngle)
+            //     this.model.position.y += moveY
+            // }
             this.updateCameraTarget(moveX, moveZ)
         }
     }
