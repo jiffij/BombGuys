@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
+import { Bomb } from './Bomb.js';
 import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js'
 import {Physics} from './physics.js';
 
@@ -18,7 +19,7 @@ export class CharacterController {
     
     // constants
     fadeDuration = 0.2
-    runVelocity = 5
+    runVelocity = 4
     walkVelocity = 2
     jumpVelocity = 0.5
     vAngle = 0
@@ -47,6 +48,11 @@ export class CharacterController {
         this.toggleRun = !this.toggleRun
     }
 
+    plantBomb(scene){
+        const position = this.model.position
+        const bomb = new Bomb(scene, position)
+    }
+
     update(delta, keysPressed) {
         const directionPressed = DIRECTIONS.some(key => keysPressed[key] == true)
         
@@ -72,9 +78,11 @@ export class CharacterController {
                 toPlay = this.animationsMap.get(play)
             }
             if (!this.jump){
+                console.log(current)
                 current.fadeOut(this.fadeDuration)
                 toPlay.reset().fadeIn(this.fadeDuration).play();
                 this.currentAction = play
+                console.log(play)
                 if (flag) {
                     this.jump = true
                 }
@@ -111,6 +119,7 @@ export class CharacterController {
             // move model & camera
             const moveX = this.walkDirection.x * velocity * delta
             const moveZ = this.walkDirection.z * velocity * delta
+
             this.player.move(moveX, moveZ);
             // this.model.position.x -= moveX
             // this.model.position.z -= moveZ

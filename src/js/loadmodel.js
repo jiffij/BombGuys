@@ -60,12 +60,10 @@ const keyDisplayQueue = new KeyDisplay()
 document.addEventListener("keydown", function(event){
     keyDisplayQueue.down(event.key.toLowerCase())
     if (event.shiftKey){
-        // run
         play = 'walk'
         mouseLoader.characterController.switchRunToggle();
     }
     else {
-        // walk
         keysPressed[event.key.toLowerCase()] = true
     }
 }, false)
@@ -76,12 +74,13 @@ document.addEventListener("keyup", function(event){
         gameMap.randomDelete()
     }
     if (event.key == "Shift"){
-        // run
         play = "idle"
-        
+    }
+    if (event.key == "j"){
+        console.log("j pressed")
+        mouseLoader.characterController.plantBomb(scene)
     }
     else {
-        // walk
         keysPressed[event.key.toLowerCase()] = false
     }
 }, false)
@@ -91,6 +90,14 @@ document.addEventListener("keyup", function(event){
 scene.background = new THREE.Color(0xFFFFFF)
 const light = new THREE.HemisphereLight(0xffffff,0x000000,2)
 scene.add(light)
+
+
+
+// test area
+// let sphere = new THREE.SphereGeometry(0.4,45,30);
+// let texture = new THREE.MeshBasicMaterial( { color: 0x123421 } );
+// let bomb = new THREE.Mesh(sphere, texture)
+// scene.add(bomb)
 
 
 // animation

@@ -5,4 +5,9 @@ export const floorConfig = {
     thickness: 0.1
 }
 
-export const mapSize = 10;
+export const bombConfig = {
+    bufferTime: 3000,
+    radius: 0.4,
+}
+
+export const mapSize = 15;
