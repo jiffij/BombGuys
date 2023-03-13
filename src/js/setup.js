@@ -3,14 +3,15 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.mod
 
 import { floorConfig, mapSize } from "./config.js";
 import { FloorPiece } from "./FloorPiece.js";
-
+import { Physics } from './physics.js';
 
 export class GameMap {
     floorPieces = [];
     colorSwitch = "color1";
 
-    constructor(scene){
-        this.scene = scene
+    constructor(scene, physicsWorld){
+        this.scene = scene;
+        this.physicsWorld = physicsWorld;
     }
 
     setup(){
@@ -38,6 +39,7 @@ export class GameMap {
                 cube.position.set(posX, -thickness, posY)
                 this.floorPieces.push(cube)
                 this.scene.add( cube );
+                this.physicsWorld.addFloorPiece(cube);
             }
         }
     }
@@ -47,6 +49,7 @@ export class GameMap {
         const randomNum = Math.floor(Math.random()*length);
         const removedPiece = this.floorPieces.splice(randomNum,1)[0]
         this.scene.remove(removedPiece)
+        this.physicsWorld.removeFloor();
     }
     
     switchColor(color1, color2){
