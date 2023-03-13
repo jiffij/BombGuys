@@ -3,9 +3,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.mod
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
 import { CharacterController } from './characterController.js';
+import { Physics } from './physics.js';
 
 export class ModelLoader {
-    constructor(path, file, animationPath, animations, scale, orbitControls, camera) {
+    constructor(path, file, animationPath, animations, scale, orbitControls, camera, physicsWorld) {
         this.path = path;
         this.file = file;
         this.animations = animations;
@@ -17,6 +18,7 @@ export class ModelLoader {
         this.characterController;
         this.orbitControls = orbitControls;
         this.camera = camera;
+        this.physicsWorld = physicsWorld;
     }
 
     addAnimation(animation){
@@ -74,7 +76,7 @@ export class ModelLoader {
             }
 
             if (this.animationMap.size == 4) {
-                this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle")
+                this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld)
             }
 
         })

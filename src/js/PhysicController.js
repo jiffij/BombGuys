@@ -1,9 +1,8 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
 import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js'
-import {Physics} from './physics.js';
 
-export class CharacterController {
+export class PhysicsController {
     // state
     toggleRun = true
     currentAction
@@ -26,21 +25,19 @@ export class CharacterController {
     constructor(model,
         mixer, animationsMap,
         orbitControl, camera,
-        currentAction, physicsWorld) {
-        this.model = model;
-        this.mixer = mixer;
-        this.animationsMap = animationsMap;
-        this.currentAction = currentAction;
+        currentAction) {
+        this.model = model
+        this.mixer = mixer
+        this.animationsMap = animationsMap
+        this.currentAction = currentAction
         this.animationsMap.forEach((value, key) => {
             if (key == currentAction) {
                 value.play()
             }
-        });
-        this.orbitControl = orbitControl;
-        this.camera = camera;
-        this.updateCameraTarget(0,0);
-        this.player = physicsWorld.addPlayer(model, [model.position.x, model.position.y, model.position.z]);
-        
+        })
+        this.orbitControl = orbitControl
+        this.camera = camera
+        this.updateCameraTarget(0,0)
     }
 
     switchRunToggle() {
@@ -111,9 +108,8 @@ export class CharacterController {
             // move model & camera
             const moveX = this.walkDirection.x * velocity * delta
             const moveZ = this.walkDirection.z * velocity * delta
-            this.player.move(moveX, moveZ);
-            // this.model.position.x -= moveX
-            // this.model.position.z -= moveZ
+            this.model.position.x -= moveX
+            this.model.position.z -= moveZ
             if (this.jump){
                 // this.vAngle += this.jumpVelocity
                 // const moveY = Math.sin(this.vAngle)
