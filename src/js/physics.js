@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es/dist/cannon-es.js';
-import { floorConfig, mapSize } from "./config.js";
+import { bodySphereRadius, floorConfig, jumpImpulse, mapSize } from "./config.js";
 
 let NUM_PLAYERS = 0
 
@@ -9,17 +9,23 @@ export class Player{
         this.body = new CANNON.Body({
             mass: 5,
             // type: CANNON.Body.STATIC,
-            shape: new CANNON.Sphere(0.3), //CANNON.Cylinder(0.3,0.3,1,20),
+            shape: new CANNON.Sphere(bodySphereRadius),
+            // shape: new CANNON.Cylinder(0.3,0.00001,0,20),
             fixedRotation: true,
         });
         this.body.position.set(position[0], position[1], position[2]);
         this.fbx = fbx;
         this.id = NUM_PLAYERS++;
+        this.impulse = new CANNON.Vec3(0, jumpImpulse, 0)
     }
 
     move(x, z){
         this.body.position.x -= x;
         this.body.position.z -= z;
+    }
+
+    jump(){
+        this.body.applyImpulse(this.impulse, this.body.position);
     }
 }
 
@@ -52,11 +58,6 @@ export class Physics{
     }
 
     addPlayer(fbx, position){
-        // const player = new CANNON.Body({
-        //     mass: 5,
-        //     shape: new CANNON.Sphere(0.3), //CANNON.Cylinder(0.3,0.3,1,20),
-        // });
-        // player.position.set(position[0], position[1], position[2]);
         const player = new Player(fbx, position)
         this.players.push(player);
         this.physicsWorld.addBody(player.body);
@@ -121,57 +122,11 @@ export class Physics{
         for (let i = 0; i < this.players.length; i++) {
         const fbx = this.players[i].fbx;
         const body = this.players[i].body;
-        fbx.position.copy(body.position);
+        fbx.position.y = body.position.y - bodySphereRadius+0.02
+        fbx.position.x = body.position.x
+        fbx.position.z = body.position.z
         // fbx.quaternion.copy(body.quaternion);
         }
     }
 }
 
-// export class PhysicsWorld {
-//     constructor() {
-//         // Create a new Cannon.js world
-//         this.world = new CANNON.World();
-
-//         // Set the gravity of the world
-//         this.world.gravity.set(0, -9.82, 0);
-
-//         // Set up collision detection
-//         this.bodies = [];
-//     //   this.world.addEventListener('beginContact', event => {
-//     //     const bodyA = event.bodyA;
-//     //     const bodyB = event.bodyB;
-//     //     // Do something when two bodies collide
-//     //   });
-//     }
-
-//     addBody(mesh, mass = 0) {
-//         // Create a new Cannon.js body
-//         const shape = new CANNON.Box(new CANNON.Vec3(1, 1, 1)); // Example shape
-//         const body = new CANNON.Body({
-//         mass: mass,
-//         shape: shape
-//         });
-//         body.position.copy(mesh.position);
-//         body.quaternion.copy(mesh.quaternion);
-
-//         // Add the body to the world and the bodies array
-//         this.world.addBody(body);
-//         this.bodies.push({ mesh: mesh, body: body });
-
-//         // Update the mesh position in the animation loop
-//         mesh.userData.physicsBody = body;
-//     }
-
-    // update(deltaTime) {
-    //     // Step the Cannon.js simulation forward in time
-    //     this.world.step(deltaTime);
-
-    //     // Update the position of each mesh based on its corresponding body
-    //     for (let i = 0; i < this.bodies.length; i++) {
-    //     const mesh = this.bodies[i].mesh;
-    //     const body = this.bodies[i].body;
-    //     mesh.position.copy(body.position);
-    //     mesh.quaternion.copy(body.quaternion);
-    //     }
-    // }
-// }

@@ -22,12 +22,12 @@ export class GameMap {
     
         let color;
         for (let i=0; i<mapSize; i++) {
-            let posX = i - Math.round(mapSize/2)
+            let posX = (i - Math.round(mapSize/2))*size
             if (mapSize % 2 == 0){
                 color = this.switchColor(color1, color2)
             }
             for (let j=0; j<mapSize; j++){
-                let posY = j - Math.round(mapSize/2)
+                let posY = (j - Math.round(mapSize/2))*size
                 const geometry = new THREE.BoxGeometry( size, thickness, size );
                 color = this.switchColor(color1, color2)
                 const material = new THREE.MeshLambertMaterial( {

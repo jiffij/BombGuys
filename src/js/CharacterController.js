@@ -10,6 +10,9 @@ export class CharacterController {
     currentAction
     jump = false
     finishJump = false
+
+    // freeze movement after jump
+    freeze = false
     
     // temporary data
     walkDirection = new THREE.Vector3()
@@ -21,7 +24,6 @@ export class CharacterController {
     fadeDuration = 0.2
     runVelocity = 4
     walkVelocity = 2
-    jumpVelocity = 0.5
     vAngle = 0
 
     constructor(model,
@@ -66,24 +68,25 @@ export class CharacterController {
         }
 
         const current = this.animationsMap.get(this.currentAction)
+        let flag = false
+
         if (this.currentAction != play || keysPressed[SPACE] || this.finishJump) {
             let toPlay;
-            let flag = false
 
             if (keysPressed[SPACE]){
                 toPlay = this.animationsMap.get("jump")
-                flag = true
             }
             else {
                 toPlay = this.animationsMap.get(play)
             }
             if (!this.jump){
-                console.log(current)
+                // console.log(current)
                 current.fadeOut(this.fadeDuration)
                 toPlay.reset().fadeIn(this.fadeDuration).play();
                 this.currentAction = play
-                console.log(play)
-                if (flag) {
+                // console.log(play)
+                if (keysPressed[SPACE]) {
+                    flag = true
                     this.jump = true
                 }
             }
@@ -95,7 +98,7 @@ export class CharacterController {
 
         this.mixer.update(delta)
 
-        if (this.currentAction !== 'idle') {
+        if (this.currentAction !== 'idle' && !this.freeze) {
             // calculate towards camera direction
             var angleYCameraDirection = Math.atan2(
                     (this.camera.position.x - this.model.position.x), 
@@ -123,14 +126,23 @@ export class CharacterController {
             this.player.move(moveX, moveZ);
             // this.model.position.x -= moveX
             // this.model.position.z -= moveZ
-            if (this.jump){
-                // this.vAngle += this.jumpVelocity
-                // const moveY = Math.sin(this.vAngle)
-                // this.model.position.y += moveY
-            }
+
             this.updateCameraTarget(moveX, moveZ)
         }
+        console.log(this.freeze)
+        if (flag){
+            this.player.jump()
+            setTimeout(this.freezeMove.bind(this), 1000)
+        }
     }
+
+
+    freezeMove(){
+        this.freeze = true
+        var self = this
+        setTimeout(function(){self.freeze = false}, 1100)
+    }
+
 
     updateCameraTarget(moveX, moveZ) {
         // move camera

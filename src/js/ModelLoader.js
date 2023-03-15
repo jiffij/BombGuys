@@ -4,9 +4,10 @@ import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
 import { CharacterController } from './characterController.js';
 import { Physics } from './physics.js';
+import { bodySphereRadius, floorConfig } from './config.js';
 
 export class ModelLoader {
-    constructor(path, file, animationPath, animations, scale, orbitControls, camera, physicsWorld) {
+    constructor(scene, path, file, animationPath, animations, scale, orbitControls, camera, physicsWorld) {
         this.path = path;
         this.file = file;
         this.animations = animations;
@@ -19,6 +20,7 @@ export class ModelLoader {
         this.orbitControls = orbitControls;
         this.camera = camera;
         this.physicsWorld = physicsWorld;
+        this.scene = scene
     }
 
     addAnimation(animation){
@@ -26,13 +28,13 @@ export class ModelLoader {
     }
 
     // load character model
-    load(scene){
+    load(){
         var loader = new FBXLoader();
         loader.setPath(this.path)
         loader.load(this.file, function(fbx) {
             this.mixer = new THREE.AnimationMixer(fbx);
             this.mixer.addEventListener("finished", ( /*event*/ ) => {
-                console.log("finish")
+                // console.log("finish")
                 // current.fadeOut(this.fadeDuration)
                 // let idleAction = this.animationMap.get("idle");
                 // idleAction.reset().fadeIn(0.2).play();
@@ -46,7 +48,8 @@ export class ModelLoader {
                     this.loadAnimation(fbx, animation)
                 }
             }
-            scene.add(fbx)
+            fbx.position.set(0,bodySphereRadius,0)
+            this.scene.add(fbx)
         }.bind(this))
     }
 
@@ -80,6 +83,14 @@ export class ModelLoader {
             }
 
         })
+    }
+
+    update(delta, keysPressed){
+        this.characterController.update(delta, keysPressed)
+    }
+
+    plantBomb(){
+        this.characterController.plantBomb(this.scene)
     }
 
 }
