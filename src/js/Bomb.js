@@ -5,6 +5,8 @@
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { bombConfig } from './config.js';
+import { Physics } from './physics.js';
+import { generateUUID } from './utils.js';
 
 
 export class Bomb {
@@ -13,27 +15,40 @@ export class Bomb {
     position;
     radius;
     timeInterval;
-    constructor(scene, position){
+    uuid;
+    quaternion;
+    constructor(scene, position, quaternion, physicsWorld){
         this.scene = scene
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
+        this.quaternion = quaternion
+        this.physicsWorld = physicsWorld
         this.init()
+
     }
     init(){
         let sphere = new THREE.SphereGeometry(this.radius,45,30);
         let texture = new THREE.MeshBasicMaterial( { color: 0x123421 } );
         this.bomb = new THREE.Mesh(sphere, texture)
+        this.uuid = generateUUID()
         this.place()
     }
     place(){
-        this.bomb.position.set(this.position.x, this.position.y + this.radius, this.position.z)
-        console.log(this.bomb)
+        console.log(this.position.y + this.radius)
+        // todo: calculate the position based on quaternion
+        this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius+0.5, this.position.z+0.5)
+        this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid)
         this.scene.add(this.bomb)
         setTimeout(this.remove.bind(this), this.timeInterval)
     }
     remove(){
-        this.scene.remove(this.bomb)
-        delete this
+        try {
+            this.scene.remove(this.bomb)
+            this.physicsWorld.removeBomb(this.uuid)
+            delete this
+        }
+        catch {}
+
     }
 }

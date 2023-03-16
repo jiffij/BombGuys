@@ -26,6 +26,9 @@ export class CharacterController {
     walkVelocity = 2
     vAngle = 0
 
+    // able to throw a bomb
+    throwability = true
+
     constructor(model,
         mixer, animationsMap,
         orbitControl, camera,
@@ -42,6 +45,7 @@ export class CharacterController {
         this.orbitControl = orbitControl;
         this.camera = camera;
         this.updateCameraTarget(0,0);
+        this.physicsWorld = physicsWorld;
         this.player = physicsWorld.addPlayer(model, [model.position.x, model.position.y, model.position.z]);
         
     }
@@ -51,8 +55,16 @@ export class CharacterController {
     }
 
     plantBomb(scene){
-        const position = this.model.position
-        const bomb = new Bomb(scene, position)
+        if (this.throwability){
+            const position = this.model.position
+            const quaternion = this.model.quaternion
+            console.log(this.physicsWorld)
+            const bomb = new Bomb(scene, position, quaternion, this.physicsWorld)
+            this.throwability = false
+            setTimeout(function(){
+                this.throwability = true
+            }.bind(this), 500)
+        }
     }
 
     update(delta, keysPressed) {
@@ -109,6 +121,7 @@ export class CharacterController {
             // rotate model
             this.rotateQuarternion.setFromAxisAngle(this.rotateAngle, angleYCameraDirection + directionOffset)
             this.model.quaternion.rotateTowards(this.rotateQuarternion, 0.2)
+            this.player.rotate(this.model.quaternion)
 
             // calculate direction
             this.camera.getWorldDirection(this.walkDirection)
@@ -129,10 +142,10 @@ export class CharacterController {
 
             this.updateCameraTarget(moveX, moveZ)
         }
-        console.log(this.freeze)
-        if (flag){
+
+        if (flag && !this.freeze){
             this.player.jump()
-            setTimeout(this.freezeMove.bind(this), 1000)
+            setTimeout(this.freezeMove.bind(this), 1250)
         }
     }
 
@@ -140,7 +153,7 @@ export class CharacterController {
     freezeMove(){
         this.freeze = true
         var self = this
-        setTimeout(function(){self.freeze = false}, 1100)
+        setTimeout(function(){self.freeze = false}, 500)
     }
 
 

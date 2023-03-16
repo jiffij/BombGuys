@@ -73,7 +73,7 @@ document.addEventListener("keyup", function(event){
     if (event.key == "Shift"){
         play = "idle"
     }
-    if (event.key == "j"){
+    if (event.key == "k"){
         player.plantBomb()
     }
     else {

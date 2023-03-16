@@ -7,12 +7,16 @@ export const floorConfig = {
 }
 
 export const bombConfig = {
-    bufferTime: 3000,
+    bufferTime: 2000,
     radius: 0.4,
 }
 
-export const jumpImpulse = 20;
+export const jumpImpulse = 25;
+
+export const bombUpImpulse = 1.5;
+export const bombForwardImpulse = 2;
 
 export const bodySphereRadius = 0.4;
 
 export const mapSize = 15;
+export const shootInterval = 0.5
