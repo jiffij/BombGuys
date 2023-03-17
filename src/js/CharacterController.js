@@ -59,7 +59,7 @@ export class CharacterController {
             const position = this.model.position
             const quaternion = this.model.quaternion
             console.log(this.physicsWorld)
-            const bomb = new Bomb(scene, position, quaternion, this.physicsWorld)
+            const bomb = new Bomb(scene, position, quaternion, this.physicsWorld, this.player)
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true

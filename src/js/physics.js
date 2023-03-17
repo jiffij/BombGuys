@@ -93,22 +93,39 @@ export class Physics{
         this.floorpieces.push(new FloorTile(mesh, body));
     }
 
-    addBomb(mesh, quaternion, uuid){
+    addBomb(mesh, quaternion, uuid, player){
         const body = new CANNON.Body({
             mass: 1,
             shape: new CANNON.Sphere(bombConfig.radius),
             collisionFilterGroup: "BOMB",
-            collisionFilterMask: "FLOOR"
+            collisionFilterMask: "FLOOR",
+            fixedRotation: true,
         });
-        body.position.x = mesh.position.x;
-        body.position.y = mesh.position.y;
-        body.position.z = mesh.position.z;
+        body.position.x = player.body.position.x;
+        body.position.y = mesh.position.y + 0.3; // it will touch the player otherwise
+        body.position.z = player.body.position.z;
         this.physicsWorld.addBody(body);
 
         // todo: add up and forward impulse
         const bombUpImpul = new CANNON.Vec3(0,bombUpImpulse,0)
         body.applyImpulse(bombUpImpul, body.position)
-        const bombForwardImpul = new CANNON.Vec3(bombForwardImpulse,0,0)
+
+        //calculate the direction in physics world
+        const euler = new THREE.Euler().setFromQuaternion(quaternion);
+        var yRotation = euler.y;
+        if(euler.x < -1.5){
+            yRotation = -yRotation
+            yRotation = yRotation + Math.PI
+        } else if (yRotation < 0){
+            yRotation = Math.PI * 2 + yRotation
+        }
+        const length = 10;
+        const Z = Math.cos(yRotation) * length;
+        const X = Math.sin(yRotation) * length;
+        // console.log(X, Z)
+      
+        const bombForwardImpul = new CANNON.Vec3(X, 0, Z);
+
         body.applyImpulse(bombForwardImpul, body.position)
 
 

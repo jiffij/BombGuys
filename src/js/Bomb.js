@@ -17,13 +17,14 @@ export class Bomb {
     timeInterval;
     uuid;
     quaternion;
-    constructor(scene, position, quaternion, physicsWorld){
+    constructor(scene, position, quaternion, physicsWorld, player){
         this.scene = scene
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
         this.quaternion = quaternion
         this.physicsWorld = physicsWorld
+        this.player = player
         this.init()
 
     }
@@ -38,7 +39,7 @@ export class Bomb {
         console.log(this.position.y + this.radius)
         // todo: calculate the position based on quaternion
         this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius+0.5, this.position.z+0.5)
-        this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid)
+        this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.player)
         this.scene.add(this.bomb)
         setTimeout(this.remove.bind(this), this.timeInterval)
     }
