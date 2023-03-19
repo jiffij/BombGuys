@@ -4,6 +4,9 @@ import { bodySphereRadius, bombConfig, bombForwardImpulse, bombUpImpulse, floorC
 import { generateUUID } from './utils.js';
 
 let NUM_PLAYERS = 0
+const PLAYER = 1;
+const FLOOR = 2;
+const BOMB = 3;
 
 export class Player{
     constructor(fbx, position){
@@ -13,9 +16,10 @@ export class Player{
             shape: new CANNON.Sphere(bodySphereRadius),
             // shape: new CANNON.Cylinder(0.3,0.00001,0,20),
             fixedRotation: true,
-            // collisionFilterGroup: "PLAYER",
         });
         this.body.position.set(position[0], position[1], position[2]);
+        this.body.collisionFilterGroup = PLAYER,
+        this.body.collisionFilterMask = FLOOR,
         this.fbx = fbx;
         this.id = NUM_PLAYERS++;
         this.impulse = new CANNON.Vec3(0, jumpImpulse, 0)
@@ -80,8 +84,10 @@ export class Physics{
             mass: 0,
             type: CANNON.Body.STATIC,
             shape: new CANNON.Box(new CANNON.Vec3(floorConfig.shape, floorConfig.thickness, floorConfig.shape)),
-            collisionFilterGroup: "FLOOR",
+
         });
+        body.collisionFilterGroup = FLOOR;
+        body.collisionFilterMask = PLAYER | BOMB;
         // body.position.set(new CANNON.Vec3(mesh.position.x, mesh.position.y, mesh.position.z));
         body.position.x = mesh.position.x;
         body.position.y = mesh.position.y;
@@ -97,10 +103,10 @@ export class Physics{
         const body = new CANNON.Body({
             mass: 1,
             shape: new CANNON.Sphere(bombConfig.radius),
-            collisionFilterGroup: "BOMB",
-            collisionFilterMask: "FLOOR",
             fixedRotation: true,
         });
+        body.collisionFilterGroup = BOMB;
+        body.collisionFilterMask = FLOOR;
         body.position.x = player.body.position.x;
         body.position.y = mesh.position.y + 0.3; // it will touch the player otherwise
         body.position.z = player.body.position.z;
@@ -119,7 +125,7 @@ export class Physics{
         } else if (yRotation < 0){
             yRotation = Math.PI * 2 + yRotation
         }
-        const length = 10;
+        const length = bombForwardImpulse;
         const Z = Math.cos(yRotation) * length;
         const X = Math.sin(yRotation) * length;
         // console.log(X, Z)
@@ -130,19 +136,12 @@ export class Physics{
 
 
         body.addEventListener("collide", function(e){
-            console.log("collide")
-            console.log(e)
-            // console.log(typeof(e.body.shapes[0]))
             if (e.body.mass == 0){
                 if (!this.bombsShouldRemove.includes(uuid)){
                     this.bombsShouldRemove.push(uuid)
                 }
-                // body.mass = 0
-                // body.type = CANNON.Body.STATIC
             }
         }.bind(this))
-
-        console.log("plant")
         // need a uuid
         this.bombs[uuid] = new PhysicsBomb(mesh, body);
     }
@@ -160,9 +159,7 @@ export class Physics{
     removeFloor(){
         for(let i = 0; i < this.floorpieces.length/2; i++){
             this.remove(this.floorpieces[i].body);
-            console.log(i);
-        }
-        
+        }        
     }
 
     movePlayer(id, x, z){

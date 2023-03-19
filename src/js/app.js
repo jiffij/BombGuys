@@ -3,7 +3,6 @@ import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es/dist/cannon-es.j
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
 import { ModelLoader } from './ModelLoader.js';
-import { KeyDisplay } from './utils.js';
 import { GameMap } from './GameMap.js';
 import { Physics } from './physics.js';
 
@@ -57,6 +56,7 @@ player.load()
 // keyboard event listener
 const keysPressed = {}
 document.addEventListener("keydown", function(event){
+    console.log(event)
     if (event.shiftKey){
         play = 'walk'
         player.characterController.switchRunToggle();
@@ -68,12 +68,11 @@ document.addEventListener("keydown", function(event){
 
 document.addEventListener("keyup", function(event){
     if (event.key == " ") {
-        // gameMap.randomDelete()
     }
     if (event.key == "Shift"){
         play = "idle"
     }
-    if (event.key == "k"){
+    if (event.key == "j"){
         player.plantBomb()
     }
     else {

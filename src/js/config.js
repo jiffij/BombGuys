@@ -14,7 +14,7 @@ export const bombConfig = {
 export const jumpImpulse = 25;
 
 export const bombUpImpulse = 1.5;
-export const bombForwardImpulse = 2;
+export const bombForwardImpulse = 3;
 
 export const bodySphereRadius = 0.4;
 

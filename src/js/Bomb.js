@@ -36,8 +36,6 @@ export class Bomb {
         this.place()
     }
     place(){
-        console.log(this.position.y + this.radius)
-        // todo: calculate the position based on quaternion
         this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius+0.5, this.position.z+0.5)
         this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.player)
         this.scene.add(this.bomb)
