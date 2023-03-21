@@ -1,7 +1,7 @@
 // create the map
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 
-import { bombConfig, floorConfig, mapSize } from "./config.js";
+import { bombConfig, floorConfig } from "./config.js";
 
 
 export class GameMap {
@@ -13,6 +13,9 @@ export class GameMap {
     color1 = floorConfig.color1;
     color2 = floorConfig.color2;
     thickness = floorConfig.thickness;
+    layers = floorConfig.layers;
+    height = floorConfig.height
+    mapSize = floorConfig.mapSize
 
     constructor(scene, physicsWorld){
         this.scene = scene;
@@ -21,45 +24,43 @@ export class GameMap {
 
     setup(){
         let color;
-        for (let i=0; i<mapSize; i++) {
-            let row = [];
-            let rowPos = [];
-            let posX = (i - Math.round(mapSize/2))*this.size
-            if (mapSize % 2 == 0){
-                color = this.switchColor(this.color1, this.color2)
+        for (let l=0; l<this.layers;l++){
+            let posY = -this.thickness-l*this.height
+            let layer = []
+            let layerPos = []
+            for (let i=0; i<this.mapSize; i++) {
+                let row = [];
+                let rowPos = [];
+                let posX = (i - Math.round(this.mapSize/2))*this.size
+                if (this.mapSize % 2 == 0){
+                    color = this.switchColor(this.color1, this.color2)
+                }
+                for (let j=0; j<this.mapSize; j++){
+                    let posZ = (j - Math.round(this.mapSize/2))*this.size
+                    const geometry = new THREE.BoxGeometry( this.size, this.thickness, this.size );
+                    color = this.switchColor(this.color1, this.color2)
+                    const material = new THREE.MeshLambertMaterial( {
+                        color: color,
+                        aoMapIntensity: 0.5,
+                        refractionRatio: 0.5
+                    } );
+                    const cube = new THREE.Mesh( geometry, material );
+                    const coord = this.getFloorCoordFromCenter([posX, posY, posZ]);
+                    console.log(coord)
+                    rowPos.push(coord);
+                    row.push(cube)
+                    cube.position.set(posX, posY, posZ)
+                    this.scene.add( cube );
+                    this.physicsWorld.addFloorPiece(cube);
+                }
+                layer.push(row)
+                layerPos.push(rowPos)
             }
-            for (let j=0; j<mapSize; j++){
-                let posY = (j - Math.round(mapSize/2))*this.size
-                const geometry = new THREE.BoxGeometry( this.size, this.thickness, this.size );
-                color = this.switchColor(this.color1, this.color2)
-                const material = new THREE.MeshLambertMaterial( {
-                    color: color,
-                    aoMapIntensity: 0.5,
-                    refractionRatio: 0.5
-                } );
-                const cube = new THREE.Mesh( geometry, material );
-                const center_x = posX;
-                const center_y = posY;
-                const center_z = -this.thickness;
-                const coord = this.getFloorCoordFromCenter([center_x, center_z, center_y]);
-                rowPos.push(coord);
-                row.push(cube)
-                cube.position.set(posX, -this.thickness, posY)
-                this.scene.add( cube );
-                this.physicsWorld.addFloorPiece(cube);
-            }
-            this.floorPiecesPos.push(rowPos)
-            this.floorPieces.push(row)
+            this.floorPiecesPos.push(layerPos)
+            this.floorPieces.push(layer)
         }
     }
 
-    randomDelete(){
-        const length = this.floorPieces.length;
-        const randomNum = Math.floor(Math.random()*length);
-        const removedPiece = this.floorPieces.splice(randomNum,1)[0]
-        this.scene.remove(removedPiece);
-        this.physicsWorld.removeFloor();
-    }
     
     switchColor(color1, color2){
         if (this.colorSwitch == "color1"){
@@ -73,9 +74,9 @@ export class GameMap {
     }
 
     removeFloor(pos){
-        let [floor_i, floor_j] = this.getRemoveFloorIndex(pos);
+        let [floor_l, floor_i, floor_j] = this.getRemoveFloorIndex(pos);
         if (floor_i !== undefined){
-            const removedPiece = this.floorPieces[floor_i][floor_j]
+            const removedPiece = this.floorPieces[floor_l][floor_i][floor_j]
             this.scene.remove(removedPiece);
             this.physicsWorld.removeFloor(removedPiece);
         }
@@ -84,15 +85,23 @@ export class GameMap {
     getRemoveFloorIndex(pos){
         let floor_i;
         let floor_j;
+        let floor_l;
         let found = false
-        for (let i=0; i<this.floorPiecesPos.length; i++){
-            let row = this.floorPiecesPos[i];
-            for (let j=0; j<row.length; j++){
-                let piece = row[j];
-                if (piece.checkFallingIn(pos)){
-                   floor_i = i;
-                   floor_j = j; 
-                   found = true;
+        for (let l=0; l<this.layers;l++){
+            let layer = this.floorPiecesPos[l]
+            for (let i=0; i<this.mapSize; i++){
+                let row = layer[i];
+                for (let j=0; j<this.mapSize; j++){
+                    let piece = row[j];
+                    if (piece.checkFallingIn(pos)){
+                       floor_i = i;
+                       floor_j = j; 
+                       floor_l = l;
+                       found = true;
+                    }
+                    if (found){
+                        break;
+                    }
                 }
                 if (found){
                     break;
@@ -102,7 +111,8 @@ export class GameMap {
                 break;
             }
         }
-        return [floor_i, floor_j]
+        return [floor_l, floor_i, floor_j]
+
     }
 
     getFloorCoordFromCenter(pos_center){
@@ -134,6 +144,7 @@ class Coord {
 
         // when multiple layers of floor need to check z
         if (x>=this.left && x<=this.right && z>=this.bottom && z<=this.top && Math.abs(this.y-y)<0.2+bombConfig.radius){
+            console.log(y)
             return true;
         }
         return false;

@@ -6,8 +6,6 @@ import { ModelLoader } from './ModelLoader.js';
 import { GameMap } from './GameMap.js';
 import { Physics } from './physics.js';
 
-// test switch action
-let play = ""
 
 // setup scene and camera
 const renderer = new THREE.WebGLRenderer()
@@ -24,33 +22,19 @@ camera.position.set(5,1,1)
 
 // orbit control
 const orbit = new OrbitControls(camera, renderer.domElement)
-orbit.minDistance = 4
-orbit.maxDistance = 4
+orbit.minDistance = 2
+orbit.maxDistance = 3
 // Disable rotation in the z direction
-orbit.minPolarAngle = Math.PI / 7 *2; // Set minimum vertical rotation to 90 degrees (pointing upwards)
-orbit.maxPolarAngle = Math.PI / 7 *2; // Set maximum vertical rotation to 90 degrees (pointing downwards)
+orbit.minPolarAngle = Math.PI / 7; // Set minimum vertical rotation to 90 degrees (pointing upwards)
+orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
 orbit.update()
 
 // physics
-
 const phy = new Physics();
 
 // create map
 const gameMap = new GameMap(scene, phy)
 gameMap.setup();
-
-// // const sphere = new THREE.CylinderGeometry(0.3,0.3, 1.5, 20, 1);
-// const sphere = new THREE.SphereGeometry(0.3);
-// const ma = new THREE.MeshNormalMaterial();
-// const mesh = new THREE.Mesh(sphere, ma);
-// scene.add(mesh);
-// const sphere2 = new THREE.SphereGeometry(0.3);
-// const ma2 = new THREE.MeshNormalMaterial();
-// const mesh2 = new THREE.Mesh(sphere2, ma2);
-// scene.add(mesh2);
-
-// phy.addPlayer(mesh, [0,1,0]);
-// phy.addPlayer(mesh2, [7,0,0]);
 
 
 // load model and animation

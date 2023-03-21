@@ -3,7 +3,10 @@ export const floorConfig = {
     color2: 0xf5f5dc,
     shape: 0.75,
     thickness: 0.01,
-    size: 1.5
+    size: 1.5,
+    layers: 4,
+    height: 4,
+    mapSize: 15,
 }
 
 export const bombConfig = {
@@ -19,5 +22,4 @@ export const bombForwardImpulse = 3;
 
 export const bodySphereRadius = 0.1;
 
-export const mapSize = 15;
 export const shootInterval = 0.5

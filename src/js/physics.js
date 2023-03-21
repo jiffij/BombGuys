@@ -1,7 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es/dist/cannon-es.js';
-import { bodySphereRadius, bombConfig, bombForwardImpulse, bombUpImpulse, floorConfig, jumpImpulse, mapSize } from "./config.js";
-import { generateUUID } from './utils.js';
+import { bodySphereRadius, bombConfig, bombForwardImpulse, bombUpImpulse, floorConfig, jumpImpulse } from "./config.js";
 
 let NUM_PLAYERS = 0
 const PLAYER = 1;
@@ -32,6 +31,10 @@ export class Player{
     move(x, z){
         this.body.position.x -= x;
         this.body.position.z -= z;
+    }
+
+    getVerticalVelocity(){
+        return this.body.velocity.y
     }
 
     jump(){
@@ -152,7 +155,6 @@ export class Physics{
 
     removeBomb(uuid){
         let bomb = this.bombs[uuid]
-        console.log(bomb)
         this.remove(bomb.body)
         delete this.bombs[uuid]
     }

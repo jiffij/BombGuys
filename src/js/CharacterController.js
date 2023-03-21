@@ -58,7 +58,6 @@ export class CharacterController {
         if (this.throwability){
             const position = this.model.position
             const quaternion = this.model.quaternion
-            console.log(this.physicsWorld)
             const bomb = new Bomb(scene, position, quaternion, this.physicsWorld, this.player, this.gameMap)
             this.throwability = false
             setTimeout(function(){
@@ -70,6 +69,7 @@ export class CharacterController {
     update(delta, keysPressed) {
         let moveX = 0
         let moveZ = 0
+        let moveY = 0
 
         const directionPressed = DIRECTIONS.some(key => keysPressed[key] == true)
         
@@ -134,16 +134,19 @@ export class CharacterController {
 
             // run/walk velocity
             const velocity = this.currentAction == 'run' ? this.runVelocity : this.walkVelocity
+            let verticalVelocity = this.player.getVerticalVelocity()
+            if (verticalVelocity < 0.000000001){
+                verticalVelocity = 0
+            }
 
             // move model & camera
             moveX = this.walkDirection.x * velocity * delta
             moveZ = this.walkDirection.z * velocity * delta
+            moveY = verticalVelocity * delta
 
             this.player.move(moveX, moveZ);
-            // this.model.position.x -= moveX
-            // this.model.position.z -= moveZ
         }
-        this.updateCameraTarget(moveX, moveZ)
+        this.updateCameraTarget(moveX, moveZ, moveY)
 
         if (flag && !this.freeze){
             this.player.jump()
@@ -155,19 +158,19 @@ export class CharacterController {
     freezeMove(){
         this.freeze = true
         var self = this
-        setTimeout(function(){self.freeze = false}, 500)
+        setTimeout(function(){self.freeze = false}, 600)
     }
 
 
-    updateCameraTarget(moveX, moveZ) {
+    updateCameraTarget(moveX, moveZ, moveY) {
         // move camera
         this.camera.position.x -= moveX
         this.camera.position.z -= moveZ
-        this.camera.position.y = this.model.position.y + 2
+        this.camera.position.y += 0
 
         // update camera target
         this.cameraTarget.x = this.model.position.x
-        this.cameraTarget.y = this.model.position.y
+        this.cameraTarget.y = this.model.position.y + 0.5
         this.cameraTarget.z = this.model.position.z
         this.orbitControl.target = this.cameraTarget
     }

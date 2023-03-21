@@ -47,6 +47,7 @@ export class Bomb {
     remove(){
         // try {
             let pos = this.bomb.position
+            console.log(this.bomb.position.y)
             let posReconstuct = [pos.x, pos.y, pos.z]
             this.gameMap.removeFloor(posReconstuct)
             this.scene.remove(this.bomb)
