@@ -49,14 +49,14 @@ gameMap.setup();
 
 
 // load model and animation
-const player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"],[0.01,0.01,0.01], orbit, camera, phy)
+const player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"],[0.01,0.01,0.01], orbit, camera, phy, gameMap)
 player.load()
 
 
 // keyboard event listener
 const keysPressed = {}
 document.addEventListener("keydown", function(event){
-    console.log(event)
+    // console.log(event)
     if (event.shiftKey){
         play = 'walk'
         player.characterController.switchRunToggle();
@@ -72,7 +72,7 @@ document.addEventListener("keyup", function(event){
     if (event.key == "Shift"){
         play = "idle"
     }
-    if (event.key == "j"){
+    if (event.key == "e"){
         player.plantBomb()
     }
     else {

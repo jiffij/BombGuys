@@ -7,7 +7,7 @@ import { Physics } from './physics.js';
 import { bodySphereRadius, floorConfig } from './config.js';
 
 export class ModelLoader {
-    constructor(scene, path, file, animationPath, animations, scale, orbitControls, camera, physicsWorld) {
+    constructor(scene, path, file, animationPath, animations, scale, orbitControls, camera, physicsWorld, gameMap) {
         this.path = path;
         this.file = file;
         this.animations = animations;
@@ -20,7 +20,8 @@ export class ModelLoader {
         this.orbitControls = orbitControls;
         this.camera = camera;
         this.physicsWorld = physicsWorld;
-        this.scene = scene
+        this.scene = scene;
+        this.gameMap = gameMap;
     }
 
     addAnimation(animation){
@@ -79,7 +80,7 @@ export class ModelLoader {
             }
 
             if (this.animationMap.size == 4) {
-                this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld)
+                this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap)
             }
 
         })

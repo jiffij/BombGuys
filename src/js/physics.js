@@ -95,14 +95,13 @@ export class Physics{
         // body.quaternion.set(mesh.quaternion.x, mesh.quaternion.y, mesh.quaternion.z, mesh.quaternion.w);
         // body.quaternion.setFromEuler(-Math.PI/2,0,0);
         this.physicsWorld.addBody(body);
-
         this.floorpieces.push(new FloorTile(mesh, body));
     }
 
     addBomb(mesh, quaternion, uuid, player){
         const body = new CANNON.Body({
             mass: 1,
-            shape: new CANNON.Sphere(bombConfig.radius),
+            shape: new CANNON.Sphere(bombConfig.bodyRadious),
             fixedRotation: true,
         });
         body.collisionFilterGroup = BOMB;
@@ -137,12 +136,13 @@ export class Physics{
 
         body.addEventListener("collide", function(e){
             if (e.body.mass == 0){
-                if (!this.bombsShouldRemove.includes(uuid)){
-                    this.bombsShouldRemove.push(uuid)
-                }
+                // if (!this.bombsShouldRemove.includes(uuid)){
+                //     this.bombsShouldRemove.push(uuid)
+                // }
+                // body.type = CANNON.Body.STATIC
+                body.velocity.set(0, 0, 0);
             }
         }.bind(this))
-        // need a uuid
         this.bombs[uuid] = new PhysicsBomb(mesh, body);
     }
 
@@ -152,14 +152,23 @@ export class Physics{
 
     removeBomb(uuid){
         let bomb = this.bombs[uuid]
-        this.physicsWorld.removeBody(bomb.body)
+        console.log(bomb)
+        this.remove(bomb.body)
         delete this.bombs[uuid]
     }
 
-    removeFloor(){
-        for(let i = 0; i < this.floorpieces.length/2; i++){
-            this.remove(this.floorpieces[i].body);
-        }        
+    removeFloor(mesh){
+        let floorPiece;
+        for (let piece of this.floorpieces){
+            if (piece.mesh == mesh){
+                floorPiece = piece
+                break;
+            }
+        }
+        this.remove(floorPiece.body)
+        // for(let i = 0; i < this.floorpieces.length/2; i++){
+        //     this.remove(this.floorpieces[i].body);
+        // }        
     }
 
     movePlayer(id, x, z){
@@ -191,9 +200,9 @@ export class Physics{
             let bomb = this.bombs[key]
             const mesh = bomb.mesh;
             const body = bomb.body;
-            mesh.position.y = body.position.y
+            mesh.position.y = body.position.y + bombConfig.radius
             mesh.position.x = body.position.x
-            mesh.position.z = body.position.z
+            mesh.position.z = body.position.z 
         }
     }
 }

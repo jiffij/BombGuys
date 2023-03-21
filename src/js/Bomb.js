@@ -8,6 +8,7 @@ import { bombConfig } from './config.js';
 import { Physics } from './physics.js';
 import { generateUUID } from './utils.js';
 
+const bombCollections = {}
 
 export class Bomb {
     bomb;
@@ -17,7 +18,7 @@ export class Bomb {
     timeInterval;
     uuid;
     quaternion;
-    constructor(scene, position, quaternion, physicsWorld, player){
+    constructor(scene, position, quaternion, physicsWorld, player, gameMap){
         this.scene = scene
         this.position = position
         this.radius = bombConfig.radius
@@ -25,6 +26,7 @@ export class Bomb {
         this.quaternion = quaternion
         this.physicsWorld = physicsWorld
         this.player = player
+        this.gameMap = gameMap
         this.init()
 
     }
@@ -33,21 +35,27 @@ export class Bomb {
         let texture = new THREE.MeshBasicMaterial( { color: 0x123421 } );
         this.bomb = new THREE.Mesh(sphere, texture)
         this.uuid = generateUUID()
+        bombCollections[this.uuid] = this
         this.place()
     }
     place(){
-        this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius+0.5, this.position.z+0.5)
+        this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius + 0.5, this.position.z + 0.5)
         this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.player)
         this.scene.add(this.bomb)
         setTimeout(this.remove.bind(this), this.timeInterval)
     }
     remove(){
-        try {
+        // try {
+            let pos = this.bomb.position
+            let posReconstuct = [pos.x, pos.y, pos.z]
+            this.gameMap.removeFloor(posReconstuct)
             this.scene.remove(this.bomb)
             this.physicsWorld.removeBomb(this.uuid)
+            // get position of exploded floors and check if there is other bombs on those floors
+            delete bombCollections[this.uuid]
             delete this
-        }
-        catch {}
 
+        // }
+        // catch {}
     }
 }

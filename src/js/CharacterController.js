@@ -32,7 +32,7 @@ export class CharacterController {
     constructor(model,
         mixer, animationsMap,
         orbitControl, camera,
-        currentAction, physicsWorld) {
+        currentAction, physicsWorld, gameMap) {
         this.model = model;
         this.mixer = mixer;
         this.animationsMap = animationsMap;
@@ -47,7 +47,7 @@ export class CharacterController {
         this.updateCameraTarget(0,0);
         this.physicsWorld = physicsWorld;
         this.player = physicsWorld.addPlayer(model, [model.position.x, model.position.y, model.position.z]);
-        
+        this.gameMap = gameMap;
     }
 
     switchRunToggle() {
@@ -59,7 +59,7 @@ export class CharacterController {
             const position = this.model.position
             const quaternion = this.model.quaternion
             console.log(this.physicsWorld)
-            const bomb = new Bomb(scene, position, quaternion, this.physicsWorld, this.player)
+            const bomb = new Bomb(scene, position, quaternion, this.physicsWorld, this.player, this.gameMap)
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true
