@@ -1,6 +1,6 @@
 export const floorConfig = {
-    color1: 0x00ff00,
-    color2: 0xff0000,
+    color1: 0xd3d3d3,
+    color2: 0xf5f5dc,
     shape: 0.75,
     thickness: 0.01,
     size: 1.5

@@ -68,6 +68,9 @@ export class CharacterController {
     }
 
     update(delta, keysPressed) {
+        let moveX = 0
+        let moveZ = 0
+
         const directionPressed = DIRECTIONS.some(key => keysPressed[key] == true)
         
         var play = 'idle';
@@ -109,6 +112,7 @@ export class CharacterController {
         }
 
         this.mixer.update(delta)
+        
 
         if (this.currentAction !== 'idle' && !this.freeze) {
             // calculate towards camera direction
@@ -121,7 +125,6 @@ export class CharacterController {
             // rotate model
             this.rotateQuarternion.setFromAxisAngle(this.rotateAngle, angleYCameraDirection + directionOffset)
             this.model.quaternion.rotateTowards(this.rotateQuarternion, 0.2)
-            this.player.rotate(this.model.quaternion)
 
             // calculate direction
             this.camera.getWorldDirection(this.walkDirection)
@@ -133,19 +136,18 @@ export class CharacterController {
             const velocity = this.currentAction == 'run' ? this.runVelocity : this.walkVelocity
 
             // move model & camera
-            const moveX = this.walkDirection.x * velocity * delta
-            const moveZ = this.walkDirection.z * velocity * delta
+            moveX = this.walkDirection.x * velocity * delta
+            moveZ = this.walkDirection.z * velocity * delta
 
             this.player.move(moveX, moveZ);
             // this.model.position.x -= moveX
             // this.model.position.z -= moveZ
-
-            this.updateCameraTarget(moveX, moveZ)
         }
+        this.updateCameraTarget(moveX, moveZ)
 
         if (flag && !this.freeze){
             this.player.jump()
-            setTimeout(this.freezeMove.bind(this), 1250)
+            setTimeout(this.freezeMove.bind(this), 1100)
         }
     }
 
@@ -161,10 +163,11 @@ export class CharacterController {
         // move camera
         this.camera.position.x -= moveX
         this.camera.position.z -= moveZ
+        this.camera.position.y = this.model.position.y + 2
 
         // update camera target
         this.cameraTarget.x = this.model.position.x
-        this.cameraTarget.y = this.model.position.y + 1
+        this.cameraTarget.y = this.model.position.y
         this.cameraTarget.z = this.model.position.z
         this.orbitControl.target = this.cameraTarget
     }

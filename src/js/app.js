@@ -24,6 +24,11 @@ camera.position.set(5,1,1)
 
 // orbit control
 const orbit = new OrbitControls(camera, renderer.domElement)
+orbit.minDistance = 4
+orbit.maxDistance = 4
+// Disable rotation in the z direction
+orbit.minPolarAngle = Math.PI / 7 *2; // Set minimum vertical rotation to 90 degrees (pointing upwards)
+orbit.maxPolarAngle = Math.PI / 7 *2; // Set maximum vertical rotation to 90 degrees (pointing downwards)
 orbit.update()
 
 // physics
@@ -49,7 +54,7 @@ gameMap.setup();
 
 
 // load model and animation
-const player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"],[0.01,0.01,0.01], orbit, camera, phy, gameMap)
+const player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"],[0.007,0.007,0.007], orbit, camera, phy, gameMap)
 player.load()
 
 
@@ -82,17 +87,14 @@ document.addEventListener("keyup", function(event){
 
 
 // add light
-scene.background = new THREE.Color(0xFFFFFF)
-const light = new THREE.HemisphereLight(0xffffff,0x000000,2)
-scene.add(light)
-
-
+var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 ); // color, intensity
+directionalLight.position.set( 1, 1, 1 ); // position
+// Increase the intensity of the directional light
+directionalLight.intensity = 1.3;
+scene.add( directionalLight );
 
 // test area
-// let sphere = new THREE.SphereGeometry(0.4,45,30);
-// let texture = new THREE.MeshBasicMaterial( { color: 0x123421 } );
-// let bomb = new THREE.Mesh(sphere, texture)
-// scene.add(bomb)
+
 
 
 // animation
