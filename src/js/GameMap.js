@@ -74,8 +74,8 @@ export class GameMap {
     }
 
     removeFloor(pos){
-        let [floor_l, floor_i, floor_j] = this.getRemoveFloorIndex(pos);
-        if (floor_i !== undefined){
+        let shouldRemove = this.getRemoveFloorIndex(pos);
+        for (let [floor_l, floor_i, floor_j] of shouldRemove){
             const removedPiece = this.floorPieces[floor_l][floor_i][floor_j]
             this.scene.remove(removedPiece);
             this.physicsWorld.removeFloor(removedPiece);
@@ -86,7 +86,7 @@ export class GameMap {
         let floor_i;
         let floor_j;
         let floor_l;
-        let found = false
+        let shouldRemove = []
         for (let l=0; l<this.layers;l++){
             let layer = this.floorPiecesPos[l]
             for (let i=0; i<this.mapSize; i++){
@@ -97,21 +97,12 @@ export class GameMap {
                        floor_i = i;
                        floor_j = j; 
                        floor_l = l;
-                       found = true;
-                    }
-                    if (found){
-                        break;
+                       shouldRemove.push([floor_l, floor_i, floor_j])
                     }
                 }
-                if (found){
-                    break;
-                }
-            }
-            if (found){
-                break;
             }
         }
-        return [floor_l, floor_i, floor_j]
+        return shouldRemove
 
     }
 
@@ -123,18 +114,20 @@ export class GameMap {
         const right = x+this.size/2;
         const bottom = z-this.size/2;
         const top = z+this.size/2;
-        return new Coord(left, right, bottom, top, y);
+        return new Coord(left, right, bottom, top, x, y, z);
     }
 }
 
 
 class Coord {
-    constructor(left, right, bottom, top, y){
+    constructor(left, right, bottom, top, x, y, z){
         this.left = left;
         this.right = right;
         this.bottom = bottom;
         this.top = top;
+        this.x = x;
         this.y = y;
+        this.z = z;
     }
 
     checkFallingIn(pos){
@@ -143,9 +136,14 @@ class Coord {
         const z = pos[2];
 
         // when multiple layers of floor need to check z
-        if (x>=this.left && x<=this.right && z>=this.bottom && z<=this.top && Math.abs(this.y-y)<0.2+bombConfig.radius){
-            console.log(y)
-            return true;
+        if (Math.abs(this.y-y)<0.2+bombConfig.radius){
+            if (Math.sqrt((x-this.x)**2+(z-this.z)**2) <= floorConfig.size){
+                return true;
+            }
+            // if (x>=this.left && x<=this.right && z>=this.bottom && z<=this.top){
+            //     console.log(y)
+            //     return true;
+            // }
         }
         return false;
     }
