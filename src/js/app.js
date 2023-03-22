@@ -11,7 +11,7 @@ import { Physics } from './physics.js';
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
-const scene = new THREE.Scene();
+export const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth/window.innerHeight,
@@ -76,6 +76,9 @@ directionalLight.position.set( 1, 1, 1 ); // position
 // Increase the intensity of the directional light
 directionalLight.intensity = 1.3;
 scene.add( directionalLight );
+
+
+
 
 // test area
 

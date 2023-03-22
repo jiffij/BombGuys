@@ -101,7 +101,7 @@ export class Physics{
         this.floorpieces.push(new FloorTile(mesh, body));
     }
 
-    addBomb(mesh, quaternion, uuid, player){
+    addBomb(mesh, quaternion, uuid, player, bombObject){
         const body = new CANNON.Body({
             mass: 1,
             shape: new CANNON.Sphere(bombConfig.bodyRadious),
@@ -144,6 +144,15 @@ export class Physics{
                 // }
                 // body.type = CANNON.Body.STATIC
                 body.velocity.set(0, 0, 0);
+                setTimeout(
+                    function (){
+                        try {
+                            bombObject.remove()
+                        }
+                        catch{}
+                    }
+                ,1500)
+
             }
         }.bind(this))
         this.bombs[uuid] = new PhysicsBomb(mesh, body);

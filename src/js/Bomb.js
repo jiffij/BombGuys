@@ -9,6 +9,14 @@ import { Physics } from './physics.js';
 import { generateUUID } from './utils.js';
 
 const bombCollections = {}
+const textureLoader = new THREE.TextureLoader();
+
+// Load the bomb texture
+const texture = textureLoader.load('../models/textures/bomb.jpg');
+// Create a material for the bomb using the texture
+const material = new THREE.MeshStandardMaterial({
+  map: texture,
+});
 
 export class Bomb {
     bomb;
@@ -33,16 +41,23 @@ export class Bomb {
     init(){
         let sphere = new THREE.SphereGeometry(this.radius,45,30);
         let texture = new THREE.MeshBasicMaterial( { color: 0x123421 } );
-        this.bomb = new THREE.Mesh(sphere, texture)
+        this.bomb = new THREE.Mesh(sphere, material)
         this.uuid = generateUUID()
         bombCollections[this.uuid] = this
         this.place()
     }
     place(){
         this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius + 0.5, this.position.z + 0.5)
-        this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.player)
+        this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.player, this)
         this.scene.add(this.bomb)
-        setTimeout(this.remove.bind(this), this.timeInterval)
+        setTimeout(
+            function (){
+                try {
+                    this.remove()
+                }
+                catch{}
+            }.bind(this)
+        ,this.timeInterval)
     }
     remove(){
         // try {

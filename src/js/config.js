@@ -2,7 +2,7 @@ export const floorConfig = {
     color1: 0xd3d3d3,
     color2: 0xf5f5dc,
     shape: 0.75,
-    thickness: 0.01,
+    thickness: 0.1,
     size: 1.5,
     layers: 4,
     height: 4,
@@ -10,7 +10,7 @@ export const floorConfig = {
 }
 
 export const bombConfig = {
-    bufferTime: 2000,
+    bufferTime: 5000,
     radius: 0.3,
     bodyRadious: 0.1
 }
