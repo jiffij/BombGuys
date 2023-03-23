@@ -4,6 +4,7 @@ import { ModelLoader } from './ModelLoader.js';
 import { GameMap } from './GameMap.js';
 import { Physics } from './physics.js';
 import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
+import { Bomb } from './Bomb.js';
 
 
 let playerId;
@@ -79,13 +80,13 @@ document.addEventListener("keydown", function(event){
 
 document.addEventListener("keyup", function(event){
     socket.emit("playerMovementKeyUp", event.key)
-    if (event.key == " ") {
-    }
-    if (event.key == "Shift"){
-        play = "idle"
-    }
     if (event.key == "e"){
-        player.plantBomb()
+        let throwable = false;
+        throwable = player.plantBomb()
+        console.log(throwable)
+        if (throwable){
+            socket.emit("plantBomb", {pos:player.getPos(),quaternion:player.getQuaternion()})
+        }
     }
     else {
         keysPressed[event.key.toLowerCase()] = false
@@ -136,13 +137,23 @@ socket.on("updatePlayerPos", (playerPos) => {
     }
 })
 
+socket.on("plantBomb", (bombInfo) => {
+    let id = bombInfo.id;
+    if (id !== playerId){
+        let pos = bombInfo.pos;
+        let quaternion = bombInfo.quaternion;
+        let bomb = new Bomb(scene, pos, quaternion, phy, gameMap);
+    }
+})
+
 setInterval(() => {
     socket.emit('updatePlayerPos', player.getBodyPos());
-}, 30);
+}, 10);
 
 setInterval(() => {
     socket.emit('updateCamera', ({"pos":camera.position, "rotation":camera.rotation}));
-}, 10);
+}, 1);
+
 
 // add light
 var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 ); // color, intensity

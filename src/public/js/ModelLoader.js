@@ -90,7 +90,13 @@ export class ModelLoader {
     }
 
     getPos(){
-        return this.model.position
+        if (this.characterController !== undefined){
+            return this.model.position;
+        }
+    }
+
+    getQuaternion(){
+        return this.model.quaternion;
     }
 
     getBodyPos(){
@@ -102,8 +108,16 @@ export class ModelLoader {
         }
     }
 
+    getPlayer(){
+        if (this.characterController !== undefined){
+            return this.characterController.player;
+        }
+    }
+
     setBodyPos(pos){
-        this.characterController.player.setPos(pos);
+        if (this.characterController !== undefined){
+            this.characterController.player.setPos(pos);
+        }
     }
 
     update(delta, keysPressed){
@@ -111,7 +125,7 @@ export class ModelLoader {
     }
 
     plantBomb(){
-        this.characterController.plantBomb(this.scene)
+        return this.characterController.plantBomb(this.scene)
     }
 
 }

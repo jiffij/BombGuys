@@ -26,21 +26,19 @@ export class Bomb {
     timeInterval;
     uuid;
     quaternion;
-    constructor(scene, position, quaternion, physicsWorld, player, gameMap){
+    constructor(scene, position, quaternion, physicsWorld, gameMap){
         this.scene = scene
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
         this.quaternion = quaternion
         this.physicsWorld = physicsWorld
-        this.player = player
         this.gameMap = gameMap
         this.init()
 
     }
     init(){
         let sphere = new THREE.SphereGeometry(this.radius,45,30);
-        let texture = new THREE.MeshBasicMaterial( { color: 0x123421 } );
         this.bomb = new THREE.Mesh(sphere, material)
         this.uuid = generateUUID()
         bombCollections[this.uuid] = this
@@ -48,7 +46,7 @@ export class Bomb {
     }
     place(){
         this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius + 0.5, this.position.z + 0.5)
-        this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.player, this)
+        this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.position, this)
         this.scene.add(this.bomb)
         setTimeout(
             function (){

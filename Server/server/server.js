@@ -78,6 +78,13 @@ io.on('connection', (socket) => {
         playersPos[socket.id] = pos
     })
 
+    socket.on("plantBomb", (bombInfo) => {
+        console.log("planting bomb")
+        bombInfo["id"] = socket.id;
+        io.sockets.emit("plantBomb", bombInfo);
+    })
+
+
     setInterval(() => {
         io.sockets.emit('playerStates', players);
       }, updateKeyboardFreq);

@@ -113,7 +113,7 @@ export class Physics{
         this.floorpieces.push(new FloorTile(mesh, body));
     }
 
-    addBomb(mesh, quaternion, uuid, player, bombObject){
+    addBomb(mesh, quaternion, uuid, playerBodyPos, bombObject){
         const body = new CANNON.Body({
             mass: 1,
             shape: new CANNON.Sphere(bombConfig.bodyRadious),
@@ -121,9 +121,9 @@ export class Physics{
         });
         body.collisionFilterGroup = BOMB;
         body.collisionFilterMask = FLOOR;
-        body.position.x = player.body.position.x;
+        body.position.x = playerBodyPos.x;
         body.position.y = mesh.position.y + 0.3; // it will touch the player otherwise
-        body.position.z = player.body.position.z;
+        body.position.z = playerBodyPos.z;
         this.physicsWorld.addBody(body);
 
         // todo: add up and forward impulse
