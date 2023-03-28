@@ -96,10 +96,6 @@ io.on('connection', (socket) => {
     setInterval(() => {
         io.sockets.emit('updateCamera', cameras);
     }, updateCamFreq);
-
-    // update gamemap
-
-    // update bomb
 });
 
 // io.on("disconnect", (socket) => {

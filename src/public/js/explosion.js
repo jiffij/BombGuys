@@ -1,41 +1,26 @@
-import { scene } from "./client";
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 
-// Create a particle geometry
-const particleGeometry = new THREE.Geometry();
+export function createExplosion(position, numParticles = 100) {
+  const geometry = new THREE.BufferGeometry();
+  const vertices = new Float32Array(numParticles * 3);
+  const velocities = new Float32Array(numParticles * 3);
 
-// Create a particle material
-const particleMaterial = new THREE.PointsMaterial({
-  color: 0xff6600,
-  size: 10,
-});
+  for (let i = 0; i < numParticles * 3; i += 3) {
+    vertices[i] = position.x;
+    vertices[i + 1] = position.y;
+    vertices[i + 2] = position.z;
 
-// Create particles
-for (let i = 0; i < 1000; i++) {
-  const particle = new THREE.Vector3(
-    Math.random() * 10 - 5,
-    Math.random() * 10 - 5,
-    Math.random() * 10 - 5
-  );
-  particleGeometry.vertices.push(particle);
-}
-
-// Create a particle system
-const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
-
-// Add the particle system to the scene
-scene.add(particleSystem);
-
-// Create an explosion function
-function createExplosion(x, y, z) {
-  // Move particles to explosion center
-  for (let i = 0; i < particleSystem.geometry.vertices.length; i++) {
-    const particle = particleSystem.geometry.vertices[i];
-    particle.x = x;
-    particle.y = y;
-    particle.z = z;
+    velocities[i] = (Math.random() - 0.5) * 0.4;
+    velocities[i + 1] = (Math.random() - 0.5) * 0.4;
+    velocities[i + 2] = (Math.random() - 0.5) * 0.4;
   }
-  particleSystem.geometry.verticesNeedUpdate = true;
-}
 
-// Call the explosion function when needed
-createExplosion(1, 1, 1);
+  geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+
+  const material = new THREE.PointsMaterial({ color: 0xff9900, size: 0.1 });
+  const points = new THREE.Points(geometry, material);
+  points.life = 50;
+
+  return points;
+}

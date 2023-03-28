@@ -61,7 +61,7 @@ export class CharacterController {
         if (this.throwability){
             const position = this.model.position
             const quaternion = this.model.quaternion
-            const bomb = new Bomb(scene, position, quaternion, this.physicsWorld, this.gameMap)
+            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap)
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true

@@ -5,8 +5,10 @@
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { bombConfig } from './config.js';
-import { Physics } from './physics.js';
+import { scene } from './client.js';
+import { explosions } from './client.js';
 import { generateUUID } from './utils.js';
+import { createExplosion } from './explosion.js';
 
 const bombCollections = {}
 const textureLoader = new THREE.TextureLoader();
@@ -20,20 +22,19 @@ const material = new THREE.MeshStandardMaterial({
 
 export class Bomb {
     bomb;
-    scene;
     position;
     radius;
     timeInterval;
     uuid;
     quaternion;
-    constructor(scene, position, quaternion, physicsWorld, gameMap){
-        this.scene = scene
+    constructor(position, quaternion, physicsWorld, gameMap){
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
         this.quaternion = quaternion
         this.physicsWorld = physicsWorld
         this.gameMap = gameMap
+        this.exploded = false
         this.init()
 
     }
@@ -47,7 +48,7 @@ export class Bomb {
     place(){
         this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius + 0.5, this.position.z + 0.5)
         this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.position, this)
-        this.scene.add(this.bomb)
+        scene.add(this.bomb)
         setTimeout(
             function (){
                 try {
@@ -59,11 +60,19 @@ export class Bomb {
     }
     remove(){
         // try {
+            // explosion 
             let pos = this.bomb.position
-            console.log(this.bomb.position.y)
+            if (this.exploded == false){
+                let explosion = createExplosion(pos)
+                explosions.push(explosion)
+                console.log(explosions)
+                scene.add(explosion)
+                this.exploded = true
+            }
+
             let posReconstuct = [pos.x, pos.y, pos.z]
             this.gameMap.removeFloor(posReconstuct)
-            this.scene.remove(this.bomb)
+            scene.remove(this.bomb)
             this.physicsWorld.removeBomb(this.uuid)
             // get position of exploded floors and check if there is other bombs on those floors
             delete bombCollections[this.uuid]
