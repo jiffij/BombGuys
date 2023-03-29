@@ -60,9 +60,6 @@ io.on('connection', (socket) => {
 
     socket.on("playerMovementKeyUp", (key) => {
         try {
-            if (key == "e"){
-                // plant bomb
-            }
             players[socket.id] [key.toLowerCase()] = false
         }
         catch{
@@ -96,6 +93,7 @@ io.on('connection', (socket) => {
     setInterval(() => {
         io.sockets.emit('updateCamera', cameras);
     }, updateCamFreq);
+
 });
 
 // io.on("disconnect", (socket) => {

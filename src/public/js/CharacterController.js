@@ -90,7 +90,7 @@ export class CharacterController {
         const current = this.animationsMap.get(this.currentAction)
         let flag = false
 
-        if (this.currentAction != play || keysPressed[SPACE] || this.finishJump) {
+        if ((this.currentAction != play || keysPressed[SPACE] || this.finishJump) && !this.freeze) {
             let toPlay;
 
             if (keysPressed[SPACE]){
@@ -156,6 +156,7 @@ export class CharacterController {
         this.updateCameraTarget(moveX, moveZ, moveY)
 
         if (flag && !this.freeze){
+
             this.player.jump()
             setTimeout(this.freezeMove.bind(this), 1100)
         }

@@ -9,6 +9,8 @@ export const floorConfig = {
     mapSize: 15,
 }
 
+export const characterScale = [0.01,0.01,0.01]
+
 export const bombConfig = {
     bufferTime: 5000,
     radius: 0.3,
@@ -20,6 +22,6 @@ export const jumpImpulse = 25;
 export const bombUpImpulse = 1.5;
 export const bombForwardImpulse = 3;
 
-export const bodySphereRadius = 0.2;
+export const bodySphereRadius = 0.4;
 
 export const shootInterval = 0.5

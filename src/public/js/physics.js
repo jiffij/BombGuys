@@ -22,6 +22,12 @@ export class Player{
         this.fbx = fbx;
         this.id = NUM_PLAYERS++;
         this.impulse = new CANNON.Vec3(0, jumpImpulse, 0)
+
+        this.body.addEventListener("collide", function(e){
+            if (e.body.mass == 0){
+                
+            }
+        }.bind(this))
     }
 
     rotate(quarternion){

@@ -2,15 +2,15 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.mod
 
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 import { CharacterController } from './characterController.js';
-import { bodySphereRadius, floorConfig } from './config.js';
+import { bodySphereRadius, characterScale, floorConfig } from './config.js';
 
 export class ModelLoader {
-    constructor(scene, path, file, animationPath, animations, scale, orbitControls, camera, physicsWorld, gameMap, isPlayer) {
+    constructor(scene, path, file, animationPath, animations, orbitControls, camera, physicsWorld, gameMap, isPlayer, pos) {
         this.path = path;
         this.file = file;
         this.animations = animations;
         this.animationPath = animationPath
-        this.scale = scale;
+        this.scale = characterScale;
         this.animationMap = new Map();
         this.mixer;
         this.currentAction;
@@ -22,6 +22,20 @@ export class ModelLoader {
         this.model;
         this.gameMap = gameMap;
         this.isPlayer = isPlayer;
+        if (pos == null){
+            this.pos = this.generateRandPos();
+        }
+        else {
+            this.pos = pos;
+        }
+    }
+
+
+    generateRandPos(){
+        let x = Math.random()*floorConfig.size*(floorConfig.mapSize-3) - floorConfig.size*(floorConfig.mapSize-3)/2
+        let z = Math.random()*floorConfig.size*(floorConfig.mapSize-3) - floorConfig.size*(floorConfig.mapSize-3)/2
+        let y = bodySphereRadius;
+        return [x,y,z]
     }
 
     addAnimation(animation){
@@ -50,7 +64,8 @@ export class ModelLoader {
                     this.loadAnimation(fbx, animation)
                 }
             }
-            fbx.position.set(0,bodySphereRadius,0)
+            console.log(this.pos)
+            fbx.position.set(this.pos[0], this.pos[1], this.pos[2])
             this.scene.add(fbx)
         }.bind(this))
     }

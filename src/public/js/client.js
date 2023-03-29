@@ -5,7 +5,6 @@ import { GameMap } from './GameMap.js';
 import { Physics } from './physics.js';
 import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
 import { Bomb } from './Bomb.js';
-import { createExplosion } from './explosion.js';
 
 
 // explosion
@@ -14,7 +13,6 @@ export let explosions = []
 // setup scene and camera
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
-document.body.appendChild(renderer.domElement)
 export const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -35,10 +33,10 @@ camera2.position.set(5,1,1)
 
 // orbit control
 const orbit = new OrbitControls(camera, renderer.domElement)
-orbit.minDistance = 2
-orbit.maxDistance = 3
+orbit.minDistance = 4
+orbit.maxDistance = 4
 // Disable rotation in the z direction
-orbit.minPolarAngle = Math.PI / 7; // Set minimum vertical rotation to 90 degrees (pointing upwards)
+orbit.minPolarAngle = Math.PI / 3; // Set minimum vertical rotation to 90 degrees (pointing upwards)
 orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
 orbit.update()
 
@@ -51,12 +49,12 @@ gameMap.setup();
 
 
 // load model and animation
-const player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"],[0.007,0.007,0.007], orbit, camera, phy, gameMap, true)
+const player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"], orbit, camera, phy, gameMap, true, null)
 player.load()
-const player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"],[0.007,0.007,0.007], orbit, camera2, phy, gameMap, false)
+const player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"], orbit, camera2, phy, gameMap, false, null)
 player2.load()
 
-setTimeout(main, 3000)
+setTimeout(main, 2000)
 
 function main(){
     let playerId;
@@ -67,11 +65,10 @@ function main(){
         playerId = id;
         console.log(playerId)
     })
-    
-    setTimeout(function(){
-        socket.emit("join",player.getPos())
-    }, 1000)
-    
+
+    socket.emit("join",player.getPos())
+    document.body.appendChild(renderer.domElement)
+
     // keyboard event listener
     const keysPressed = {}
     document.addEventListener("keydown", function(event){
