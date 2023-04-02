@@ -5,11 +5,10 @@ import { CharacterController } from './characterController.js';
 import { bodySphereRadius, characterScale, floorConfig } from './config.js';
 
 export class ModelLoader {
-    constructor(scene, path, file, animationPath, animations, orbitControls, camera, physicsWorld, gameMap, isPlayer, pos) {
+    constructor(scene, path, file, animations, orbitControls, camera, physicsWorld, gameMap, isPlayer, pos) {
         this.path = path;
         this.file = file;
         this.animations = animations;
-        this.animationPath = animationPath
         this.scale = characterScale;
         this.animationMap = new Map();
         this.mixer;
@@ -50,67 +49,40 @@ export class ModelLoader {
             this.model = fbx
             this.mixer = new THREE.AnimationMixer(fbx);
             this.mixer.addEventListener("finished", ( /*event*/ ) => {
-                // console.log("finish")
-                // current.fadeOut(this.fadeDuration)
-                // let idleAction = this.animationMap.get("idle");
-                // idleAction.reset().fadeIn(0.2).play();
                 this.characterController.finishJump = true
                 this.characterController.jump = false
             
             } )
             fbx.scale.set(this.scale[0],this.scale[1],this.scale[2])
-            if (this.animations.length > 0){
-                // this.loadAnimation(fbx, this.animations[0], 1000)
-                setTimeout(this.loadAnimation(fbx, this.animations[1]), 100)
-                setTimeout(this.loadAnimation(fbx, this.animations[0]), 200)
-                setTimeout(this.loadAnimation(fbx, this.animations[2]), 300)
-                    
-                
-            }
             fbx.position.set(this.pos[0], this.pos[1], this.pos[2])
+            this.loadAnimation(fbx, this.animations)                    
             this.scene.add(fbx)
         }.bind(this))
     }
 
     // load animation
     loadAnimation(fbx, animation) {
-        let anim = new FBXLoader()
-        anim.setPath(this.animationPath)
-        anim.load(animation, (anim) => {
-            console.log("finished", animation)
+        let keys = Object.keys(animation)
+        for (let key of keys){
+            let anim = animation[key]
             let action = this.mixer.clipAction(anim.animations[0])
 
-            if (animation == "jump.fbx"){
+            if (key == "jump"){
                 action.setLoop(THREE.LoopOnce);
                 action.clampWhenFinished = true;
                 action.enable = true;
                 this.animationMap.set("jump",action)
             }
-            if (animation == "run.fbx"){
+            if (key == "run"){
                 this.animationMap.set("run",action)
             }
-            if (animation == "idle.fbx"){
+            if (key == "idle"){
                 action.play()
                 this.animationMap.set("idle",action)
             }
+        }
 
-            // else {
-            //     console.log(animation)
-            //     this.animationMap.set("walk",action)
-            // }
-
-            if (this.animationMap.size == 3) {
-                console.log("finish loading")
-                this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer)
-            }
-
-        },
-        (progress) => {
-
-        },
-        (error) => {
-            console.log("fail to load", animation)
-        })
+        this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer)
     }
 
     getPos(){

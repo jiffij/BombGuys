@@ -5,6 +5,7 @@ import { GameMap } from './GameMap.js';
 import { Physics } from './physics.js';
 import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
 import { Bomb } from './Bomb.js';
+import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 import { serverIp } from './config.js';
 
 
@@ -88,6 +89,43 @@ let updateCameraEmit;
 
 initialize()
 
+const animations = {}
+
+function loadFBX(url) {
+    return new Promise((resolve, reject) => {
+      const loader = new FBXLoader();
+      loader.setPath("../../models/animation/")
+      loader.load(
+        url,
+        (fbx) => {
+          resolve(fbx);
+        },
+        undefined,
+        (error) => {
+          reject(error);
+        }
+      );
+    });
+}
+
+async function loadAssets() {
+    try {
+      // Load animations and skins here
+      const fbx1 = await loadFBX('idle.fbx');
+      const fbx2 = await loadFBX('run.fbx');
+      const fbx3 = await loadFBX('jump.fbx');
+      animations["idle"] = fbx1
+      animations["run"] = fbx2
+      animations["jump"] = fbx3
+      // Process and store the loaded animations and skins
+    } catch (error) {
+      console.error('Error loading assets:', error);
+    }
+}
+
+await loadAssets()
+console.log(animations)
+
 let playerId;
 let keysPressedFromServer = {}
 const socket = io(`http://64.226.64.79`);
@@ -132,9 +170,9 @@ socket.emit("join",0)
 let player
 let player2
 function loadModel(){
-    player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["idle.fbx","run.fbx","jump.fbx"], orbit, camera, phy, gameMap, true, null)
+    player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", animations, orbit, camera, phy, gameMap, true, null)
     player.load()
-    player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["idle.fbx","run.fbx","jump.fbx"], orbit, camera2, phy, gameMap, false, null)
+    player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", animations, orbit, camera2, phy, gameMap, false, null)
     player2.load()
     setTimeout(main, 2000)
 }
