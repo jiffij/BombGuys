@@ -25,9 +25,9 @@ const cameras = {};
 let gameMap = []
 let bombs = []
 
-const updatePosFreq = 10;
-const updateCamFreq = 1;
-const updateKeyboardFreq = 0.1;
+const updatePosFreq = 30;
+const updateCamFreq = 30;
+const updateKeyboardFreq = 5;
 
 server.listen(port, ()=> {
     console.log(`Server is up on port ${port}.`)
@@ -39,6 +39,7 @@ io.on('connection', (socket) => {
         console.log(socket.id)
         players[socket.id] = {}
         socket.emit("playerId", socket.id)
+        io.sockets.emit("playerNum", Object.keys(players).length)
     });
 
     socket.on("disconnect", () => {
@@ -46,6 +47,7 @@ io.on('connection', (socket) => {
         delete players[socket.id]
         delete cameras[socket.id]
         delete playersPos[socket.id]
+        io.sockets.emit("playerNum", Object.keys(players).length)
     })
 
     // update movement
