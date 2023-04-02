@@ -13,7 +13,7 @@ export class ModelLoader {
         this.scale = characterScale;
         this.animationMap = new Map();
         this.mixer;
-        this.currentAction;
+        this.currentAction = "idle";
         this.characterController;
         this.orbitControls = orbitControls;
         this.camera = camera;
@@ -60,11 +60,13 @@ export class ModelLoader {
             } )
             fbx.scale.set(this.scale[0],this.scale[1],this.scale[2])
             if (this.animations.length > 0){
-                for (let animation of this.animations){
-                    this.loadAnimation(fbx, animation)
-                }
+                // this.loadAnimation(fbx, this.animations[0], 1000)
+                setTimeout(this.loadAnimation(fbx, this.animations[1]), 100)
+                setTimeout(this.loadAnimation(fbx, this.animations[0]), 200)
+                setTimeout(this.loadAnimation(fbx, this.animations[2]), 300)
+                    
+                
             }
-            console.log(this.pos)
             fbx.position.set(this.pos[0], this.pos[1], this.pos[2])
             this.scene.add(fbx)
         }.bind(this))
@@ -75,30 +77,39 @@ export class ModelLoader {
         let anim = new FBXLoader()
         anim.setPath(this.animationPath)
         anim.load(animation, (anim) => {
+            console.log("finished", animation)
             let action = this.mixer.clipAction(anim.animations[0])
-            if (animation == "idle.fbx"){
-                action.play()
-                this.currentAction = "idle"
-                this.animationMap.set("idle",action)
-            }
-            else if (animation == "run.fbx"){
-                this.animationMap.set("run",action)
-            }
-            else if (animation == "jump.fbx"){
+
+            if (animation == "jump.fbx"){
                 action.setLoop(THREE.LoopOnce);
                 action.clampWhenFinished = true;
                 action.enable = true;
-                
                 this.animationMap.set("jump",action)
             }
-            else {
-                this.animationMap.set("walk",action)
+            if (animation == "run.fbx"){
+                this.animationMap.set("run",action)
+            }
+            if (animation == "idle.fbx"){
+                action.play()
+                this.animationMap.set("idle",action)
             }
 
-            if (this.animationMap.size == 4) {
+            // else {
+            //     console.log(animation)
+            //     this.animationMap.set("walk",action)
+            // }
+
+            if (this.animationMap.size == 3) {
+                console.log("finish loading")
                 this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer)
             }
 
+        },
+        (progress) => {
+
+        },
+        (error) => {
+            console.log("fail to load", animation)
         })
     }
 

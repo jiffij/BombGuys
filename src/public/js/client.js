@@ -5,156 +5,235 @@ import { GameMap } from './GameMap.js';
 import { Physics } from './physics.js';
 import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
 import { Bomb } from './Bomb.js';
+import { serverIp } from './config.js';
 
+
+let firstTimeLoad = false
+
+function initialize(){
+    // explosion
+    explosions = []
+
+    // setup scene and camera
+    renderer = new THREE.WebGLRenderer()
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth/window.innerHeight,
+        0.1,
+        1000
+    )
+    camera.position.set(5,1,1)
+    // for player2
+    camera2 = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth/window.innerHeight,
+        0.1,
+        1000
+    )
+    camera2.position.set(5,1,1)
+
+    // orbit control
+    orbit = new OrbitControls(camera, renderer.domElement)
+    orbit.minDistance = 4
+    orbit.maxDistance = 4
+    // Disable rotation in the z direction
+    orbit.minPolarAngle = Math.PI / 3; // Set minimum vertical rotation to 90 degrees (pointing upwards)
+    orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
+    orbit.update()
+
+    // physics
+    phy = new Physics();
+
+    // create map
+    gameMap = new GameMap(scene, phy)
+    gameMap.setup();
+}
+
+
+function clear(){
+    if (renderer !== undefined){
+        renderer.setAnimationLoop(null)
+    }
+    clearInterval(updatePlayerPosEmit)
+    clearInterval(updateCameraEmit)
+    socket.off("playerStates")
+    socket.off("updateCamera")
+    socket.off("updatePlayerPos")
+    socket.off("plantBomb")
+}
 
 // explosion
 export let explosions = []
 
 // setup scene and camera
-const renderer = new THREE.WebGLRenderer()
-renderer.setSize(window.innerWidth, window.innerHeight)
-export const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth/window.innerHeight,
-    0.1,
-    1000
-)
-camera.position.set(5,1,1)
-// for player2
-const camera2 = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth/window.innerHeight,
-    0.1,
-    1000
-)
-camera2.position.set(5,1,1)
-
+let renderer;
+export let scene;
+let camera;
+let camera2;
 
 // orbit control
-const orbit = new OrbitControls(camera, renderer.domElement)
-orbit.minDistance = 4
-orbit.maxDistance = 4
-// Disable rotation in the z direction
-orbit.minPolarAngle = Math.PI / 3; // Set minimum vertical rotation to 90 degrees (pointing upwards)
-orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
-orbit.update()
+let orbit;
 
 // physics
-const phy = new Physics();
+let phy;
 
 // create map
-const gameMap = new GameMap(scene, phy)
-gameMap.setup();
+let gameMap;
 
+// setInterval function id
+let updatePlayerPosEmit;
+let updateCameraEmit;
+
+initialize()
+
+let playerId;
+let keysPressedFromServer = {}
+const socket = io(`http://64.226.64.79`);
+
+socket.on("playerId", (id) => {
+    playerId = id;
+    console.log(playerId)
+})
+
+// Wait for more player
+const centeredText = document.createElement('div');
+centeredText.textContent = 'Waiting for more players...';
+centeredText.classList.add('centered-text');
+document.body.appendChild(centeredText);
+
+socket.on("playerNum", num => {
+    console.log(num)
+    if (num == 2){
+        initialize()
+        loadModel()
+    }
+    else {
+        let objectsToRemove = []
+        // Loop through the children of the scene
+        clear()
+        if (scene !== undefined){
+            scene.traverse((child) => {
+                objectsToRemove.push(child);
+            });
+            objectsToRemove.forEach((object) => {
+                scene.remove(object);
+            });
+            renderer.domElement.remove()
+        }
+        document.body.appendChild(centeredText);
+    }
+})
+
+socket.emit("join",0)
 
 // load model and animation
-const player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"], orbit, camera, phy, gameMap, true, null)
-player.load()
-const player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["walk.fbx","idle.fbx","run.fbx","jump.fbx"], orbit, camera2, phy, gameMap, false, null)
-player2.load()
+let player
+let player2
+function loadModel(){
+    player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["idle.fbx","run.fbx","jump.fbx"], orbit, camera, phy, gameMap, true, null)
+    player.load()
+    player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["idle.fbx","run.fbx","jump.fbx"], orbit, camera2, phy, gameMap, false, null)
+    player2.load()
+    setTimeout(main, 2000)
+}
 
-setTimeout(main, 2000)
+const keysPressed = {}
 
-function main(){
-    let playerId;
-    let keysPressedFromServer = {}
-    const socket = io('http://localhost:3000');
-    
-    socket.on("playerId", (id) => {
-        playerId = id;
-        console.log(playerId)
-    })
+function keyDownEvent(event){
+    socket.emit("playerMovementKeyDown", event.key)
+    keysPressed[event.key.toLowerCase()] = true
+}
 
-    socket.emit("join",player.getPos())
-    document.body.appendChild(renderer.domElement)
+function keyUpEvent(event){
+    socket.emit("playerMovementKeyUp", event.key)
+    if (event.key == "e"){
+        let throwable = false;
+        throwable = player.plantBomb()
+        if (throwable){
+            socket.emit("plantBomb", {pos:player.getPos(),quaternion:player.getQuaternion()})
+        }
+    }
+    else {
+        keysPressed[event.key.toLowerCase()] = false
+    }
+}
 
-    // keyboard event listener
-    const keysPressed = {}
-    document.addEventListener("keydown", function(event){
-        socket.emit("playerMovementKeyDown", event.key)
-        if (event.shiftKey){
-            play = 'walk'
-            player.characterController.switchRunToggle();
-        }
-        else {
-            keysPressed[event.key.toLowerCase()] = true
-        }
-    }, false)
-    
-    document.addEventListener("keyup", function(event){
-        socket.emit("playerMovementKeyUp", event.key)
-        if (event.key == "e"){
-            let throwable = false;
-            throwable = player.plantBomb()
-            console.log(throwable)
-            if (throwable){
-                socket.emit("plantBomb", {pos:player.getPos(),quaternion:player.getQuaternion()})
-            }
-        }
-        else {
-            keysPressed[event.key.toLowerCase()] = false
-        }
-    }, false)
-    
-    // Listen events from server
-    socket.on('playerStates', (players) => {
-        // Update the positions of the players in the game map
-        let keys = Object.keys(players)
-        if (keys.length == 2){
-          if (keys[0] == playerId){
-              keysPressedFromServer = players[keys[1]]
-          }
-          else {
-              keysPressedFromServer = players[keys[0]]
-          }
-        }
-      });
-    
-    socket.on("updateCamera", (cameras) => {
-        let keys = Object.keys(cameras)
-        let cameraInfo;
-        if (keys.length == 2){
-          if (keys[0] == playerId){
+function playerStatesFunction(players){
+    let keys = Object.keys(players)
+    if (keys.length == 2){
+      if (keys[0] == playerId){
+          keysPressedFromServer = players[keys[1]]
+      }
+      else {
+          keysPressedFromServer = players[keys[0]]
+      }
+    }
+}
+
+function updateCameraFunction(cameras){
+    let keys = Object.keys(cameras)
+    let cameraInfo;
+    if (keys.length == 2){
+        if (keys[0] == playerId){
             cameraInfo = cameras[keys[1]]
             updateCamera(camera2, cameraInfo)
-          }
-          else {
+        }
+        else {
             cameraInfo = cameras[keys[0]]
             updateCamera(camera2, cameraInfo)
-          }
         }
-    })
-    
-    socket.on("updatePlayerPos", (playerPos) => {
-        let keys = Object.keys(playerPos)
-        let pos;
-        if (keys.length == 2){
-          if (keys[0] == playerId){
+    }
+}
+
+function updatePlayerPosEvent(playerPos){
+    let keys = Object.keys(playerPos)
+    let pos;
+    if (keys.length == 2){
+        if (keys[0] == playerId){
             pos = playerPos[keys[1]]
             player2.setBodyPos(pos);
         }
-          else {
+        else {
             pos = playerPos[keys[0]]
             player2.setBodyPos(pos);
-          }
         }
-    })
+    }
+}
+
+function plantBombEvent(bombInfo){
+    let id = bombInfo.id;
+    if (id !== playerId){
+        let pos = bombInfo.pos;
+        let quaternion = bombInfo.quaternion;
+        let bomb = new Bomb(pos, quaternion, phy, gameMap);
+    }
+}
+
+function main(){
+
+    centeredText.remove()
+
+    document.body.appendChild(renderer.domElement)
+
+    // keyboard event listener
+    document.removeEventListener("keydown", keyDownEvent)
+    document.removeEventListener("keyup", keyUpEvent)
+    document.addEventListener("keydown", keyDownEvent)
+    document.addEventListener("keyup", keyUpEvent)
     
-    socket.on("plantBomb", (bombInfo) => {
-        let id = bombInfo.id;
-        if (id !== playerId){
-            let pos = bombInfo.pos;
-            let quaternion = bombInfo.quaternion;
-            let bomb = new Bomb(pos, quaternion, phy, gameMap);
-        }
-    })
+    // Listen events from server
+    socket.on('playerStates', playerStatesFunction);
+    socket.on("updateCamera", updateCameraFunction)
+    socket.on("updatePlayerPos", updatePlayerPosEvent)
+    socket.on("plantBomb", plantBombEvent)
     
-    setInterval(() => {
+    updatePlayerPosEmit = setInterval(() => {
         socket.emit('updatePlayerPos', player.getBodyPos());
     }, 10);
     
-    setInterval(() => {
+    updateCameraEmit = setInterval(() => {
         socket.emit('updateCamera', ({"pos":camera.position, "rotation":camera.rotation}));
     }, 1);
     
@@ -165,8 +244,6 @@ function main(){
     // Increase the intensity of the directional light
     directionalLight.intensity = 1.3;
     scene.add( directionalLight );
-
-
     
     
     // test area
@@ -215,13 +292,13 @@ function main(){
     
     }
     renderer.setAnimationLoop(animate)
-
-    window.addEventListener("resize", function(){
-        camera.aspect = window.innerWidth / window.innerHeight,
-        camera.updateProjectionMatrix()
-        renderer.setSize(window.innerWidth, window.innerHeight)
-    })
 }
+
+window.addEventListener("resize", function(){
+    camera.aspect = window.innerWidth / window.innerHeight,
+    camera.updateProjectionMatrix()
+    renderer.setSize(window.innerWidth, window.innerHeight)
+})
 
 // other functions
 function updateCamera(camera, cameraInfo){

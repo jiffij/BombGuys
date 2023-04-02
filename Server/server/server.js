@@ -13,7 +13,7 @@ let io = new Server(server, {
       origin: '*', // You can replace the '*' with your specific client origin, e.g., 'http://localhost:8888'
       methods: ['GET', 'POST'],
       allowedHeaders: ['Content-Type'],
-      credentials: true
+      credentials: true 
     }
   });
 
