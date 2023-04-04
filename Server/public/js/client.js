@@ -173,10 +173,10 @@ initialize()
 // should be in waiting room function
 function enterWaitRoom(){
     if (dev){
-        socket = io(`http://64.226.64.79`);
+        socket = io(`http://localhost:3000`);
     }
     else {
-        socket = io(`http://localhost:3000`);
+        socket = io(`http://64.226.64.79`);
     }
     // Wait for more player
     document.body.innerHTML = '';
