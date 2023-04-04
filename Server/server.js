@@ -3,7 +3,7 @@ import express from 'express';
 import { Server as socketIOServer } from 'socket.io';// import cors from 'cors';
 import path from 'path';
 
-const publicPath = path.join(process.cwd(), '/../public');
+const publicPath = path.join(process.cwd(), 'Server/public');
 const port = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
