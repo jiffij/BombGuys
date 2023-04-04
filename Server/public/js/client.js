@@ -6,7 +6,7 @@ import { Physics } from './physics.js';
 import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
 import { Bomb } from './Bomb.js';
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
-import { serverIp } from './config.js';
+import { dev, serverIp } from './config.js';
 
 
 // global variables
@@ -172,8 +172,12 @@ initialize()
 
 // should be in waiting room function
 function enterWaitRoom(){
-    // socket = io(`http://64.226.64.79`);
-    socket = io(`http://localhost:3000`);
+    if (dev){
+        socket = io(`http://64.226.64.79`);
+    }
+    else {
+        socket = io(`http://localhost:3000`);
+    }
     // Wait for more player
     document.body.innerHTML = '';
     centeredText = document.createElement('div');
