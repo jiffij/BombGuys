@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>My Home Page</title>
+	<title>BombGuy</title>
 	<style>
 		body {
 			background-image: url('../img/background.png');
@@ -50,16 +50,9 @@
 </head>
 <body>
 	<div class="container" id="home">
-		
 			<input type="text" placeholder="Room Id / Leave it empty to start now">
 			<button id="start_btn">Start now</button>
-		
 	</div>
-	<!-- <script> 
-    let btn = document.getElementById("start_btn");
-    let container = document.getElementById("home");
-	btn.addEventListener("click", () => { container.style.display = 'none'; console.log('hide');}); 
-	</script> -->
 	<script src="/socket.io/socket.io.js"></script>
     <script type="module" src="./js/client.js"></script>
 </body>

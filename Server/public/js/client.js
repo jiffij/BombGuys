@@ -3,13 +3,114 @@ import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/j
 import { ModelLoader } from './ModelLoader.js';
 import { GameMap } from './GameMap.js';
 import { Physics } from './physics.js';
-// import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
+import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
 import { Bomb } from './Bomb.js';
+import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 import { serverIp } from './config.js';
 
-const socket = io();
 
-let firstTimeLoad = false
+// global variables
+let playerId;
+let keysPressedFromServer = {}
+let socket;
+
+// explosion
+export let explosions = []
+
+// setup scene and camera
+let renderer;
+export let scene;
+let camera;
+let camera2;
+
+// orbit control
+let orbit;
+
+// physics
+let phy;
+
+// create map
+let gameMap;
+
+// players
+let player
+let player2
+
+// setInterval function id
+let updatePlayerPosEmit;
+let updateCameraEmit;
+
+const animations = {}
+
+// html components
+let startButton;
+let centeredText;
+let modal;
+
+// in game
+let inGame = false;
+
+
+// load animations
+function loadFBX(url) {
+    return new Promise((resolve, reject) => {
+      const loader = new FBXLoader();
+      loader.setPath("../../models/animation/")
+      loader.load(
+        url,
+        (fbx) => {
+          resolve(fbx);
+        },
+        undefined,
+        (error) => {
+          reject(error);
+        }
+      );
+    });
+}
+
+async function loadAssets() {
+    try {
+      // Load animations and skins here
+      const fbx1 = await loadFBX('idle.fbx');
+      const fbx2 = await loadFBX('run.fbx');
+      const fbx3 = await loadFBX('jump.fbx');
+      animations["idle"] = fbx1
+      animations["run"] = fbx2
+      animations["jump"] = fbx3
+      // Process and store the loaded animations and skins
+    } catch (error) {
+      console.error('Error loading assets:', error);
+    }
+}
+
+await loadAssets()
+
+
+function createMainPage(){
+    document.body.style.backgroundImage = "url('../img/background.png')";
+    document.body.innerHTML = '';
+
+    let container = document.createElement('div');
+    container.setAttribute('class', 'container');
+    container.setAttribute('id', 'home');
+
+    let input = document.createElement('input');
+    input.setAttribute('type', 'text');
+    input.setAttribute('placeholder', 'Room Id / Leave it empty to start now');
+
+    startButton = document.createElement('button');
+    startButton.setAttribute('id', 'start_btn');
+    startButton.textContent = 'Start now';
+    startButton.onclick = enterWaitRoom
+
+    container.appendChild(input);
+    container.appendChild(startButton);
+
+    document.body.appendChild(container);
+}
+
+createMainPage()
 
 function initialize(){
     // explosion
@@ -65,79 +166,53 @@ function clear(){
     socket.off("plantBomb")
 }
 
-// explosion
-export let explosions = []
-
-// setup scene and camera
-let renderer;
-export let scene;
-let camera;
-let camera2;
-
-// orbit control
-let orbit;
-
-// physics
-let phy;
-
-// create map
-let gameMap;
-
-// setInterval function id
-let updatePlayerPosEmit;
-let updateCameraEmit;
 
 initialize()
 
-let playerId;
-let keysPressedFromServer = {}
-// const socket = io(`http://64.226.64.79`);
 
-socket.on("playerId", (id) => {
-    playerId = id;
-    console.log(playerId)
-})
-
-// Wait for more player
-const centeredText = document.createElement('div');
-centeredText.textContent = 'Waiting for more players...';
-centeredText.classList.add('centered-text');
-document.body.appendChild(centeredText);
-
-socket.on("playerNum", num => {
-    console.log(num)
-    if (num == 2){
-        initialize()
-        loadModel()
-    }
-    else {
-        let objectsToRemove = []
-        // Loop through the children of the scene
-        clear()
-        if (scene !== undefined){
-            scene.traverse((child) => {
-                objectsToRemove.push(child);
-            });
-            objectsToRemove.forEach((object) => {
-                scene.remove(object);
-            });
-            renderer.domElement.remove()
+// should be in waiting room function
+function enterWaitRoom(){
+    // socket = io(`http://64.226.64.79`);
+    socket = io(`http://localhost:3000`);
+    // Wait for more player
+    document.body.innerHTML = '';
+    centeredText = document.createElement('div');
+    centeredText.textContent = 'Waiting for more players...';
+    centeredText.classList.add('centered-text');
+    document.body.appendChild(centeredText);
+    socket.on("playerId", (id) => {
+        playerId = id;
+        console.log(playerId)
+    })
+    
+    socket.on("playerNum", num => {
+        console.log(num)
+        if (num == 2){
+            initialize()
+            loadModel()
+            setTimeout(() => {
+                document.body.style.backgroundImage = "none"
+                main()
+                inGame = true
+            }, 500)
         }
-        document.body.appendChild(centeredText);
-    }
-})
-
-socket.emit("join",0)
+        else {
+            if (inGame) {
+                gameEnd()
+                inGame = false
+            }
+        }
+    })
+    
+    socket.emit("join",0)
+}
 
 // load model and animation
-let player
-let player2
 function loadModel(){
-    player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["idle.fbx","run.fbx","jump.fbx"], orbit, camera, phy, gameMap, true, null)
+    player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", animations, orbit, camera, phy, gameMap, true, null)
     player.load()
-    player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", "../../models/animation/",["idle.fbx","run.fbx","jump.fbx"], orbit, camera2, phy, gameMap, false, null)
+    player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", animations, orbit, camera2, phy, gameMap, false, null)
     player2.load()
-    setTimeout(main, 2000)
 }
 
 const keysPressed = {}
@@ -213,9 +288,7 @@ function plantBombEvent(bombInfo){
 }
 
 function main(){
-
-    centeredText.remove()
-
+    document.body.innerHTML = ""
     document.body.appendChild(renderer.domElement)
 
     // keyboard event listener
@@ -310,3 +383,58 @@ function updateCamera(camera, cameraInfo){
     camera.rotation._y = cameraInfo.rotation._y
     camera.rotation._z = cameraInfo.rotation._z
 }
+
+// gameend: go back to start screen or directly join another game
+// a window to select
+function popupWindow(){
+    modal = document.createElement('div');
+    modal.setAttribute('id', 'myModal');
+    modal.setAttribute('class', 'modal');
+
+    let modalContent = document.createElement('div');
+    modalContent.setAttribute('class', 'modal-content');
+
+    let closeModal = document.createElement('span');
+    closeModal.setAttribute('id', 'closeModal');
+    closeModal.setAttribute('class', 'close');
+
+    closeModal.innerHTML = '&times;';
+
+    var modalText = document.createElement('p');
+    modalText.textContent = 'Content inside the modal';
+
+    modalContent.appendChild(closeModal);
+    modalContent.appendChild(modalText);
+    modal.appendChild(modalContent);
+
+    document.body.appendChild(modal);
+    console.log("game ENDED")
+    document.getElementById('closeModal').onclick = function() {
+        document.getElementById('myModal').style.display = 'none';
+    }
+}
+
+function clearScene(){
+    let objectsToRemove = []
+    // Loop through the children of the scene
+    clear()
+    if (scene !== undefined){
+        scene.traverse((child) => {
+            objectsToRemove.push(child);
+        });
+        objectsToRemove.forEach((object) => {
+            scene.remove(object);
+        });
+    }
+    document.body.innerHTML = '';
+}
+
+function gameEnd(){
+    popupWindow()
+    // check return to start or enter waiting room
+}
+
+function clearHTML(){
+    
+}
+

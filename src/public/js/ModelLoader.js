@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
-import { CharacterController } from './characterController.js';
+import { CharacterController } from './CharacterController.js';
 import { bodySphereRadius, characterScale, floorConfig } from './config.js';
 
 export class ModelLoader {
