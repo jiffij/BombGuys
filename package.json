@@ -9,7 +9,8 @@
     "three": "^0.150.1"
   },
   "scripts": {
-    "start": "node ./Server/server/server.js"
+    "start-server": "node ./Server/server.js",
+    "start-client": "node ./Server/app.js"
   },
   "type": "module"
 }

@@ -9,7 +9,61 @@ import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm
 import { serverIp } from './config.js';
 
 
-let firstTimeLoad = false
+// global variables
+let playerId;
+let keysPressedFromServer = {}
+let socket;
+
+// explosion
+export let explosions = []
+
+// setup scene and camera
+let renderer;
+export let scene;
+let camera;
+let camera2;
+
+// orbit control
+let orbit;
+
+// physics
+let phy;
+
+// create map
+let gameMap;
+
+// players
+let player
+let player2
+
+// setInterval function id
+let updatePlayerPosEmit;
+let updateCameraEmit;
+
+const animations = {}
+
+// html components
+let startButton;
+let centeredText;
+let startButtonDiv;
+let modal;
+
+// in game
+let inGame = false;
+
+function createMainPage(){
+    document.body.innerHTML = '';
+    startButtonDiv = document.createElement('div')
+    startButtonDiv.classList.add("start-button-div")
+    startButton= document.createElement('button')
+    startButton.textContent = "Start"
+    startButton.classList.add("start-button")
+    startButton.onclick = enterWaitRoom
+    startButtonDiv.appendChild(startButton)
+    document.body.appendChild(startButtonDiv)
+}
+
+createMainPage()
 
 function initialize(){
     // explosion
@@ -65,31 +119,8 @@ function clear(){
     socket.off("plantBomb")
 }
 
-// explosion
-export let explosions = []
-
-// setup scene and camera
-let renderer;
-export let scene;
-let camera;
-let camera2;
-
-// orbit control
-let orbit;
-
-// physics
-let phy;
-
-// create map
-let gameMap;
-
-// setInterval function id
-let updatePlayerPosEmit;
-let updateCameraEmit;
 
 initialize()
-
-const animations = {}
 
 function loadFBX(url) {
     return new Promise((resolve, reject) => {
@@ -124,51 +155,55 @@ async function loadAssets() {
 }
 
 await loadAssets()
-console.log(animations)
 
-let playerId;
-let keysPressedFromServer = {}
-const socket = io(`http://64.226.64.79`);
 
-socket.on("playerId", (id) => {
-    playerId = id;
-    console.log(playerId)
-})
-
-// Wait for more player
-const centeredText = document.createElement('div');
-centeredText.textContent = 'Waiting for more players...';
-centeredText.classList.add('centered-text');
-document.body.appendChild(centeredText);
-
-socket.on("playerNum", num => {
-    console.log(num)
-    if (num == 2){
-        initialize()
-        loadModel()
-    }
-    else {
-        let objectsToRemove = []
-        // Loop through the children of the scene
-        clear()
-        if (scene !== undefined){
-            scene.traverse((child) => {
-                objectsToRemove.push(child);
-            });
-            objectsToRemove.forEach((object) => {
-                scene.remove(object);
-            });
-            renderer.domElement.remove()
+// should be in waiting room function
+function enterWaitRoom(){
+    // socket = io(`http://64.226.64.79`);
+    socket = io(`http://localhost:3000`);
+    // Wait for more player
+    document.body.innerHTML = '';
+    centeredText = document.createElement('div');
+    centeredText.textContent = 'Waiting for more players...';
+    centeredText.classList.add('centered-text');
+    document.body.appendChild(centeredText);
+    socket.on("playerId", (id) => {
+        playerId = id;
+        console.log(playerId)
+    })
+    
+    socket.on("playerNum", num => {
+        console.log(num)
+        if (num == 2){
+            initialize()
+            loadModel()
+            inGame = true
         }
-        document.body.appendChild(centeredText);
-    }
-})
-
-socket.emit("join",0)
+        else {
+            if (inGame) {
+                gameEnd()
+                inGame = false
+            }
+            // let objectsToRemove = []
+            // // Loop through the children of the scene
+            // clear()
+            // if (scene !== undefined){
+            //     scene.traverse((child) => {
+            //         objectsToRemove.push(child);
+            //     });
+            //     objectsToRemove.forEach((object) => {
+            //         scene.remove(object);
+            //     });
+            //     document.body.innerHTML = '';
+            // }
+            // document.body.appendChild(centeredText);
+        }
+    })
+    
+    socket.emit("join",0)
+}
 
 // load model and animation
-let player
-let player2
 function loadModel(){
     player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", animations, orbit, camera, phy, gameMap, true, null)
     player.load()
@@ -250,9 +285,7 @@ function plantBombEvent(bombInfo){
 }
 
 function main(){
-
     centeredText.remove()
-
     document.body.appendChild(renderer.domElement)
 
     // keyboard event listener
@@ -347,3 +380,58 @@ function updateCamera(camera, cameraInfo){
     camera.rotation._y = cameraInfo.rotation._y
     camera.rotation._z = cameraInfo.rotation._z
 }
+
+// gameend: go back to start screen or directly join another game
+// a window to select
+function popupWindow(){
+    modal = document.createElement('div');
+    modal.setAttribute('id', 'myModal');
+    modal.setAttribute('class', 'modal');
+
+    let modalContent = document.createElement('div');
+    modalContent.setAttribute('class', 'modal-content');
+
+    let closeModal = document.createElement('span');
+    closeModal.setAttribute('id', 'closeModal');
+    closeModal.setAttribute('class', 'close');
+
+    closeModal.innerHTML = '&times;';
+
+    var modalText = document.createElement('p');
+    modalText.textContent = 'Content inside the modal';
+
+    modalContent.appendChild(closeModal);
+    modalContent.appendChild(modalText);
+    modal.appendChild(modalContent);
+
+    document.body.appendChild(modal);
+    console.log("game ENDED")
+    document.getElementById('closeModal').onclick = function() {
+        document.getElementById('myModal').style.display = 'none';
+    }
+}
+
+function clearScene(){
+    let objectsToRemove = []
+    // Loop through the children of the scene
+    clear()
+    if (scene !== undefined){
+        scene.traverse((child) => {
+            objectsToRemove.push(child);
+        });
+        objectsToRemove.forEach((object) => {
+            scene.remove(object);
+        });
+    }
+    document.body.innerHTML = '';
+}
+
+function gameEnd(){
+    popupWindow()
+    // check return to start or enter waiting room
+}
+
+function clearHTML(){
+    
+}
+

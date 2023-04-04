@@ -1,15 +1,20 @@
-// const path          = require('path');
-const http          = require('http');
-const express       = require('express');
-const socketIO      = require('socket.io');
-// const cors = require('cors');
-const path          = require('path');
+import http from 'http';
+import express from 'express';
+import { Server as socketIOServer } from 'socket.io';// import cors from 'cors';
+import path from 'path';
 
-const publicPath    = path.join(__dirname, '/../public');
-const port          = process.env.PORT || 3000;
-let app             = express();
-let server          = http.createServer(app);
-let io              = socketIO(server);
+const publicPath = path.join(process.cwd(), '/../public');
+const port = process.env.PORT || 3000;
+const app = express();
+const server = http.createServer(app);
+const io = new socketIOServer(server, {
+    cors: {
+      origin: '*', // You can replace the '*' with your specific client origin, e.g., 'http://localhost:8888'
+      methods: ['GET', 'POST'],
+      allowedHeaders: ['Content-Type'],
+      credentials: true 
+    }
+});
 app.use(express.static(publicPath));
 //     ,{
 //     cors: {
