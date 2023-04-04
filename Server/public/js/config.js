@@ -26,3 +26,4 @@ export const bodySphereRadius = 0.4;
 
 export const shootInterval = 0.5;
 export const serverIp = "64.226.64.79";
+export const dev = false;
