@@ -1,21 +1,24 @@
 // const path          = require('path');
 const http          = require('http');
 const express       = require('express');
-const { Server } = require('socket.io');
-const cors = require('cors');
+const socketIO      = require('socket.io');
+// const cors = require('cors');
+const path          = require('path');
 
-// const publicPath    = path.join(__dirname, '/../public');
+const publicPath    = path.join(__dirname, '/../public');
 const port          = process.env.PORT || 3000;
 let app             = express();
 let server          = http.createServer(app);
-let io = new Server(server, {
-    cors: {
-      origin: '*', // You can replace the '*' with your specific client origin, e.g., 'http://localhost:8888'
-      methods: ['GET', 'POST'],
-      allowedHeaders: ['Content-Type'],
-      credentials: true 
-    }
-  });
+let io              = socketIO(server);
+app.use(express.static(publicPath));
+//     ,{
+//     cors: {
+//       origin: '*', // You can replace the '*' with your specific client origin, e.g., 'http://localhost:8888'
+//       methods: ['GET', 'POST'],
+//       allowedHeaders: ['Content-Type'],
+//       credentials: true 
+//     }
+//   });
 
 // app.use(express.static(publicPath));
 // A basic example of storing player states on the server

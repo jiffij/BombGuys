@@ -4,7 +4,7 @@
 	<title>My Home Page</title>
 	<style>
 		body {
-			background-image: url('../img/background.png');
+			background-image: url('img/background.png');
 			background-size: cover;
 			background-position: center;
 		}
@@ -21,7 +21,7 @@
 
 		input[type=text] {
 			width: 100%;
-			max-width: 300px;
+			/* max-width: 600px; Change this value to adjust the width */
 			height: 40px;
 			padding: 10px;
 			border-radius: 20px;
@@ -49,18 +49,16 @@
 	</style>
 </head>
 <body>
-	<div class="container" id="home">
-		
+	<div class="container">
+		<form>
 			<input type="text" placeholder="Room Id / Leave it empty to start now">
-			<button id="start_btn">Start now</button>
-		
+			<button id="start_btn" onclick="goToOtherPage()">Start now</button>
+		</form>
 	</div>
-	<!-- <script> 
-    let btn = document.getElementById("start_btn");
-    let container = document.getElementById("home");
-	btn.addEventListener("click", () => { container.style.display = 'none'; console.log('hide');}); 
-	</script> -->
-	<script src="/socket.io/socket.io.js"></script>
-    <script type="module" src="./js/client.js"></script>
+	<script> 
+	let btn = document.getElementById("start_btn"); 
+	btn.addEventListener("click", () => { window.location.href = "html/index.html"; }); 
+	</script>
+	
 </body>
 </html>
