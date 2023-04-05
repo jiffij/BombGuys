@@ -113,6 +113,7 @@ await loadAssets()
 
 
 function createMainPage(){
+    console.log("creating main page")
     document.body.style.backgroundImage = "url('../img/background.png')";
     document.body.innerHTML = '';
 
@@ -394,7 +395,6 @@ function main(){
           }
         
         renderer.render(scene, camera)
-        requestAnimationFrame(animate);
     }
     renderer.setAnimationLoop(animate)
 }
