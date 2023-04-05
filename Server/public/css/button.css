@@ -1,0 +1,91 @@
+input[type=text] {
+  width: 100%;
+  max-width: 300px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: rgb(120, 77, 206);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+}
+
+button:hover {
+  background-color: #3E8E41;
+}
+
+.gameEndButton {
+  appearance: button;
+  background-color: #1899D6;
+  border: solid transparent;
+  border-radius: 16px;
+  border-width: 0 0 4px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: din-round,sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  line-height: 20px;
+  margin: 0;
+  outline: none;
+  overflow: visible;
+  padding: 13px 16px;
+  text-align: center;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  transform: translateZ(0);
+  transition: filter .2s;
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  margin-top: 50px;
+  margin-left: 30px;
+  margin-right: 30px;
+  width: 100px;
+}
+
+.gameEndButton:after {
+  background-clip: padding-box;
+  background-color: #1CB0F6;
+  border: solid transparent;
+  border-radius: 16px;
+  border-width: 0 0 4px;
+  bottom: -4px;
+  content: "";
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: -1;
+}
+
+.gameEndButton:main,
+.gameEndButton:focus {
+  user-select: auto;
+}
+
+.gameEndButton:hover:not(:disabled) {
+  background-color: #1899D6;
+  filter: brightness(1.1);
+  -webkit-filter: brightness(1.1);
+}
+
+.gameEndButton:disabled {
+  cursor: auto;
+}

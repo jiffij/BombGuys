@@ -53,6 +53,9 @@ let modal;
 // in game
 let inGame = false;
 
+// game end sentence
+let gameEndWords = "Game Over!"
+
 
 // load animations
 function loadFBX(url) {
@@ -202,6 +205,7 @@ function enterWaitRoom(){
     }
     // Wait for more player
     document.body.innerHTML = '';
+    document.body.style.backgroundImage = "url('../img/background.png')";
     centeredText = document.createElement('div');
     centeredText.textContent = 'Waiting for more players...';
     centeredText.classList.add('centered-text');
@@ -315,6 +319,7 @@ function plantBombEvent(bombInfo){
 
 function main(){
     document.body.innerHTML = ""
+    renderer.domElement.setAttribute('id', 'scene');
     document.body.appendChild(renderer.domElement)
 
     // keyboard event listener
@@ -389,7 +394,7 @@ function main(){
           }
         
         renderer.render(scene, camera)
-    
+        requestAnimationFrame(animate);
     }
     renderer.setAnimationLoop(animate)
 }
@@ -426,11 +431,31 @@ function popupWindow(){
 
     closeModal.innerHTML = '&times;';
 
-    var modalText = document.createElement('p');
-    modalText.textContent = 'Content inside the modal';
+    let modalText = document.createElement('p');
+    modalText.textContent = gameEndWords;
+
+    let replayButton = document.createElement('button');
+    replayButton.setAttribute("class", "gameEndButton")
+    replayButton.textContent = "replay"
+    replayButton.onclick = function(){
+        clearScene()
+        disconnectFromServer()
+        enterWaitRoom()
+    }
+
+    let returnButton = document.createElement('button');
+    returnButton.setAttribute("class", "gameEndButton")
+    returnButton.textContent = "home"
+    returnButton.onclick = function(){
+        clearScene()
+        disconnectFromServer()
+        createMainPage()
+    }
 
     modalContent.appendChild(closeModal);
     modalContent.appendChild(modalText);
+    modalContent.appendChild(replayButton);
+    modalContent.appendChild(returnButton);
     modal.appendChild(modalContent);
 
     document.body.appendChild(modal);
@@ -458,6 +483,10 @@ function clearScene(){
 function gameEnd(){
     popupWindow()
     // check return to start or enter waiting room
+}
+
+function disconnectFromServer() {
+    socket.emit('disconnect_me');
 }
 
 function clearHTML(){
