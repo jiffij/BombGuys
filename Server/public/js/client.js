@@ -40,7 +40,10 @@ let player2
 let updatePlayerPosEmit;
 let updateCameraEmit;
 
+// load skin and animation
 const animations = {}
+let skin1;
+let skin2;
 
 // html components
 let startButton;
@@ -69,12 +72,31 @@ function loadFBX(url) {
     });
 }
 
+function loadSkin(url) {
+    return new Promise((resolve, reject) => {
+        const loader = new FBXLoader();
+        loader.setPath("../../models/static/")
+        loader.load(
+          url,
+          (fbx) => {
+            resolve(fbx);
+          },
+          undefined,
+          (error) => {
+            reject(error);
+          }
+        );
+      });
+}
+
 async function loadAssets() {
     try {
       // Load animations and skins here
       const fbx1 = await loadFBX('idle.fbx');
       const fbx2 = await loadFBX('run.fbx');
       const fbx3 = await loadFBX('jump.fbx');
+      skin1 = await loadSkin('mouse.fbx');
+      skin2 = await loadSkin('mouse.fbx');
       animations["idle"] = fbx1
       animations["run"] = fbx2
       animations["jump"] = fbx3
@@ -213,9 +235,9 @@ function enterWaitRoom(){
 
 // load model and animation
 function loadModel(){
-    player = new ModelLoader(scene, "../../models/static/", "mouse.fbx", animations, orbit, camera, phy, gameMap, true, null)
+    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, null)
     player.load()
-    player2 = new ModelLoader(scene, "../../models/static/", "mouse.fbx", animations, orbit, camera2, phy, gameMap, false, null)
+    player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, null)
     player2.load()
 }
 
@@ -309,11 +331,11 @@ function main(){
     
     updatePlayerPosEmit = setInterval(() => {
         socket.emit('updatePlayerPos', player.getBodyPos());
-    }, 10);
+    }, 30);
     
     updateCameraEmit = setInterval(() => {
         socket.emit('updateCamera', ({"pos":camera.position, "rotation":camera.rotation}));
-    }, 1);
+    }, 10);
     
     
     // add light

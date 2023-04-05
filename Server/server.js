@@ -35,7 +35,7 @@ let bombs = []
 
 const updatePosFreq = 30;
 const updateCamFreq = 30;
-const updateKeyboardFreq = 5;
+const updateKeyboardFreq = 10;
 
 server.listen(port, ()=> {
     console.log(`Server is up on port ${port}.`)
