@@ -5,9 +5,10 @@ import { CharacterController } from './CharacterController.js';
 import { bodySphereRadius, characterScale, floorConfig } from './config.js';
 
 export class ModelLoader {
-    constructor(scene, path, file, animations, orbitControls, camera, physicsWorld, gameMap, isPlayer, pos) {
-        this.path = path;
-        this.file = file;
+    constructor(scene, skin, animations, orbitControls, camera, physicsWorld, gameMap, isPlayer, pos) {
+        // this.path = path;
+        // this.file = file;
+        this.model = skin
         this.animations = animations;
         this.scale = characterScale;
         this.animationMap = new Map();
@@ -18,7 +19,6 @@ export class ModelLoader {
         this.camera = camera;
         this.physicsWorld = physicsWorld;
         this.scene = scene;
-        this.model;
         this.gameMap = gameMap;
         this.isPlayer = isPlayer;
         if (pos == null){
@@ -43,21 +43,17 @@ export class ModelLoader {
 
     // load character model
     load(){
-        var loader = new FBXLoader();
-        loader.setPath(this.path)
-        loader.load(this.file, function(fbx) {
-            this.model = fbx
-            this.mixer = new THREE.AnimationMixer(fbx);
-            this.mixer.addEventListener("finished", ( /*event*/ ) => {
-                this.characterController.finishJump = true
-                this.characterController.jump = false
-            
-            } )
-            fbx.scale.set(this.scale[0],this.scale[1],this.scale[2])
-            fbx.position.set(this.pos[0], this.pos[1], this.pos[2])
-            this.loadAnimation(fbx, this.animations)                    
-            this.scene.add(fbx)
-        }.bind(this))
+        this.mixer = new THREE.AnimationMixer(this.model);
+        this.mixer.addEventListener("finished", ( /*event*/ ) => {
+            this.characterController.finishJump = true
+            this.characterController.jump = false
+        
+        } )
+        this.model.scale.set(this.scale[0],this.scale[1],this.scale[2])
+        this.model.position.set(this.pos[0], this.pos[1], this.pos[2])
+        this.loadAnimation(this.model, this.animations)                    
+        this.scene.add(this.model)
+
     }
 
     // load animation
@@ -82,7 +78,7 @@ export class ModelLoader {
             }
         }
 
-        this.characterController = new CharacterController(fbx, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer)
+        this.characterController = new CharacterController(this.model, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer)
     }
 
     getPos(){
