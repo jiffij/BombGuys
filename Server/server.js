@@ -50,12 +50,23 @@ io.on('connection', (socket) => {
         io.sockets.emit("playerNum", Object.keys(players).length)
     });
 
+    socket.on('disconnect_me', () => {
+        console.log("disconnected")
+        delete players[socket.id]
+        delete cameras[socket.id]
+        delete playersPos[socket.id]
+        io.sockets.emit("playerNum", Object.keys(players).length)
+        socket.disconnect();
+        console.log('User disconnected:', socket.id);
+    });
+
     socket.on("disconnect", () => {
         console.log("disconnected")
         delete players[socket.id]
         delete cameras[socket.id]
         delete playersPos[socket.id]
         io.sockets.emit("playerNum", Object.keys(players).length)
+        console.log('User disconnected:', socket.id);
     })
 
     // update movement
@@ -105,14 +116,5 @@ io.on('connection', (socket) => {
     }, updateCamFreq);
 
 });
-
-// io.on("disconnect", (socket) => {
-//     console.log(5)
-// })
-
-// io.on("startGame", () => {
-//     io.emit('start');
-//     console.log("startGame");
-// });
 
 
