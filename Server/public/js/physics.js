@@ -6,6 +6,7 @@ let NUM_PLAYERS = 0
 const PLAYER = 1;
 const FLOOR = 2;
 const BOMB = 3;
+const EQUIPMENT = 4;
 
 export class Player{
     constructor(fbx, position){
@@ -18,7 +19,7 @@ export class Player{
         });
         this.body.position.set(position[0], position[1], position[2]);
         this.body.collisionFilterGroup = PLAYER,
-        this.body.collisionFilterMask = FLOOR,
+        this.body.collisionFilterMask = FLOOR | EQUIPMENT,
         this.fbx = fbx;
         this.id = NUM_PLAYERS++;
         this.impulse = new CANNON.Vec3(0, jumpImpulse, 0)
@@ -80,6 +81,19 @@ class PhysicsBomb{
     }
 }
 
+class PhysicsEquipment{
+    constructor(mesh, body){
+        this.mesh = mesh;
+        this.body = body;
+    }
+
+    delete(){
+        delete this.mesh;
+        delete this.body;
+        delete this;
+    }
+}
+
 
 export class Physics{
     constructor() {
@@ -90,6 +104,7 @@ export class Physics{
         this.floorpieces = [];
         this.bombs = {};
         this.bombsShouldRemove = [];
+        this.equipments = {};
     }
 
     addPlayer(fbx, position){
@@ -108,7 +123,7 @@ export class Physics{
 
         });
         body.collisionFilterGroup = FLOOR;
-        body.collisionFilterMask = PLAYER | BOMB;
+        body.collisionFilterMask = PLAYER | BOMB | EQUIPMENT;
         // body.position.set(new CANNON.Vec3(mesh.position.x, mesh.position.y, mesh.position.z));
         body.position.x = mesh.position.x;
         body.position.y = mesh.position.y;
@@ -176,6 +191,40 @@ export class Physics{
         this.bombs[uuid] = new PhysicsBomb(mesh, body);
     }
 
+    addEquipment(mesh, quaternion, uuid, playerBodyPos, Object){
+        const body = new CANNON.Body({
+            mass: 2,
+            shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
+            fixedRotation: true,
+        });
+        body.collisionFilterGroup = EQUIPMENT,
+        body.collisionFilterMask = FLOOR | PLAYER,
+        body.position.x = mesh.position.x;
+        body.position.y = mesh.position.y; // it will touch the player otherwise
+        body.position.z = mesh.position.z;
+        this.physicsWorld.addBody(body);
+
+        body.addEventListener("collide", function(e){
+            if (e.body.mass == 5){
+                console.log('equipment collision');
+                try {
+                    Object.remove()
+                }
+                catch{ print('remove error')}
+                    // }
+                // ,1500)
+
+            }
+        }.bind(this))
+        this.equipments[uuid] = new PhysicsEquipment(mesh, body);
+    }
+
+    removeEquipment(uuid){
+        let equip = this.equipments[uuid]
+        this.remove(equip.body)
+        delete this.equipments[uuid]
+    }
+
     remove(body){
         this.physicsWorld.removeBody(body);
     }
@@ -232,6 +281,18 @@ export class Physics{
             mesh.position.y = body.position.y + bombConfig.radius
             mesh.position.x = body.position.x
             mesh.position.z = body.position.z 
+        }
+        const equip_keys = Object.keys(this.equipments);
+        for(let i = 0; i < equip_keys.length; i++){
+            let key = equip_keys[i]
+            let equip = this.equipments[key]
+            if(equip != undefined){
+            const mesh = equip.mesh;
+            const body = equip.body;
+            mesh.position.y = body.position.y
+            mesh.position.x = body.position.x
+            mesh.position.z = body.position.z 
+            }
         }
     }
 }
