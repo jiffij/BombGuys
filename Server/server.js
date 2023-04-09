@@ -9,27 +9,28 @@ const app = express();
 const server = http.createServer(app);
 const io = new socketIOServer(server, {
     cors: {
-      origin: '*', // You can replace the '*' with your specific client origin, e.g., 'http://localhost:8888'
+      origin: '*',
       methods: ['GET', 'POST'],
       allowedHeaders: ['Content-Type'],
       credentials: true 
     }
 });
 app.use(express.static(publicPath));
-//     ,{
-//     cors: {
-//       origin: '*', // You can replace the '*' with your specific client origin, e.g., 'http://localhost:8888'
-//       methods: ['GET', 'POST'],
-//       allowedHeaders: ['Content-Type'],
-//       credentials: true 
-//     }
-//   });
+
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
 // app.use(express.static(publicPath));
 // A basic example of storing player states on the server
 const players = {};
 const playersPos = {};
 const cameras = {};
+const waitingRoom = {};
 let gameMap = []
 let bombs = []
 
@@ -47,7 +48,6 @@ io.on('connection', (socket) => {
         console.log(socket.id)
         players[socket.id] = {}
         socket.emit("playerId", socket.id)
-        io.sockets.emit("playerNum", Object.keys(players).length)
     });
 
     socket.on('disconnect_me', () => {
@@ -55,7 +55,15 @@ io.on('connection', (socket) => {
         delete players[socket.id]
         delete cameras[socket.id]
         delete playersPos[socket.id]
-        io.sockets.emit("playerNum", Object.keys(players).length)
+        for (let uuid of Object.keys(waitingRoom)){
+            const clientId = socket.id;
+            const index = waitingRoom[uuid].indexOf(clientId);
+            if (index !== -1){
+                waitingRoom[uuid].splice(index, 1);
+                notifyPlayerNum(uuid)
+                break
+            }
+        }
         socket.disconnect();
         console.log('User disconnected:', socket.id);
     });
@@ -65,8 +73,40 @@ io.on('connection', (socket) => {
         delete players[socket.id]
         delete cameras[socket.id]
         delete playersPos[socket.id]
-        io.sockets.emit("playerNum", Object.keys(players).length)
+        for (let uuid of Object.keys(waitingRoom)){
+            const clientId = socket.id;
+            const index = waitingRoom[uuid].indexOf(clientId);
+            if (index !== -1){
+                waitingRoom[uuid].splice(index, 1);
+                notifyPlayerNum(uuid)
+                break
+            }
+        }
         console.log('User disconnected:', socket.id);
+    })
+
+    // create a room
+    socket.on("createRoom", () => {
+        const uuid = generateUUID();
+        waitingRoom[uuid] = [socket.id]
+    })
+
+    socket.on("joinRoom", () => {
+        let haveEmptyRoom = false;
+        for (let uuid of Object.keys(waitingRoom)){
+            if (waitingRoom[uuid].length < 2){
+                waitingRoom[uuid].push(socket.id)
+                notifyPlayerNum(uuid)
+                haveEmptyRoom = true
+                break;
+            }
+        }
+        if (!haveEmptyRoom){
+            // if no room, create one
+            const uuid = generateUUID();
+            waitingRoom[uuid] = [socket.id]
+            socket.emit("playerNum", waitingRoom[uuid].length)
+        }
     })
 
     // update movement
@@ -115,6 +155,16 @@ io.on('connection', (socket) => {
         io.sockets.emit('updateCamera', cameras);
     }, updateCamFreq);
 
+
 });
+
+// Send a message to a list of specific clients
+function notifyPlayerNum(uuid) {
+    const clientIds = waitingRoom[uuid]
+    const num = waitingRoom[uuid].length
+    clientIds.forEach((clientId) => {
+        io.to(clientId).emit('playerNum', num);
+    });
+}
 
 
