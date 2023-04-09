@@ -120,4 +120,7 @@ export class ModelLoader {
         return this.characterController.plantBomb(this.scene)
     }
 
+    isAlive(){
+        return this.characterController.alive
+    }
 }

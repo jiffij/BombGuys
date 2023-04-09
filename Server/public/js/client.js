@@ -56,8 +56,6 @@ let inGame = false;
 // game end sentence
 let gameEndWords = "Game Over!"
 
-// waiting room id
-let waitingRoomId;
 
 
 // load animations
@@ -235,12 +233,6 @@ function enterWaitRoom(){
                 inGame = true
             }, 500)
         }
-        else {
-            if (inGame) {
-                gameEnd()
-                inGame = false
-            }
-        }
     })
     
     socket.emit("join",0)
@@ -355,11 +347,6 @@ function main(){
     // add light
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
-    // var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 ); // color, intensity
-    // directionalLight.position.set( 1, 1, 1 ); // position
-    // // Increase the intensity of the directional light
-    // directionalLight.intensity = 1.3;
-    // scene.add( directionalLight );
     
     
     // test area
@@ -383,6 +370,24 @@ function main(){
         }
         orbit.update()
     
+        // check win or lose
+        if (player.isAlive() == false){
+            if (inGame) {
+                gameEndWords = "You Lose!"
+                console.log("lose")
+                gameEnd()
+                inGame = false
+            }
+        }
+
+        if (player2.isAlive() == false){
+            if (inGame) {
+                gameEndWords = "You Win!"
+                console.log("win")
+                gameEnd()
+                inGame = false
+            }
+        }
     
         for (let i=0;i<explosions.length;i++){
             let explosion = explosions[i]
@@ -404,6 +409,7 @@ function main(){
             }
           }
         
+        gameMap.layer.rotation.z += 0.01;
         renderer.render(scene, camera)
     }
     renderer.setAnimationLoop(animate)
