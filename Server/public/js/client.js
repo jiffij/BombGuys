@@ -56,6 +56,9 @@ let inGame = false;
 // game end sentence
 let gameEndWords = "Game Over!"
 
+// waiting room id
+let waitingRoomId;
+
 
 // load animations
 function loadFBX(url) {
@@ -204,6 +207,10 @@ function enterWaitRoom(){
     else {
         socket = io(`http://64.226.64.79`);
     }
+
+    // send request to the server to create a room or to join a room
+    socket.emit("joinRoom");
+
     // Wait for more player
     document.body.innerHTML = '';
     document.body.style.backgroundImage = "url('../img/background.png')";
