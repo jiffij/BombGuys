@@ -16,6 +16,7 @@ export class GameMap {
     layers = floorConfig.layers;
     height = floorConfig.height
     mapSize = floorConfig.mapSize
+    layer;
 
     constructor(scene, physicsWorld){
         this.scene = scene;
@@ -58,6 +59,21 @@ export class GameMap {
             this.floorPiecesPos.push(layerPos)
             this.floorPieces.push(layer)
         }
+
+        // Create the layer
+        const layerGeometry = new THREE.CircleGeometry(40, 64);
+        const layerMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffc0cb,
+            roughness: 0.2,
+            metalness: 0.5,
+            envMapIntensity: 0.2,
+
+            map: generateTexture(),
+        });
+        this.layer = new THREE.Mesh(layerGeometry, layerMaterial);
+        this.layer.rotation.x = -Math.PI / 2;
+        this.layer.position.set(0,-25,0)
+        this.scene.add(this.layer);
     }
 
     
@@ -114,7 +130,7 @@ export class GameMap {
                 var p = possible_positions[randomIndex];
                 var mesh = this.floorPieces[p.l][p.i][p.j];
                 console.log(mesh.position, mesh.quaternion);
-                const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this);
+                // const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this);
             }
         }
     }
@@ -155,6 +171,30 @@ export class GameMap {
     }
 }
 
+function generateTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+  
+    const context = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY);
+  
+    const gradient = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+    gradient.addColorStop(0, 'rgba(255, 191, 207, 1)');
+    gradient.addColorStop(0.5, 'rgba(255, 128, 171, 0.5)');
+    gradient.addColorStop(1, 'rgba(255, 64, 135, 0)');
+  
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1, 1);
+  
+    return texture;
+  }
 
 class Coord {
     constructor(left, right, bottom, top, x, y, z){

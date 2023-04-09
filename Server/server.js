@@ -2,6 +2,7 @@ import http from 'http';
 import express from 'express';
 import { Server as socketIOServer } from 'socket.io';// import cors from 'cors';
 import path from 'path';
+import { playerNum } from './public/js/config.js';
 
 const publicPath = path.join(process.cwd(), '/public');
 const port = process.env.PORT || 3000;
@@ -31,6 +32,7 @@ const players = {};
 const playersPos = {};
 const cameras = {};
 const waitingRoom = {};
+const waitingRoomInGame = {};
 let gameMap = []
 let bombs = []
 
@@ -89,15 +91,19 @@ io.on('connection', (socket) => {
     socket.on("createRoom", () => {
         const uuid = generateUUID();
         waitingRoom[uuid] = [socket.id]
+        waitingRoomInGame[uuid] = false
     })
 
     socket.on("joinRoom", () => {
         let haveEmptyRoom = false;
         for (let uuid of Object.keys(waitingRoom)){
-            if (waitingRoom[uuid].length < 2){
+            if (waitingRoom[uuid].length < playerNum && waitingRoomInGame[uuid] == false){
                 waitingRoom[uuid].push(socket.id)
                 notifyPlayerNum(uuid)
                 haveEmptyRoom = true
+                if (waitingRoom[uuid].length == playerNum){
+                    waitingRoomInGame[uuid] = true
+                }
                 break;
             }
         }
@@ -105,6 +111,7 @@ io.on('connection', (socket) => {
             // if no room, create one
             const uuid = generateUUID();
             waitingRoom[uuid] = [socket.id]
+            waitingRoomInGame[uuid] = false
             socket.emit("playerNum", waitingRoom[uuid].length)
         }
     })

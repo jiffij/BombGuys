@@ -27,6 +27,9 @@ export class CharacterController {
     // able to throw a bomb
     throwability = true
 
+    // alive or not
+    alive = true
+
     constructor(model,
         mixer, animationsMap,
         orbitControl, camera,
@@ -158,6 +161,10 @@ export class CharacterController {
             this.player.jump()
             setTimeout(this.freezeMove.bind(this), 1100)
         }
+
+        if (this.model.position.y <= -25){
+            this.alive = false
+        }
     }
 
 
@@ -208,4 +215,5 @@ export class CharacterController {
 
         return directionOffset
     }
+
 }

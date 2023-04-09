@@ -56,8 +56,6 @@ let inGame = false;
 // game end sentence
 let gameEndWords = "Game Over!"
 
-// waiting room id
-let waitingRoomId;
 
 
 // load animations
@@ -148,6 +146,7 @@ function initialize(){
     // setup scene and camera
     renderer = new THREE.WebGLRenderer()
     renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.setClearColor(0xffc0cb, 1)
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(
         75,
@@ -233,12 +232,6 @@ function enterWaitRoom(){
                 main()
                 inGame = true
             }, 500)
-        }
-        else {
-            if (inGame) {
-                gameEnd()
-                inGame = false
-            }
         }
     })
     
@@ -352,11 +345,8 @@ function main(){
     
     
     // add light
-    var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 ); // color, intensity
-    directionalLight.position.set( 1, 1, 1 ); // position
-    // Increase the intensity of the directional light
-    directionalLight.intensity = 1.3;
-    scene.add( directionalLight );
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambientLight);
     
     
     // test area
@@ -380,6 +370,24 @@ function main(){
         }
         orbit.update()
     
+        // check win or lose
+        if (player.isAlive() == false){
+            if (inGame) {
+                gameEndWords = "You Lose!"
+                console.log("lose")
+                gameEnd()
+                inGame = false
+            }
+        }
+
+        if (player2.isAlive() == false){
+            if (inGame) {
+                gameEndWords = "You Win!"
+                console.log("win")
+                gameEnd()
+                inGame = false
+            }
+        }
     
         for (let i=0;i<explosions.length;i++){
             let explosion = explosions[i]
@@ -401,6 +409,7 @@ function main(){
             }
           }
         
+        gameMap.layer.rotation.z += 0.01;
         renderer.render(scene, camera)
     }
     renderer.setAnimationLoop(animate)
@@ -425,6 +434,13 @@ function updateCamera(camera, cameraInfo){
 // gameend: go back to start screen or directly join another game
 // a window to select
 function popupWindow(){
+    disconnectFromServer()
+        // keyboard event listener
+    document.removeEventListener("keydown", keyDownEvent)
+    document.removeEventListener("keyup", keyUpEvent)
+    document.addEventListener("keydown", keyDownEvent)
+    document.addEventListener("keyup", keyUpEvent)
+
     modal = document.createElement('div');
     modal.setAttribute('id', 'myModal');
     modal.setAttribute('class', 'modal');
@@ -446,7 +462,6 @@ function popupWindow(){
     replayButton.textContent = "replay"
     replayButton.onclick = function(){
         clearScene()
-        disconnectFromServer()
         enterWaitRoom()
     }
 
@@ -455,7 +470,6 @@ function popupWindow(){
     returnButton.textContent = "home"
     returnButton.onclick = function(){
         clearScene()
-        disconnectFromServer()
         createMainPage()
     }
 
