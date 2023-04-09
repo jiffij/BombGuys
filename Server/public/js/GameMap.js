@@ -58,6 +58,14 @@ export class GameMap {
             this.floorPiecesPos.push(layerPos)
             this.floorPieces.push(layer)
         }
+
+        const geometry = new THREE.SphereGeometry(32, 1, 32);
+        const blackHoleMaterial = new THREE.MeshBasicMaterial({color: 0x000000});
+        const blackHole = new THREE.Mesh(geometry, blackHoleMaterial);
+        this.scene.add(blackHole);
+
+
+
     }
 
     
