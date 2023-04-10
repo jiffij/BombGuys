@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es/dist/cannon-es.js';
-import { bodySphereRadius, bombConfig, bombForwardImpulse, bombUpImpulse, floorConfig, jumpImpulse } from "./config.js";
+import { bodySphereRadius, bombConfig, bombForwardImpulse, bombUpImpulse, floorConfig, jumpImpulse, jetImpulse } from "./config.js";
 
 let NUM_PLAYERS = 0
 const PLAYER = 1;
@@ -26,12 +26,14 @@ export class Player{
         this.fbx = fbx;
         this.id = NUM_PLAYERS++;
         this.impulse = new CANNON.Vec3(0, jumpImpulse, 0)
+        this.jet = false;
+        this.jetimpulse = new CANNON.Vec3(0, jetImpulse, 0)
         // this.boost_speed = 0;
-        this.body.addEventListener("collide", function(e){
-            if (e.body.mass == 0){
+        // this.body.addEventListener("collide", function(e){
+        //     if (e.body.mass == 0){
                 
-            }
-        }.bind(this))
+        //     }
+        // }.bind(this))
     }
 
     rotate(quarternion){
@@ -60,7 +62,12 @@ export class Player{
     }
 
     jump(){
-        this.body.applyImpulse(this.impulse, this.body.position);
+        if(this.jet){
+            this.body.applyImpulse(this.jetimpulse, this.body.position);
+        }else{
+            this.body.applyImpulse(this.impulse, this.body.position);
+        }
+        
     }
 }
 

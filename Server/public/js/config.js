@@ -18,6 +18,7 @@ export const bombConfig = {
 }
 
 export const jumpImpulse = 25;
+export const jetImpulse = 60;
 
 export const bombUpImpulse = 1.5;
 export const bombForwardImpulse = 3;

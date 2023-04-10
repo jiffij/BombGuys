@@ -56,7 +56,25 @@ export class Equipments {
             delete this
 
     }
+
+
+
+
+    
     applyEquip(player){
+
+        function keyupQ(e){
+            if(e.key.toLocaleLowerCase() == 'q'){
+                player.jet = false;
+            }
+        };
+
+        function keydownQ(e){
+            if(e.key.toLocaleLowerCase() == 'q'){
+                player.jet = true;
+            }
+        };
+
         switch (this.tool) {
             case EQUIPMENT.BOOT:
                 player.CharacterController.boost = true;
@@ -68,7 +86,14 @@ export class Equipments {
                 break;
 
             case EQUIPMENT.JET:
-            
+                document.addEventListener('keydown', keydownQ);
+                document.addEventListener('keyup', keyupQ);
+                setTimeout(() => {
+                    document.removeEventListener('keydown', keydownQ);
+                    document.removeEventListener('keyup', keyupQ);
+                    console.log('stop jet');
+                }, 10000);
+                console.log('Jet');
                 break;
             
             case EQUIPMENT.GLOVE:
