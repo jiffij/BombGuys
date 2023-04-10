@@ -1,6 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { Bomb } from './Bomb.js';
-import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js'
+import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js';
+import { boostSpeed } from './config.js';
 
 export class CharacterController {
     // state
@@ -33,7 +34,7 @@ export class CharacterController {
     constructor(model,
         mixer, animationsMap,
         orbitControl, camera,
-        currentAction, physicsWorld, gameMap, isPlayer) {
+        currentAction, physicsWorld, gameMap, isPlayer, playerId) {
         this.model = model;
         this.mixer = mixer;
         this.animationsMap = animationsMap;
@@ -49,9 +50,11 @@ export class CharacterController {
             this.updateCameraTarget(0,0);
         }
         this.physicsWorld = physicsWorld;
-        this.player = physicsWorld.addPlayer(model, [model.position.x, model.position.y, model.position.z]);
+        this.playerId = playerId;
+        this.player = physicsWorld.addPlayer(model, [model.position.x, model.position.y, model.position.z], playerId, this);
         this.gameMap = gameMap;
         this.isPlayer = isPlayer;
+        this.boost = false;
     }
 
     switchRunToggle() {
@@ -140,7 +143,10 @@ export class CharacterController {
             
 
             // run/walk velocity
-            const velocity = this.currentAction == 'run' ? this.runVelocity : this.walkVelocity
+            var velocity = this.currentAction == 'run' ? this.runVelocity : this.walkVelocity
+            if(this.boost){
+                velocity += boostSpeed;
+            }
             let verticalVelocity = this.player.getVerticalVelocity()
             if (verticalVelocity < 0.000000001){
                 verticalVelocity = 0

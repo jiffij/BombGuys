@@ -9,7 +9,7 @@ const BOMB = 3;
 const EQUIPMENT = 4;
 
 export class Player{
-    constructor(fbx, position){
+    constructor(fbx, position, playerId, CharacterController){
         this.body = new CANNON.Body({
             mass: 5,
             // type: CANNON.Body.STATIC,
@@ -17,13 +17,16 @@ export class Player{
             // shape: new CANNON.Cylinder(0.3,0.00001,0,20),
             fixedRotation: true,
         });
+        this.CharacterController = CharacterController;
+        this.playerId = playerId;
+        this.body.userData = {id: playerId};
         this.body.position.set(position[0], position[1], position[2]);
         this.body.collisionFilterGroup = PLAYER,
         this.body.collisionFilterMask = FLOOR | EQUIPMENT,
         this.fbx = fbx;
         this.id = NUM_PLAYERS++;
         this.impulse = new CANNON.Vec3(0, jumpImpulse, 0)
-
+        // this.boost_speed = 0;
         this.body.addEventListener("collide", function(e){
             if (e.body.mass == 0){
                 
@@ -107,8 +110,8 @@ export class Physics{
         this.equipments = {};
     }
 
-    addPlayer(fbx, position){
-        const player = new Player(fbx, position)
+    addPlayer(fbx, position, playerId, CharacterController){
+        const player = new Player(fbx, position, playerId, CharacterController)
         this.players.push(player);
         this.physicsWorld.addBody(player.body);
         return player;       
@@ -207,12 +210,22 @@ export class Physics{
         body.addEventListener("collide", function(e){
             if (e.body.mass == 5){
                 console.log('equipment collision');
-                try {
-                    Object.remove()
-                }
-                catch{ print('remove error')}
-                    // }
-                // ,1500)
+                setTimeout(
+                    function (){
+                        try {
+                            Object.remove()
+                        }
+                        catch{ print('remove error')}
+
+                        if(e.body.userData.id != 'enemy'){
+                            console.log('hit equip');
+                            var myself = this.players.find(function(obj){
+                                return obj.playerId === 'myself';
+                            });
+                            Object.applyEquip(myself);
+                        }
+                    }.bind(this)
+                ,100)
 
             }
         }.bind(this))

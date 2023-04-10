@@ -5,7 +5,7 @@ import { CharacterController } from './CharacterController.js';
 import { bodySphereRadius, characterScale, floorConfig } from './config.js';
 
 export class ModelLoader {
-    constructor(scene, skin, animations, orbitControls, camera, physicsWorld, gameMap, isPlayer, pos) {
+    constructor(scene, skin, animations, orbitControls, camera, physicsWorld, gameMap, isPlayer, pos, playerId) {
         // this.path = path;
         // this.file = file;
         this.model = skin
@@ -21,6 +21,7 @@ export class ModelLoader {
         this.scene = scene;
         this.gameMap = gameMap;
         this.isPlayer = isPlayer;
+        this.playerId = playerId;
         if (pos == null){
             this.pos = this.generateRandPos();
         }
@@ -78,7 +79,7 @@ export class ModelLoader {
             }
         }
 
-        this.characterController = new CharacterController(this.model, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer)
+        this.characterController = new CharacterController(this.model, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer, this.playerId)
     }
 
     getPos(){

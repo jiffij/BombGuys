@@ -240,9 +240,9 @@ function enterWaitRoom(){
 
 // load model and animation
 function loadModel(){
-    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, null)
+    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, null, 'myself')
     player.load()
-    player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, null)
+    player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, null, 'enemy')
     player2.load()
 }
 

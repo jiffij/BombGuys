@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
-import { bombConfig } from './config.js';
+import { EQUIPMENT } from './config.js';
 import { scene } from './client.js';
 import { generateUUID } from './utils.js';
 
@@ -21,12 +21,10 @@ export class Equipments {
     quaternion;
     constructor(position, quaternion, physicsWorld, gameMap){
         this.position = position
-        // this.radius = bombConfig.radius
-        // this.timeInterval = bombConfig.bufferTime
         this.quaternion = quaternion
         this.physicsWorld = physicsWorld
         this.gameMap = gameMap
-
+        this.tool = Math.floor(Math.random()*3); // randomly select an equipment
         this.init()
 
     }
@@ -52,9 +50,33 @@ export class Equipments {
             
             scene.remove(this.equipment)
             this.physicsWorld.removeEquipment(this.uuid)
+
             // get position of exploded floors and check if there is other bombs on those floors
             delete equipmentCollections[this.uuid]
             delete this
 
+    }
+    applyEquip(player){
+        switch (this.tool) {
+            case EQUIPMENT.BOOT:
+                player.CharacterController.boost = true;
+                setTimeout(() => {
+                    player.CharacterController.boost = false;
+                    console.log('stop boost');
+                }, 15000);
+                console.log('boosted');
+                break;
+
+            case EQUIPMENT.JET:
+            
+                break;
+            
+            case EQUIPMENT.GLOVE:
+            
+                break;
+
+            default:
+                break;
+        }
     }
 }
