@@ -1,7 +1,8 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { EQUIPMENT } from './config.js';
-import { scene } from './client.js';
+import { scene, socket } from './client.js';
 import { generateUUID } from './utils.js';
+import './client.js';
 
 
 const equipmentCollections = {}
@@ -19,12 +20,12 @@ export class Equipments {
     position;
     uuid;
     quaternion;
-    constructor(position, quaternion, physicsWorld, gameMap){
+    constructor(position, quaternion, physicsWorld, gameMap, tool){
         this.position = position
         this.quaternion = quaternion
         this.physicsWorld = physicsWorld
         this.gameMap = gameMap
-        this.tool = Math.floor(Math.random()*3); // randomly select an equipment
+        this.tool = tool; // randomly select an equipment
         this.init()
 
     }
@@ -36,6 +37,11 @@ export class Equipments {
         equipmentCollections[this.uuid] = this
         this.place()
         console.log('equipment init');
+        socket.emit("createEquip", {
+            position: this.position,
+            quaternion: this.quarternion,
+            tool: this.tool,
+        })
     }
     place(){
         this.equipment.position.set(this.position.x, this.position.y + 0.5, this.position.z)
@@ -73,7 +79,13 @@ export class Equipments {
             if(e.key.toLocaleLowerCase() == 'q'){
                 player.jet = true;
             }
-        };
+        }; 
+
+        function keydownF(e){
+            if(e.key.toLocaleLowerCase() == 'f'){
+                player.reverseGravity();
+            }
+        }
 
         switch (this.tool) {
             case EQUIPMENT.BOOT:
@@ -97,7 +109,10 @@ export class Equipments {
                 break;
             
             case EQUIPMENT.GLOVE:
-            
+                document.addEventListener('keypress', keydownF);
+                setTimeout(() => {
+                    document.removeEventListener('keypress', keydownF);
+                }, 10000);
                 break;
 
             default:
