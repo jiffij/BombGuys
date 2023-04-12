@@ -218,7 +218,6 @@ function enterWaitRoom(){
     })
     
     socket.on("startGame", gameMapInfo => {
-        console.log(gameMapInfo)
         initialize()
         // create map
         gameMap = new GameMap(scene, phy, gameMapInfo)
@@ -430,11 +429,9 @@ function updateCamera(camera, cameraInfo){
 // a window to select
 function popupWindow(){
     disconnectFromServer()
-        // keyboard event listener
+    // keyboard event listener
     document.removeEventListener("keydown", keyDownEvent)
     document.removeEventListener("keyup", keyUpEvent)
-    document.addEventListener("keydown", keyDownEvent)
-    document.addEventListener("keyup", keyUpEvent)
 
     modal = document.createElement('div');
     modal.setAttribute('id', 'myModal');
