@@ -9,6 +9,10 @@ export const floorConfig = {
     mapSize: 15,
 }
 
+export const life_1 = 0xd3d3d3
+export const life_2 = 0xf5f5dc
+export const life_3 = 0xfcba03
+
 export const characterScale = [0.01,0.01,0.01]
 
 export const bombConfig = {

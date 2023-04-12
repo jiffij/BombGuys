@@ -59,17 +59,13 @@ export class Bomb {
         ,this.timeInterval)
     }
     remove(){
-        // try {
-            // explosion 
-            let pos = this.bomb.position
-            if (this.exploded == false){
-                let explosion = createExplosion(pos)
-                explosions.push(explosion)
-                console.log(explosions)
-                scene.add(explosion)
-                this.exploded = true
-            }
-
+        let pos = this.bomb.position
+        if (this.exploded == false){
+            let explosion = createExplosion(pos)
+            explosions.push(explosion)
+            console.log(explosions)
+            scene.add(explosion)
+            this.exploded = true
             let posReconstuct = [pos.x, pos.y, pos.z]
             this.gameMap.removeFloor(posReconstuct)
             scene.remove(this.bomb)
@@ -77,8 +73,6 @@ export class Bomb {
             // get position of exploded floors and check if there is other bombs on those floors
             delete bombCollections[this.uuid]
             delete this
-
-        // }
-        // catch {}
+        }
     }
 }
