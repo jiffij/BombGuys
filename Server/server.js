@@ -68,7 +68,7 @@ io.on('connection', (socket) => {
             const index = waitingRoom[uuid].indexOf(clientId);
             if (index !== -1){
                 waitingRoom[uuid].splice(index, 1);
-                notifyPlayerNum(uuid)
+                // notifyPlayerNum(uuid)
                 break
             }
         }
@@ -86,7 +86,7 @@ io.on('connection', (socket) => {
             const index = waitingRoom[uuid].indexOf(clientId);
             if (index !== -1){
                 waitingRoom[uuid].splice(index, 1);
-                notifyPlayerNum(uuid)
+                // notifyPlayerNum(uuid)
                 break
             }
         }
