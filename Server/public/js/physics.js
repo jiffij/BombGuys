@@ -235,13 +235,14 @@ export class Physics{
                             Object.remove()
                         }
                         catch{ print('remove error')}
-
-                        if(e.body.userData.id != 'enemy'){
-                            console.log('hit equip');
-                            var myself = this.players.find(function(obj){
-                                return obj.playerId === 'myself';
-                            });
-                            Object.applyEquip(myself);
+                        if (e.body.userData !== undefined){
+                            if(e.body.userData.id != 'enemy'){
+                                console.log('hit equip');
+                                var myself = this.players.find(function(obj){
+                                    return obj.playerId === 'myself';
+                                });
+                                Object.applyEquip(myself);
+                            }
                         }
                     }.bind(this)
                 ,100)
