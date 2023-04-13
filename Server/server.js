@@ -155,7 +155,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on("createEquip", (equip)=>{
-        console.log('create equipment');
         socket.broadcast.emit('genEquip', equip);
     })
 

@@ -314,7 +314,7 @@ function plantBombEvent(bombInfo){
 }
 
 function makeEquip(equip){
-    new Equipments(equip.position, equip.quaternion, phy, gameMap, equip.tool);
+    new Equipments(equip.position, equip.quaternion, phy, gameMap, equip.tool, true);
 }
 
 function main(){

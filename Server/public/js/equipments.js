@@ -20,12 +20,13 @@ export class Equipments {
     position;
     uuid;
     quaternion;
-    constructor(position, quaternion, physicsWorld, gameMap, tool){
+    constructor(position, quaternion, physicsWorld, gameMap, tool, generateByServer){
         this.position = position
         this.quaternion = quaternion
         this.physicsWorld = physicsWorld
         this.gameMap = gameMap
         this.tool = tool; // randomly select an equipment
+        this.generateByServer = generateByServer
         this.init()
 
     }
@@ -37,11 +38,13 @@ export class Equipments {
         equipmentCollections[this.uuid] = this
         this.place()
         console.log('equipment init');
-        socket.emit("createEquip", {
-            position: this.position,
-            quaternion: this.quarternion,
-            tool: this.tool,
-        })
+        if (!this.generateByServer){
+            socket.emit("createEquip", {
+                position: this.position,
+                quaternion: this.quarternion,
+                tool: this.tool,
+            })
+        }
     }
     place(){
         this.equipment.position.set(this.position.x, this.position.y + 0.5, this.position.z)
@@ -53,18 +56,13 @@ export class Equipments {
         // catch{} 
     }
     remove(){
-            
-            scene.remove(this.equipment)
-            this.physicsWorld.removeEquipment(this.uuid)
+        scene.remove(this.equipment)
+        this.physicsWorld.removeEquipment(this.uuid)
 
-            // get position of exploded floors and check if there is other bombs on those floors
-            delete equipmentCollections[this.uuid]
-            delete this
-
+        // get position of exploded floors and check if there is other bombs on those floors
+        delete equipmentCollections[this.uuid]
+        delete this
     }
-
-
-
 
     
     applyEquip(player){
@@ -101,6 +99,7 @@ export class Equipments {
                 document.addEventListener('keydown', keydownQ);
                 document.addEventListener('keyup', keyupQ);
                 setTimeout(() => {
+                    player.jet = false;
                     document.removeEventListener('keydown', keydownQ);
                     document.removeEventListener('keyup', keyupQ);
                     console.log('stop jet');
