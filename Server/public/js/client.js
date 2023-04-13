@@ -7,12 +7,13 @@ import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
 import { Bomb } from './Bomb.js';
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 import { dev, serverIp } from './config.js';
+import { Equipments } from './equipments.js';
 
 
 // global variables
 let playerId;
 let keysPressedFromServer = {}
-let socket;
+export let socket;
 
 // explosion
 export let explosions = []
@@ -312,6 +313,10 @@ function plantBombEvent(bombInfo){
     }
 }
 
+function makeEquip(equip){
+    new Equipments(equip.position, equip.quaternion, phy, gameMap, equip.tool);
+}
+
 function main(){
     document.body.innerHTML = ""
     renderer.domElement.setAttribute('id', 'scene');
@@ -328,6 +333,7 @@ function main(){
     socket.on("updateCamera", updateCameraFunction)
     socket.on("updatePlayerPos", updatePlayerPosEvent)
     socket.on("plantBomb", plantBombEvent)
+    socket.on("genEquip", makeEquip);
     
     updatePlayerPosEmit = setInterval(() => {
         socket.emit('updatePlayerPos', player.getBodyPos());

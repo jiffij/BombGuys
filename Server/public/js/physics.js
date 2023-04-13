@@ -28,6 +28,7 @@ export class Player{
         this.impulse = new CANNON.Vec3(0, jumpImpulse, 0)
         this.jet = false;
         this.jetimpulse = new CANNON.Vec3(0, jetImpulse, 0)
+        this.reverse = false;
         // this.boost_speed = 0;
         // this.body.addEventListener("collide", function(e){
         //     if (e.body.mass == 0){
@@ -59,6 +60,17 @@ export class Player{
 
     getVerticalVelocity(){
         return this.body.velocity.y
+    }
+
+    reverseGravity(){
+        if(this.reverse) return;
+        console.log('reverse gravity');
+        this.reverse = true;
+        this.body.velocity.y += 10;
+        setTimeout(() => {
+            this.body.velocity.y -= 10;
+            this.reverse = false;
+        }, 3000);
     }
 
     jump(){
