@@ -348,7 +348,9 @@ function main(){
     // let explosion = createExplosion(explosionPosition);
     // scene.add(explosion);
     
-    
+    // Pre-compile shaders for the scene
+    renderer.compile(scene, camera);
+
     // animation
     let clock = new THREE.Clock();
     
