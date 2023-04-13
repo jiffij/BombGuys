@@ -154,6 +154,11 @@ io.on('connection', (socket) => {
         io.sockets.emit("plantBomb", bombInfo);
     })
 
+    socket.on("createEquip", (equip)=>{
+        console.log('create equipment');
+        socket.broadcast.emit('genEquip', equip);
+    })
+
     setInterval(() => {
         io.sockets.emit('playerStates', players);
       }, updateKeyboardFreq);
