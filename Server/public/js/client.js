@@ -58,7 +58,6 @@ let inGame = false;
 let gameEndWords = "Game Over!"
 
 
-
 // load animations
 function loadFBX(url) {
     return new Promise((resolve, reject) => {
@@ -176,10 +175,6 @@ function initialize(){
 
     // physics
     phy = new Physics();
-
-    // create map
-    gameMap = new GameMap(scene, phy)
-    gameMap.setup();
 }
 
 
@@ -223,19 +218,18 @@ function enterWaitRoom(){
         console.log(playerId)
     })
     
-    socket.on("playerNum", num => {
-        console.log(num)
-        if (num == 2){
-            initialize()
-            loadModel()
-            setTimeout(() => {
-                document.body.style.backgroundImage = "none"
-                main()
-                inGame = true
-            }, 500)
-        }
+    socket.on("startGame", gameMapInfo => {
+        initialize()
+        // create map
+        gameMap = new GameMap(scene, phy, gameMapInfo)
+        gameMap.setup();
+        loadModel()
+        setTimeout(() => {
+            document.body.style.backgroundImage = "none"
+            main()
+            inGame = true
+        }, 500)
     })
-    
     socket.emit("join",0)
 }
 
@@ -441,11 +435,9 @@ function updateCamera(camera, cameraInfo){
 // a window to select
 function popupWindow(){
     disconnectFromServer()
-        // keyboard event listener
+    // keyboard event listener
     document.removeEventListener("keydown", keyDownEvent)
     document.removeEventListener("keyup", keyUpEvent)
-    document.addEventListener("keydown", keyDownEvent)
-    document.addEventListener("keyup", keyUpEvent)
 
     modal = document.createElement('div');
     modal.setAttribute('id', 'myModal');

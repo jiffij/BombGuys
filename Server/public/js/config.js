@@ -9,6 +9,10 @@ export const floorConfig = {
     mapSize: 15,
 }
 
+export const life_1 = 0xd3d3d3
+export const life_2 = 0xf5f5dc
+export const life_3 = 0xfcba03
+
 export const characterScale = [0.01,0.01,0.01]
 
 export const bombConfig = {
@@ -27,7 +31,7 @@ export const bodySphereRadius = 0.4;
 
 export const shootInterval = 0.8;
 export const serverIp = "64.226.64.79";
-export const dev = true;
+export const dev = false;
 export const playerNum = 2;
 
 export const EQUIPMENT = {

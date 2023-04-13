@@ -1,13 +1,13 @@
 // create the map
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 
-import { bombConfig, floorConfig } from "./config.js";
+import { bombConfig, floorConfig, life_1, life_2 } from "./config.js";
 import {Equipments} from "./equipments.js";
 
 export class GameMap {
     floorPieces = [];
-    // 2d array containing 4 corner coords easier extract neighbor floor pieces
     floorPiecesPos = [];
+    floorPiecesLife = [];
     colorSwitch = "color1";
     size = floorConfig.size;
     color1 = floorConfig.color1;
@@ -18,28 +18,29 @@ export class GameMap {
     mapSize = floorConfig.mapSize
     layer;
 
-    constructor(scene, physicsWorld){
+    constructor(scene, physicsWorld, gameMapInfo){
         this.scene = scene;
         this.physicsWorld = physicsWorld;
+        this.gameMapInfo = gameMapInfo
     }
 
     setup(){
-        let color;
         for (let l=0; l<this.layers;l++){
             let posY = -this.thickness-l*this.height
             let layer = []
             let layerPos = []
+            let layerLife = []
             for (let i=0; i<this.mapSize; i++) {
                 let row = [];
                 let rowPos = [];
+                let rowLife = [];
                 let posX = (i - Math.round(this.mapSize/2))*this.size
-                if (this.mapSize % 2 == 0){
-                    color = this.switchColor(this.color1, this.color2)
-                }
                 for (let j=0; j<this.mapSize; j++){
                     let posZ = (j - Math.round(this.mapSize/2))*this.size
+                    let color = this.gameMapInfo[l][i][j]["color"]
+                    let life = this.gameMapInfo[l][i][j]["life"]
+                    rowLife.push(life)
                     const geometry = new THREE.BoxGeometry( this.size, this.thickness, this.size );
-                    color = this.switchColor(this.color1, this.color2)
                     const material = new THREE.MeshLambertMaterial( {
                         color: color,
                         aoMapIntensity: 0.5,
@@ -55,9 +56,11 @@ export class GameMap {
                 }
                 layer.push(row)
                 layerPos.push(rowPos)
+                layerLife.push(rowLife)
             }
             this.floorPiecesPos.push(layerPos)
             this.floorPieces.push(layer)
+            this.floorPiecesLife.push(layerLife)
         }
 
         // Create the layer
@@ -89,11 +92,26 @@ export class GameMap {
     }
 
     removeFloor(pos){
-        let shouldRemove = this.getRemoveFloorIndex(pos);
-        for (let [floor_l, floor_i, floor_j] of shouldRemove){
-            const removedPiece = this.floorPieces[floor_l][floor_i][floor_j]
-            this.scene.remove(removedPiece);
-            this.physicsWorld.removeFloor(removedPiece);
+        let checkRemove = this.getRemoveFloorIndex(pos);
+        let shouldRemove = []
+        for (let [floor_l, floor_i, floor_j] of checkRemove){
+            if (this.floorPiecesLife[floor_l][floor_i][floor_j] == 1){
+                shouldRemove.push([floor_l, floor_i, floor_j])
+                const removedPiece = this.floorPieces[floor_l][floor_i][floor_j]
+                this.scene.remove(removedPiece);
+                this.physicsWorld.removeFloor(removedPiece);
+            }
+            else {
+                const piece = this.floorPieces[floor_l][floor_i][floor_j]
+                this.floorPiecesLife[floor_l][floor_i][floor_j] -= 1;
+                console.log("changing color")
+                if (this.floorPiecesLife[floor_l][floor_i][floor_j] == 1){
+                    piece.material.color.set(life_1)
+                }
+                else {
+                    piece.material.color.set(life_2)
+                }
+            }
         }
         const possible_positions = [];
         for (let t = 0; t < shouldRemove.length; t++) {
