@@ -68,7 +68,13 @@ export class stateMachine{
 
         this.ringBody.addEventListener("collide", function(e){
             if(e.body.mass == 5){
-                currentState = "chase";
+                this.currentState = "chase";
+                let id = e.body.userData.id;
+                var target = this.players.find(function(obj){
+                    return obj.playerId === id;
+                });
+                this.destination = target.body.position;
+                // this.destination = e.contact.bi.position.clone();
             }
         })
     }
