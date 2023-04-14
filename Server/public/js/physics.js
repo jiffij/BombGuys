@@ -7,6 +7,7 @@ const PLAYER = 1;
 const FLOOR = 2;
 const BOMB = 3;
 const EQUIPMENT = 4;
+const RING = 5;
 
 export class Player{
     constructor(fbx, position, playerId, CharacterController){
