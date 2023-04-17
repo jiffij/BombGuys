@@ -9,16 +9,17 @@ import { scene } from './client.js';
 import { explosions } from './client.js';
 import { generateUUID } from './utils.js';
 import { createExplosion } from './explosion.js';
+import { bombMaterial } from './client.js';
 
 const bombCollections = {}
-const textureLoader = new THREE.TextureLoader();
+// const textureLoader = new THREE.TextureLoader();
 
-// Load the bomb texture
-const texture = textureLoader.load('../models/textures/bomb.jpg');
-// Create a material for the bomb using the texture
-const material = new THREE.MeshStandardMaterial({
-  map: texture,
-});
+// // Load the bomb texture
+// const texture = textureLoader.load('../models/textures/bomb.jpg');
+// // Create a material for the bomb using the texture
+// const bombMaterial = new THREE.MeshStandardMaterial({
+//   map: texture,
+// });
 
 export class Bomb {
     bomb;
@@ -40,7 +41,8 @@ export class Bomb {
     }
     init(){
         let sphere = new THREE.SphereGeometry(this.radius,45,30);
-        this.bomb = new THREE.Mesh(sphere, material)
+        this.bomb = new THREE.Mesh(sphere, bombMaterial)
+        this.bomb.frustumCulled = false;
         this.uuid = generateUUID()
         bombCollections[this.uuid] = this
         this.place()

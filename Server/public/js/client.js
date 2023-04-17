@@ -45,6 +45,10 @@ let updateCameraEmit;
 const animations = {}
 let skin1;
 let skin2;
+// Load the bomb texture
+let texture;
+// Create a material for the bomb using the texture
+export let bombMaterial
 
 // html components
 let startButton;
@@ -96,14 +100,19 @@ function loadSkin(url) {
 async function loadAssets() {
     try {
       // Load animations and skins here
-      const fbx1 = await loadFBX('idle.fbx');
-      const fbx2 = await loadFBX('run.fbx');
-      const fbx3 = await loadFBX('jump.fbx');
-      skin1 = await loadSkin('mouse.fbx');
-      skin2 = await loadSkin('mouse.fbx');
-      animations["idle"] = fbx1
-      animations["run"] = fbx2
-      animations["jump"] = fbx3
+        const fbx1 = await loadFBX('idle.fbx');
+        const fbx2 = await loadFBX('run.fbx');
+        const fbx3 = await loadFBX('jump.fbx');
+        skin1 = await loadSkin('mouse.fbx');
+        skin2 = await loadSkin('mouse.fbx');
+        const textureLoader = new THREE.TextureLoader();
+        texture = await textureLoader.load('../models/textures/bomb.jpg');
+        bombMaterial = new THREE.MeshStandardMaterial({
+            map: texture,
+        });
+        animations["idle"] = fbx1
+        animations["run"] = fbx2
+        animations["jump"] = fbx3
       // Process and store the loaded animations and skins
     } catch (error) {
       console.error('Error loading assets:', error);
@@ -356,6 +365,7 @@ function main(){
     
     // Pre-compile shaders for the scene
     renderer.compile(scene, camera);
+    let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap)
 
     // animation
     let clock = new THREE.Clock();

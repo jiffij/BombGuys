@@ -52,9 +52,9 @@ export class ModelLoader {
         } )
         this.model.scale.set(this.scale[0],this.scale[1],this.scale[2])
         this.model.position.set(this.pos[0], this.pos[1], this.pos[2])
-        this.loadAnimation(this.model, this.animations)                    
+        this.loadAnimation(this.model, this.animations)     
+        this.model.frustumCulled = false               
         this.scene.add(this.model)
-
     }
 
     // load animation
