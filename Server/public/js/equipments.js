@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { EQUIPMENT } from './config.js';
-import { rocket, scene, socket } from './client.js';
+import { equipmentDisplayManager, rocket, scene, shoes, socket } from './client.js';
 import { generateUUID } from './utils.js';
 import './client.js';
 
@@ -28,14 +28,24 @@ export class Equipments {
         this.tool = tool; // randomly select an equipment
         this.generateByServer = generateByServer
         this.removed = false
+        this.bootIntervalId;
+        this.gloveIntervalId;
+        this.jetIntervalId;
         this.init()
 
     }
     init(){
         const box = new THREE.BoxGeometry(0.5,0.5,0.5);
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        this.equipment = new THREE.Mesh(box, material)
-        this.equipment = rocket;
+        if (this.tool == EQUIPMENT.BOOT){
+            this.equipment = shoes;
+        }
+        else if (this.tool == EQUIPMENT.JET){
+            this.equipment = rocket;
+        }
+        else {
+            this.equipment = new THREE.Mesh(box, material)
+        }
         this.uuid = generateUUID()
         equipmentCollections[this.uuid] = this
         this.place()
@@ -78,6 +88,7 @@ export class Equipments {
         function keydownQ(e){
             if(e.key.toLocaleLowerCase() == 'q'){
                 player.jet = true;
+                equipmentDisplayManager.removeJet();
             }
         }; 
 
@@ -90,22 +101,24 @@ export class Equipments {
         switch (this.tool) {
             case EQUIPMENT.BOOT:
                 player.CharacterController.boost = true;
-                setTimeout(() => {
+                clearInterval(this.bootIntervalId)
+                this.bootIntervalIt = setTimeout(() => {
                     player.CharacterController.boost = false;
                     console.log('stop boost');
-                }, 15000);
+                }, 10000);
                 console.log('boosted');
                 break;
 
             case EQUIPMENT.JET:
                 document.addEventListener('keydown', keydownQ);
                 document.addEventListener('keyup', keyupQ);
-                setTimeout(() => {
+                clearInterval(this.jetIntervalId)
+                this.jetIntervalId = setTimeout(() => {
                     player.jet = false;
                     document.removeEventListener('keydown', keydownQ);
                     document.removeEventListener('keyup', keyupQ);
                     console.log('stop jet');
-                }, 10000);
+                }, 60000);
                 console.log('Jet');
                 break;
             

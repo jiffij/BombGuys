@@ -51,6 +51,7 @@ let texture;
 // Create a material for the bomb using the texture
 export let bombMaterial
 export let rocket
+export let shoes
 
 // html components
 let startButton;
@@ -116,7 +117,9 @@ async function loadAssets() {
             map: texture,
         });
         rocket = await loadSkin('rocket.fbx');
-        rocket.scale.set(0.001,0.001,0.001)
+        shoes = await loadSkin('cartoonShoes.fbx');
+        rocket.scale.set(0.003,0.003,0.003)
+        shoes.scale.set(0.3,0.3,0.3)
         animations["idle"] = fbx1
         animations["run"] = fbx2
         animations["jump"] = fbx3

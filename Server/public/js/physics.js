@@ -236,14 +236,14 @@ export class Physics{
         this.physicsWorld.addBody(body);
 
         body.addEventListener("collide", function(e){
-            if (e.body.mass == 5){
-                if (e.body.userData !== undefined){
-                    console.log(e.body.userData)
-                    if (Object.removed == false){
+            if (Object.removed == false){
+                if (e.body.mass == 5){
+                    if (e.body.userData !== undefined){
                         Object.removed = true
                         console.log('equipment collision');
                         setTimeout(
                             function (){
+                                console.log(e.body)
                                 if(e.body.userData.id != 'enemy'){
                                     console.log('hit equip');
                                     var myself = this.players.find(function(obj){
@@ -258,7 +258,7 @@ export class Physics{
                                 }
                                 catch{ print('remove error')}
                             }.bind(this)
-                        ,0)
+                        ,10)
                     }
                 }
             }
