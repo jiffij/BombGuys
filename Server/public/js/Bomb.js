@@ -28,7 +28,7 @@ export class Bomb {
     timeInterval;
     uuid;
     quaternion;
-    constructor(position, quaternion, physicsWorld, gameMap){
+    constructor(position, quaternion, physicsWorld, gameMap, generateByServer){
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
@@ -36,6 +36,7 @@ export class Bomb {
         this.physicsWorld = physicsWorld
         this.gameMap = gameMap
         this.exploded = false
+        this.generateByServer = generateByServer
         this.init()
 
     }
@@ -69,7 +70,7 @@ export class Bomb {
             scene.add(explosion)
             this.exploded = true
             let posReconstuct = [pos.x, pos.y, pos.z]
-            this.gameMap.removeFloor(posReconstuct)
+            this.gameMap.removeFloor(posReconstuct, this.generateByServer)
             scene.remove(this.bomb)
             this.physicsWorld.removeBomb(this.uuid)
             // get position of exploded floors and check if there is other bombs on those floors

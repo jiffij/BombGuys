@@ -324,7 +324,7 @@ function plantBombEvent(bombInfo){
     if (id !== playerId){
         let pos = bombInfo.pos;
         let quaternion = bombInfo.quaternion;
-        let bomb = new Bomb(pos, quaternion, phy, gameMap);
+        let bomb = new Bomb(pos, quaternion, phy, gameMap, true);
     }
 }
 
@@ -383,7 +383,7 @@ function main(){
     function animate() {
         if (firstRender){
             firstRender = false
-            let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap)
+            let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
             bomb.remove()
             player2.setBodyPos(player.getBodyPos())
         }

@@ -91,7 +91,7 @@ export class GameMap {
         }
     }
 
-    removeFloor(pos){
+    removeFloor(pos, generateByServer){
         let checkRemove = this.getRemoveFloorIndex(pos);
         let shouldRemove = []
         for (let [floor_l, floor_i, floor_j] of checkRemove){
@@ -113,41 +113,43 @@ export class GameMap {
                 }
             }
         }
-        const possible_positions = [];
-        for (let t = 0; t < shouldRemove.length; t++) {
-            const l = shouldRemove[t][0];
-            const i = shouldRemove[t][1];
-            const j = shouldRemove[t][2];
-        
-            for (let dx = -1; dx <= 1; dx++) {
-              for (let dy = -1; dy <= 1; dy++) {
-                // exclude the current position
-                if (dx === 0 && dy === 0) {
-                  continue;
-                }
-        
-                // calculate the adjacent position
-                const adjX = i + dx;
-                const adjY = j + dy;
-        
-                // check if the adjacent position is not already in the group
-                const isAdjacent = shouldRemove.some((p) => p[1] === adjX && p[2] === adjY);
-                if (!isAdjacent) {
-                  // add the adjacent position to the array
-                  if(adjX >= 0 && adjX <= floorConfig.mapSize && adjY >= 0 && adjY <= floorConfig.mapSize){
-                    possible_positions.push({l: l, i: adjX, j: adjY });
+        if (!generateByServer){
+            const possible_positions = [];
+            for (let t = 0; t < shouldRemove.length; t++) {
+                const l = shouldRemove[t][0];
+                const i = shouldRemove[t][1];
+                const j = shouldRemove[t][2];
+            
+                for (let dx = -1; dx <= 1; dx++) {
+                  for (let dy = -1; dy <= 1; dy++) {
+                    // exclude the current position
+                    if (dx === 0 && dy === 0) {
+                      continue;
+                    }
+            
+                    // calculate the adjacent position
+                    const adjX = i + dx;
+                    const adjY = j + dy;
+            
+                    // check if the adjacent position is not already in the group
+                    const isAdjacent = shouldRemove.some((p) => p[1] === adjX && p[2] === adjY);
+                    if (!isAdjacent) {
+                      // add the adjacent position to the array
+                      if(adjX >= 0 && adjX <= floorConfig.mapSize && adjY >= 0 && adjY <= floorConfig.mapSize){
+                        possible_positions.push({l: l, i: adjX, j: adjY });
+                      }
+                    }
                   }
                 }
               }
-            }
-          }
-        if(possible_positions.length > 0){
-            if(Math.random() > 0.5){
-                const randomIndex = Math.floor(Math.random()*possible_positions.length);
-                var p = possible_positions[randomIndex];
-                var mesh = this.floorPieces[p.l][p.i][p.j];
-                console.log(mesh.position, mesh.quaternion);
-                const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, 1, false);
+            if(possible_positions.length > 0){
+                if(Math.random() > 0.5){
+                    const randomIndex = Math.floor(Math.random()*possible_positions.length);
+                    var p = possible_positions[randomIndex];
+                    var mesh = this.floorPieces[p.l][p.i][p.j];
+                    console.log(mesh.position, mesh.quaternion);
+                    const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, 1, false);
+                }
             }
         }
     }
