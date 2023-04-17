@@ -5,7 +5,7 @@ import path from 'path';
 import { life_1, life_2, life_3, playerNum } from './public/js/config.js';
 import { floorConfig } from './public/js/config.js';
 
-const publicPath = path.join(process.cwd(), './public');
+const publicPath = path.join(process.cwd(), './Server/public');
 const port = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
@@ -91,6 +91,7 @@ io.on('connection', (socket) => {
             }
         }
         console.log('User disconnected:', socket.id);
+        
     })
 
     // create a room

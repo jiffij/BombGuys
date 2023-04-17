@@ -8,6 +8,7 @@ import { Bomb } from './Bomb.js';
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 import { dev, serverIp } from './config.js';
 import { Equipments } from './equipments.js';
+import { EquipmentDisplayManager } from './equipmentDisplay.js';
 
 
 // global variables
@@ -45,6 +46,11 @@ let updateCameraEmit;
 const animations = {}
 let skin1;
 let skin2;
+// Load the bomb texture
+let texture;
+// Create a material for the bomb using the texture
+export let bombMaterial
+export let rocket
 
 // html components
 let startButton;
@@ -56,6 +62,9 @@ let inGame = false;
 
 // game end sentence
 let gameEndWords = "Game Over!"
+
+// equipments
+export let equipmentDisplayManager;
 
 
 // load animations
@@ -96,14 +105,21 @@ function loadSkin(url) {
 async function loadAssets() {
     try {
       // Load animations and skins here
-      const fbx1 = await loadFBX('idle.fbx');
-      const fbx2 = await loadFBX('run.fbx');
-      const fbx3 = await loadFBX('jump.fbx');
-      skin1 = await loadSkin('mouse.fbx');
-      skin2 = await loadSkin('mouse.fbx');
-      animations["idle"] = fbx1
-      animations["run"] = fbx2
-      animations["jump"] = fbx3
+        const fbx1 = await loadFBX('idle.fbx');
+        const fbx2 = await loadFBX('run.fbx');
+        const fbx3 = await loadFBX('jump.fbx');
+        skin1 = await loadSkin('mouse.fbx');
+        skin2 = await loadSkin('mouse.fbx');
+        const textureLoader = new THREE.TextureLoader();
+        texture = await textureLoader.load('../models/textures/bomb.jpg');
+        bombMaterial = new THREE.MeshStandardMaterial({
+            map: texture,
+        });
+        rocket = await loadSkin('rocket.fbx');
+        rocket.scale.set(0.001,0.001,0.001)
+        animations["idle"] = fbx1
+        animations["run"] = fbx2
+        animations["jump"] = fbx3
       // Process and store the loaded animations and skins
     } catch (error) {
       console.error('Error loading assets:', error);
@@ -168,13 +184,16 @@ function initialize(){
     orbit = new OrbitControls(camera, renderer.domElement)
     orbit.minDistance = 4
     orbit.maxDistance = 4
-    // Disable rotation in the z direction
-    orbit.minPolarAngle = Math.PI / 3; // Set minimum vertical rotation to 90 degrees (pointing upwards)
-    orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
+    // // Disable rotation in the z direction
+    // orbit.minPolarAngle = Math.PI / 3; // Set minimum vertical rotation to 90 degrees (pointing upwards)
+    // orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
     orbit.update()
 
     // physics
     phy = new Physics();
+
+    // initialize equipment manager
+    equipmentDisplayManager = new EquipmentDisplayManager()
 }
 
 
@@ -224,21 +243,17 @@ function enterWaitRoom(){
         gameMap = new GameMap(scene, phy, gameMapInfo)
         gameMap.setup();
         loadModel()
-        setTimeout(() => {
-            document.body.style.backgroundImage = "none"
-            main()
-            inGame = true
-        }, 500)
+        main()
     })
     socket.emit("join",0)
 }
 
 // load model and animation
 function loadModel(){
-    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, null, 'myself')
-    player.load()
     player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, null, 'enemy')
     player2.load()
+    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, null, 'myself')
+    player.load()
 }
 
 const keysPressed = {}
@@ -309,7 +324,7 @@ function plantBombEvent(bombInfo){
     if (id !== playerId){
         let pos = bombInfo.pos;
         let quaternion = bombInfo.quaternion;
-        let bomb = new Bomb(pos, quaternion, phy, gameMap);
+        let bomb = new Bomb(pos, quaternion, phy, gameMap, true);
     }
 }
 
@@ -318,9 +333,13 @@ function makeEquip(equip){
 }
 
 function main(){
-    document.body.innerHTML = ""
-    renderer.domElement.setAttribute('id', 'scene');
-    document.body.appendChild(renderer.domElement)
+    inGame = true
+    setTimeout(function (){
+        document.body.style.backgroundImage = "none"
+        document.body.innerHTML = ""
+        renderer.domElement.setAttribute('id', 'scene');
+        document.body.appendChild(renderer.domElement)
+    }, 2000)
 
     // keyboard event listener
     document.removeEventListener("keydown", keyDownEvent)
@@ -348,7 +367,6 @@ function main(){
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
     
-    
     // test area
     // const explosionPosition = new THREE.Vector3(0, 0, 0);
     // let explosion = createExplosion(explosionPosition);
@@ -357,10 +375,19 @@ function main(){
     // Pre-compile shaders for the scene
     renderer.compile(scene, camera);
 
+    let firstRender = true;
+
     // animation
     let clock = new THREE.Clock();
     
     function animate() {
+        if (firstRender){
+            firstRender = false
+            let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
+            bomb.remove()
+            player2.setBodyPos(player.getBodyPos())
+        }
+        renderer.render(scene, camera)
         phy.update();
         // phy.movePlayer();
         let updateDelta = clock.getDelta();
@@ -412,7 +439,6 @@ function main(){
           }
         
         gameMap.layer.rotation.z += 0.01;
-        renderer.render(scene, camera)
     }
     renderer.setAnimationLoop(animate)
 }

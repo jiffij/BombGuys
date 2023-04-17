@@ -9,16 +9,17 @@ import { scene } from './client.js';
 import { explosions } from './client.js';
 import { generateUUID } from './utils.js';
 import { createExplosion } from './explosion.js';
+import { bombMaterial } from './client.js';
 
 const bombCollections = {}
-const textureLoader = new THREE.TextureLoader();
+// const textureLoader = new THREE.TextureLoader();
 
-// Load the bomb texture
-const texture = textureLoader.load('../models/textures/bomb.jpg');
-// Create a material for the bomb using the texture
-const material = new THREE.MeshStandardMaterial({
-  map: texture,
-});
+// // Load the bomb texture
+// const texture = textureLoader.load('../models/textures/bomb.jpg');
+// // Create a material for the bomb using the texture
+// const bombMaterial = new THREE.MeshStandardMaterial({
+//   map: texture,
+// });
 
 export class Bomb {
     bomb;
@@ -27,7 +28,7 @@ export class Bomb {
     timeInterval;
     uuid;
     quaternion;
-    constructor(position, quaternion, physicsWorld, gameMap){
+    constructor(position, quaternion, physicsWorld, gameMap, generateByServer){
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
@@ -35,12 +36,14 @@ export class Bomb {
         this.physicsWorld = physicsWorld
         this.gameMap = gameMap
         this.exploded = false
+        this.generateByServer = generateByServer
         this.init()
 
     }
     init(){
         let sphere = new THREE.SphereGeometry(this.radius,45,30);
-        this.bomb = new THREE.Mesh(sphere, material)
+        this.bomb = new THREE.Mesh(sphere, bombMaterial)
+        // this.bomb.frustumCulled = false;
         this.uuid = generateUUID()
         bombCollections[this.uuid] = this
         this.place()
@@ -67,7 +70,7 @@ export class Bomb {
             scene.add(explosion)
             this.exploded = true
             let posReconstuct = [pos.x, pos.y, pos.z]
-            this.gameMap.removeFloor(posReconstuct)
+            this.gameMap.removeFloor(posReconstuct, this.generateByServer)
             scene.remove(this.bomb)
             this.physicsWorld.removeBomb(this.uuid)
             // get position of exploded floors and check if there is other bombs on those floors
