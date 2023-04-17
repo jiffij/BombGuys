@@ -11,11 +11,18 @@ const RING = 5;
 
 export class Player{
     constructor(fbx, position, playerId, CharacterController){
+        const box = new THREE.Box3().setFromObject(fbx);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const halfExtents = new CANNON.Vec3(size.x / 4, size.y / 2, size.z / 4);
+        const shape = new CANNON.Box(halfExtents);
+        this.height = size.y / 2
         this.body = new CANNON.Body({
             mass: 5,
             // type: CANNON.Body.STATIC,
-            shape: new CANNON.Sphere(bodySphereRadius),
+            // shape: new CANNON.Sphere(bodySphereRadius),
             // shape: new CANNON.Cylinder(0.3,0.00001,0,20),
+            shape: shape,
             fixedRotation: true,
         });
         this.CharacterController = CharacterController;
@@ -229,25 +236,27 @@ export class Physics{
 
         body.addEventListener("collide", function(e){
             if (e.body.mass == 5){
-                console.log('equipment collision');
-                setTimeout(
-                    function (){
-                        try {
-                            Object.remove()
-                        }
-                        catch{ print('remove error')}
-                        if (e.body.userData !== undefined){
-                            if(e.body.userData.id != 'enemy'){
-                                console.log('hit equip');
-                                var myself = this.players.find(function(obj){
-                                    return obj.playerId === 'myself';
-                                });
-                                Object.applyEquip(myself);
+                if (Object.removed == false){
+                    Object.removed = true
+                    console.log('equipment collision');
+                    setTimeout(
+                        function (){
+                            try {
+                                Object.remove()
                             }
-                        }
-                    }.bind(this)
-                ,100)
-
+                            catch{ print('remove error')}
+                            if (e.body.userData !== undefined){
+                                if(e.body.userData.id != 'enemy'){
+                                    console.log('hit equip');
+                                    var myself = this.players.find(function(obj){
+                                        return obj.playerId === 'myself';
+                                    });
+                                    Object.applyEquip(myself);
+                                }
+                            }
+                        }.bind(this)
+                    ,100)
+                }
             }
         }.bind(this))
         this.equipments[uuid] = new PhysicsEquipment(mesh, body);
@@ -301,7 +310,7 @@ export class Physics{
         for (let i = 0; i < this.players.length; i++) {
             const fbx = this.players[i].fbx;
             const body = this.players[i].body;
-            fbx.position.y = body.position.y - bodySphereRadius+0.02
+            fbx.position.y = body.position.y - this.players[i].height - 0.03
             fbx.position.x = body.position.x
             fbx.position.z = body.position.z
         // fbx.quaternion.copy(body.quaternion);

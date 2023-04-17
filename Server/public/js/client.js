@@ -177,9 +177,9 @@ function initialize(){
     orbit = new OrbitControls(camera, renderer.domElement)
     orbit.minDistance = 4
     orbit.maxDistance = 4
-    // Disable rotation in the z direction
-    orbit.minPolarAngle = Math.PI / 3; // Set minimum vertical rotation to 90 degrees (pointing upwards)
-    orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
+    // // Disable rotation in the z direction
+    // orbit.minPolarAngle = Math.PI / 3; // Set minimum vertical rotation to 90 degrees (pointing upwards)
+    // orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
     orbit.update()
 
     // physics
@@ -244,10 +244,10 @@ function enterWaitRoom(){
 
 // load model and animation
 function loadModel(){
-    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, null, 'myself')
-    player.load()
     player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, null, 'enemy')
     player2.load()
+    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, null, 'myself')
+    player.load()
 }
 
 const keysPressed = {}
@@ -357,15 +357,16 @@ function main(){
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
     
-    
     // test area
     // const explosionPosition = new THREE.Vector3(0, 0, 0);
     // let explosion = createExplosion(explosionPosition);
     // scene.add(explosion);
     
     // Pre-compile shaders for the scene
-    renderer.compile(scene, camera);
     let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap)
+    bomb.remove()
+    renderer.compile(scene, camera);
+
 
     // animation
     let clock = new THREE.Clock();
@@ -423,6 +424,7 @@ function main(){
         
         gameMap.layer.rotation.z += 0.01;
         renderer.render(scene, camera)
+
     }
     renderer.setAnimationLoop(animate)
 }

@@ -42,7 +42,7 @@ export class Bomb {
     init(){
         let sphere = new THREE.SphereGeometry(this.radius,45,30);
         this.bomb = new THREE.Mesh(sphere, bombMaterial)
-        this.bomb.frustumCulled = false;
+        // this.bomb.frustumCulled = false;
         this.uuid = generateUUID()
         bombCollections[this.uuid] = this
         this.place()

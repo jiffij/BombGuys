@@ -27,6 +27,7 @@ export class Equipments {
         this.gameMap = gameMap
         this.tool = tool; // randomly select an equipment
         this.generateByServer = generateByServer
+        this.removed = false
         this.init()
 
     }
