@@ -18,7 +18,7 @@ export class EquipmentDisplayManager{
                 if (this.jetTag == undefined){
                     this.createJetTag()
                 }
-                clearInterval(this.updateJetTime)
+                clearInterval(this.jetIntervalID)
                 this.jetIntervalID = setInterval(this.updateJetTime.bind(this), 1000)
                 break
             case EQUIPMENT.BOOT:
@@ -26,7 +26,7 @@ export class EquipmentDisplayManager{
                 if (this.bootTag == undefined){
                     this.createBootTag()
                 }
-                clearInterval(this.updateBootTime)
+                clearInterval(this.bootIntervalID)
                 this.bootIntervalID = setInterval(this.updateBootTime.bind(this), 1000)
                 break
         }
@@ -36,6 +36,7 @@ export class EquipmentDisplayManager{
         if (this.remainingTime["jet"]<=0){
             clearInterval(this.jetIntervalID)
             this.jetTag.remove()
+            this.jetTag = undefined
         }
         this.remainingTime["jet"] -= 1;
         this.updateJetTag()
@@ -44,6 +45,7 @@ export class EquipmentDisplayManager{
         if (this.remainingTime["boot"]<=0){
             clearInterval(this.bootIntervalID)
             this.bootTag.remove()
+            this.jetTag = undefined
         }
         this.remainingTime["boot"] -= 1;
         this.updateBootTag()  
