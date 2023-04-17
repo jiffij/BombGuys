@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { EQUIPMENT } from './config.js';
-import { scene, socket } from './client.js';
+import { rocket, scene, socket } from './client.js';
 import { generateUUID } from './utils.js';
 import './client.js';
 
@@ -35,6 +35,7 @@ export class Equipments {
         const box = new THREE.BoxGeometry(0.5,0.5,0.5);
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         this.equipment = new THREE.Mesh(box, material)
+        this.equipment = rocket;
         this.uuid = generateUUID()
         equipmentCollections[this.uuid] = this
         this.place()

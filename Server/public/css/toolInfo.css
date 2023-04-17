@@ -1,0 +1,14 @@
+.toolInfo {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    margin-left: 30px;
+    margin-top: 30px;
+    font-size: 20px;
+    width: 100%;
+    height: 100%;
+    font-weight: bold;
+    overflow: auto;
+    pointer-events: none;
+}

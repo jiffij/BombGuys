@@ -8,6 +8,7 @@ import { Bomb } from './Bomb.js';
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 import { dev, serverIp } from './config.js';
 import { Equipments } from './equipments.js';
+import { EquipmentDisplayManager } from './equipmentDisplay.js';
 
 
 // global variables
@@ -49,6 +50,7 @@ let skin2;
 let texture;
 // Create a material for the bomb using the texture
 export let bombMaterial
+export let rocket
 
 // html components
 let startButton;
@@ -60,6 +62,9 @@ let inGame = false;
 
 // game end sentence
 let gameEndWords = "Game Over!"
+
+// equipments
+export let equipmentDisplayManager;
 
 
 // load animations
@@ -110,6 +115,8 @@ async function loadAssets() {
         bombMaterial = new THREE.MeshStandardMaterial({
             map: texture,
         });
+        rocket = await loadSkin('rocket.fbx');
+        rocket.scale.set(0.001,0.001,0.001)
         animations["idle"] = fbx1
         animations["run"] = fbx2
         animations["jump"] = fbx3
@@ -184,6 +191,9 @@ function initialize(){
 
     // physics
     phy = new Physics();
+
+    // initialize equipment manager
+    equipmentDisplayManager = new EquipmentDisplayManager()
 }
 
 
@@ -233,11 +243,7 @@ function enterWaitRoom(){
         gameMap = new GameMap(scene, phy, gameMapInfo)
         gameMap.setup();
         loadModel()
-        setTimeout(() => {
-            document.body.style.backgroundImage = "none"
-            main()
-            inGame = true
-        }, 500)
+        main()
     })
     socket.emit("join",0)
 }
@@ -327,9 +333,13 @@ function makeEquip(equip){
 }
 
 function main(){
-    document.body.innerHTML = ""
-    renderer.domElement.setAttribute('id', 'scene');
-    document.body.appendChild(renderer.domElement)
+    inGame = true
+    setTimeout(function (){
+        document.body.style.backgroundImage = "none"
+        document.body.innerHTML = ""
+        renderer.domElement.setAttribute('id', 'scene');
+        document.body.appendChild(renderer.domElement)
+    }, 2000)
 
     // keyboard event listener
     document.removeEventListener("keydown", keyDownEvent)
@@ -363,15 +373,21 @@ function main(){
     // scene.add(explosion);
     
     // Pre-compile shaders for the scene
-    let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap)
-    bomb.remove()
     renderer.compile(scene, camera);
 
+    let firstRender = true;
 
     // animation
     let clock = new THREE.Clock();
     
     function animate() {
+        if (firstRender){
+            firstRender = false
+            let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap)
+            bomb.remove()
+            player2.setBodyPos(player.getBodyPos())
+        }
+        renderer.render(scene, camera)
         phy.update();
         // phy.movePlayer();
         let updateDelta = clock.getDelta();
@@ -423,8 +439,6 @@ function main(){
           }
         
         gameMap.layer.rotation.z += 0.01;
-        renderer.render(scene, camera)
-
     }
     renderer.setAnimationLoop(animate)
 }

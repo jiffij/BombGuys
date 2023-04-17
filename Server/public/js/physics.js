@@ -1,6 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es/dist/cannon-es.js';
 import { bodySphereRadius, bombConfig, bombForwardImpulse, bombUpImpulse, floorConfig, jumpImpulse, jetImpulse } from "./config.js";
+import { equipmentDisplayManager } from './client.js';
 
 let NUM_PLAYERS = 0
 const PLAYER = 1;
@@ -236,26 +237,29 @@ export class Physics{
 
         body.addEventListener("collide", function(e){
             if (e.body.mass == 5){
-                if (Object.removed == false){
-                    Object.removed = true
-                    console.log('equipment collision');
-                    setTimeout(
-                        function (){
-                            try {
-                                Object.remove()
-                            }
-                            catch{ print('remove error')}
-                            if (e.body.userData !== undefined){
+                if (e.body.userData !== undefined){
+                    console.log(e.body.userData)
+                    if (Object.removed == false){
+                        Object.removed = true
+                        console.log('equipment collision');
+                        setTimeout(
+                            function (){
                                 if(e.body.userData.id != 'enemy'){
                                     console.log('hit equip');
                                     var myself = this.players.find(function(obj){
                                         return obj.playerId === 'myself';
                                     });
+                                    equipmentDisplayManager.pickUp(Object.tool)
                                     Object.applyEquip(myself);
                                 }
-                            }
-                        }.bind(this)
-                    ,100)
+                                
+                                try {
+                                    Object.remove()
+                                }
+                                catch{ print('remove error')}
+                            }.bind(this)
+                        ,0)
+                    }
                 }
             }
         }.bind(this))
