@@ -188,8 +188,8 @@ function initialize(){
     orbit.minDistance = 4
     orbit.maxDistance = 4
     // // Disable rotation in the z direction
-    // orbit.minPolarAngle = Math.PI / 3; // Set minimum vertical rotation to 90 degrees (pointing upwards)
-    // orbit.maxPolarAngle = Math.PI / 3; // Set maximum vertical rotation to 90 degrees (pointing downwards)
+    orbit.minPolarAngle = Math.PI / 6; // Set minimum vertical rotation to 90 degrees (pointing upwards)
+    orbit.maxPolarAngle = Math.PI / 2; // Set maximum vertical rotation to 90 degrees (pointing downwards)
     orbit.update()
 
     // physics
@@ -342,7 +342,7 @@ function main(){
         document.body.innerHTML = ""
         renderer.domElement.setAttribute('id', 'scene');
         document.body.appendChild(renderer.domElement)
-    }, 2000)
+    }, 3000)
 
     // keyboard event listener
     document.removeEventListener("keydown", keyDownEvent)
@@ -377,6 +377,8 @@ function main(){
     
     // Pre-compile shaders for the scene
     renderer.compile(scene, camera);
+    let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap)
+
 
     let firstRender = true;
 
@@ -386,8 +388,8 @@ function main(){
     function animate() {
         if (firstRender){
             firstRender = false
-            let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
-            bomb.remove()
+            // let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
+            // setTimeout(bomb.remove(), 1000)
             player2.setBodyPos(player.getBodyPos())
         }
         renderer.render(scene, camera)
