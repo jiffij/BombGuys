@@ -88,7 +88,7 @@ export class Equipments {
         function keydownQ(e){
             if(e.key.toLocaleLowerCase() == 'q'){
                 player.jet = true;
-                equipmentDisplayManager.removeJet();
+                equipmentDisplayManager.removeJet()
             }
         }; 
 
@@ -118,7 +118,7 @@ export class Equipments {
                     document.removeEventListener('keydown', keydownQ);
                     document.removeEventListener('keyup', keyupQ);
                     console.log('stop jet');
-                }, 60000);
+                }, 30000);
                 console.log('Jet');
                 break;
             

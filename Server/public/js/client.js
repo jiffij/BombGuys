@@ -6,7 +6,7 @@ import { Physics } from './physics.js';
 import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
 import { Bomb } from './Bomb.js';
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
-import { dev, serverIp } from './config.js';
+import { BombPower, dev, serverIp } from './config.js';
 import { Equipments } from './equipments.js';
 import { EquipmentDisplayManager } from './equipmentDisplay.js';
 
@@ -35,8 +35,8 @@ let phy;
 let gameMap;
 
 // players
-let player
-let player2
+export let player
+export let player2
 
 // setInterval function id
 let updatePlayerPosEmit;
@@ -327,7 +327,7 @@ function plantBombEvent(bombInfo){
     if (id !== playerId){
         let pos = bombInfo.pos;
         let quaternion = bombInfo.quaternion;
-        let bomb = new Bomb(pos, quaternion, phy, gameMap, true);
+        let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[1]);
     }
 }
 
@@ -377,7 +377,6 @@ function main(){
     
     // Pre-compile shaders for the scene
     renderer.compile(scene, camera);
-    let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap)
 
 
     let firstRender = true;
@@ -390,6 +389,7 @@ function main(){
             firstRender = false
             // let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
             // setTimeout(bomb.remove(), 1000)
+            let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[1])
             player2.setBodyPos(player.getBodyPos())
         }
         renderer.render(scene, camera)

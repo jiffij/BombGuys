@@ -31,13 +31,18 @@ export const bodySphereRadius = 0.8;
 
 export const shootInterval = 0.8;
 export const serverIp = "64.226.64.79";
-export const dev = false;
+export const dev = true;
 export const playerNum = 2;
 
 export const EQUIPMENT = {
     BOOT: 0,
     JET: 1,
     GLOVE: 2,
+}
+
+export const BombPower = {
+    1: 2,
+    2: 4
 }
 
 export const boostSpeed = 4;

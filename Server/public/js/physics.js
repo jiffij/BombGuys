@@ -51,19 +51,21 @@ export class Player{
     }
 
     move(x, z){
-        this.body.position.x -= x;
-        this.body.position.z -= z;
+        this.fbx.position.x -= x;
+        this.fbx.position.z -= z;
+        // this.CharacterController.camera.position.x -= x
+        // this.CharacterController.camera.position.z -= z
     }
 
     getPos(){
-        return this.body.position;
+        return this.fbx.position;
     }
 
     setPos(pos){
         if (pos.x !==undefined){
-            this.body.position.x = pos.x;
-            this.body.position.y = pos.y;
-            this.body.position.z = pos.z;
+            this.fbx.position.x = pos.x;
+            this.fbx.position.y = pos.y;
+            this.fbx.position.z = pos.z;
         }
     }
 
@@ -236,32 +238,33 @@ export class Physics{
         this.physicsWorld.addBody(body);
 
         body.addEventListener("collide", function(e){
-            if (Object.removed == false){
-                if (e.body.mass == 5){
-                    if (e.body.userData !== undefined){
-                        Object.removed = true
-                        console.log('equipment collision');
-                        setTimeout(
-                            function (){
-                                console.log(e.body)
-                                if(e.body.userData.id != 'enemy'){
-                                    console.log('hit equip');
-                                    var myself = this.players.find(function(obj){
-                                        return obj.playerId === 'myself';
-                                    });
-                                    equipmentDisplayManager.pickUp(Object.tool)
-                                    Object.applyEquip(myself);
-                                }
-                                
-                                try {
-                                    Object.remove()
-                                }
-                                catch{ print('remove error')}
-                            }.bind(this)
-                        ,10)
+            setTimeout(function(){
+                if (Object.removed == false){
+                    if (e.body.mass === 5){
+                        console.log(e.body.mass)
+                        if (e.body.userData !== undefined){
+                            Object.removed = true
+                            console.log('equipment collision');
+
+                            console.log(e.body)
+                            if(e.body.userData.id != 'enemy'){
+                                console.log('hit equip');
+                                var myself = this.players.find(function(obj){
+                                    return obj.playerId === 'myself';
+                                });
+                                equipmentDisplayManager.pickUp(Object.tool)
+                                Object.applyEquip(myself);
+                            }
+                            
+                            try {
+                                Object.remove()
+                            }
+                            catch{ print('remove error')}
+
+                        }
                     }
                 }
-            }
+            }.bind(this),10)
         }.bind(this))
         this.equipments[uuid] = new PhysicsEquipment(mesh, body);
     }
@@ -312,11 +315,13 @@ export class Physics{
         this.bombsShouldRemove = []
         // Update the position of each mesh based on its corresponding body
         for (let i = 0; i < this.players.length; i++) {
-            const fbx = this.players[i].fbx;
-            const body = this.players[i].body;
-            fbx.position.y = body.position.y - this.players[i].height - 0.03
-            fbx.position.x = body.position.x
-            fbx.position.z = body.position.z
+            let player = this.players[i]
+            const fbx = player.fbx;
+            const body = player.body;
+            fbx.position.y = body.position.y - player.height - 0.03
+            body.position.x = fbx.position.x
+            body.position.z = fbx.position.z
+            
         // fbx.quaternion.copy(body.quaternion);
         }
         const keys = Object.keys(this.bombs)

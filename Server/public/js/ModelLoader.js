@@ -82,6 +82,10 @@ export class ModelLoader {
         this.characterController = new CharacterController(this.model, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer, this.playerId)
     }
 
+    affectByBomb(){
+        this.characterController.freezeByBomb();
+    }
+
     getPos(){
         if (this.characterController !== undefined){
             return this.model.position;

@@ -15,8 +15,10 @@ export class EquipmentDisplayManager{
     pickUp(type){
         switch(type){
             case EQUIPMENT.JET:
-                this.remainingTime["jet"] = 60;
-                this.lineOrder.push("jet")
+                this.remainingTime["jet"] = 30;
+                if (!this.lineOrder.includes("jet")){
+                    this.lineOrder.push("jet")
+                }
                 if (this.jetTag == undefined){
                     this.createJetTag()
                 }
@@ -25,7 +27,9 @@ export class EquipmentDisplayManager{
                 break
             case EQUIPMENT.BOOT:
                 this.remainingTime["boot"] = 10;
-                this.lineOrder.push("boot")
+                if (!this.lineOrder.includes("boot")){
+                    this.lineOrder.push("boot")
+                }
                 if (this.bootTag == undefined){
                     this.createBootTag()
                 }
@@ -45,8 +49,8 @@ export class EquipmentDisplayManager{
         if (this.remainingTime["boot"]<=0){
             let index = this.lineOrder.indexOf("boot");
             this.lineOrder.splice(index,1);
-            clearInterval(this.bootIntervalID)
-            this.bootTag.remove()
+            clearInterval(this.bootIntervalID);
+            this.bootTag.remove();
             this.bootTag = undefined
             this.updateOtherTag()
         }

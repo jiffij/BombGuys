@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { Bomb } from './Bomb.js';
 import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js';
-import { boostSpeed } from './config.js';
+import { BombPower, boostSpeed } from './config.js';
 
 export class CharacterController {
     // state
@@ -65,7 +65,7 @@ export class CharacterController {
         if (this.throwability){
             const position = this.model.position
             const quaternion = this.model.quaternion
-            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false)
+            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[1])
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true
@@ -163,7 +163,6 @@ export class CharacterController {
         this.updateCameraTarget(moveX, moveZ, moveY)
 
         if (flag && !this.freeze){
-
             this.player.jump()
             setTimeout(this.freezeMove.bind(this), 1100)
         }
@@ -177,7 +176,15 @@ export class CharacterController {
     freezeMove(){
         this.freeze = true
         var self = this
-        setTimeout(function(){self.freeze = false}, 600)
+        this.player.jet = false
+        setTimeout(function(){self.freeze = false}, 500)
+    }
+
+    freezeByBomb(){
+        this.freeze = true
+        var self = this
+        console.log("being bombed")
+        setTimeout(function(){self.freeze = false}, 1000)
     }
 
 
@@ -191,9 +198,10 @@ export class CharacterController {
         this.cameraTarget.x = this.model.position.x
         this.cameraTarget.y = this.model.position.y + 0.5
         this.cameraTarget.z = this.model.position.z
-        if (this.isPlayer){
-            this.orbitControl.target = this.cameraTarget
+        if (this.isPlayer) {
+            this.orbitControl.target = this.cameraTarget;
         }
+
     }
 
     directionOffset(keysPressed) {
