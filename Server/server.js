@@ -33,15 +33,15 @@ const players = {};
 const playersPos = {};
 const cameras = {};
 const waitingRoom = {};
+const playerWaitingRoom = {};
 const waitingRoomInGame = {};
 let gameMap = []
 let bombs = []
 
 
 // update frequency
-const updatePosFreq = 30;
-const updateCamFreq = 30;
-const updateKeyboardFreq = 10;
+const updatePosFreq = 100;
+const updateKeyboardFreq = 100;
 const randomBombFreq = 10000;
 
 
@@ -99,6 +99,7 @@ io.on('connection', (socket) => {
         const uuid = generateUUID();
         waitingRoom[uuid] = [socket.id]
         waitingRoomInGame[uuid] = false
+        playerWaitingRoom[socket.id] = uuid
     })
 
     socket.on("joinRoom", () => {
@@ -106,6 +107,7 @@ io.on('connection', (socket) => {
         for (let uuid of Object.keys(waitingRoom)){
             if (waitingRoom[uuid].length < playerNum && waitingRoomInGame[uuid] == false){
                 waitingRoom[uuid].push(socket.id)
+                playerWaitingRoom[socket.id] = uuid
                 haveEmptyRoom = true
                 if (waitingRoom[uuid].length == playerNum){
                     notifyPlayerNum(uuid)
@@ -119,31 +121,9 @@ io.on('connection', (socket) => {
             const uuid = generateUUID();
             waitingRoom[uuid] = [socket.id]
             waitingRoomInGame[uuid] = false
+            playerWaitingRoom[socket.id] = uuid
             socket.emit("playerNum", waitingRoom[uuid].length)
         }
-    })
-
-    // update movement
-    socket.on("playerMovementKeyDown", (key) => {
-        try {
-            players[socket.id] [key.toLowerCase()] = true
-        }
-        catch{
-
-        }
-    })
-
-    socket.on("playerMovementKeyUp", (key) => {
-        try {
-            players[socket.id] [key.toLowerCase()] = false
-        }
-        catch{
-            
-        }
-    })
-
-    socket.on("updateCamera", (camera) => {
-        cameras[socket.id] = camera
     })
 
     socket.on("updatePlayerPos", (pos) => {
@@ -151,25 +131,22 @@ io.on('connection', (socket) => {
     })
 
     socket.on("plantBomb", (bombInfo) => {
-        bombInfo["id"] = socket.id;
-        io.sockets.emit("plantBomb", bombInfo);
+        let uuid = playerWaitingRoom[socket.id];
+        notifyPlayerBomb(uuid, bombInfo, socket.id);
+    })
+
+    socket.on("playerJump", () => {
+        let uuid = playerWaitingRoom[socket.id]
+        notifyPlayerJump(uuid, socket.id);
     })
 
     socket.on("createEquip", (equip)=>{
-        socket.broadcast.emit('genEquip', equip);
+        let uuid = playerWaitingRoom[socket.id]
+        notifyPlayerEquipGen(uuid, equip, socket.id)
     })
 
-    setInterval(() => {
-        io.sockets.emit('playerStates', players);
-      }, updateKeyboardFreq);
 
-    setInterval(() => {
-        io.sockets.emit('updatePlayerPos', playersPos);
-      }, updatePosFreq);
-
-    setInterval(() => {
-        io.sockets.emit('updateCamera', cameras);
-    }, updateCamFreq);
+    setInterval(notifyPlayerPos, updatePosFreq);
 
     // setInterval(() => {
     //     const pos = Math.random()
@@ -183,10 +160,52 @@ io.on('connection', (socket) => {
 // Send a message to a list of specific clients
 function notifyPlayerNum(uuid) {
     const clientIds = waitingRoom[uuid]
-    const num = waitingRoom[uuid].length
     const gameMapInfo = generateMap()
     clientIds.forEach((clientId) => {
         io.to(clientId).emit('startGame', gameMapInfo);
+    });
+}
+
+function notifyPlayerJump(uuid, id){
+    const clientIds = waitingRoom[uuid]
+    clientIds.forEach((clientId) => {
+        if (id != clientId){
+            io.to(clientId).emit("playerJump");
+        }
+    });
+}
+
+function notifyPlayerPos(){
+    let uuids = Object.keys(waitingRoom)
+    for (let uuid of uuids){
+        const clientIds = waitingRoom[uuid]
+        const pos = {}
+        clientIds.forEach((clientId) => {
+            pos[clientId] = playersPos[clientId]
+        });
+        clientIds.forEach((clientId) => {
+            io.to(clientId).emit("updatePlayerPos", pos);
+        });
+    }
+
+}
+
+function notifyPlayerBomb(uuid, bombInfo, id){
+    const clientIds = waitingRoom[uuid]
+    clientIds.forEach((clientId) => {
+        if (id != clientId){
+            io.to(clientId).emit("plantBomb", bombInfo);
+        }
+    });
+
+}
+
+function notifyPlayerEquipGen(uuid, equip, id){
+    const clientIds = waitingRoom[uuid]
+    clientIds.forEach((clientId) => {
+        if (id != clientId){
+            io.to(clientId).emit('genEquip', equip);
+        }
     });
 }
 
