@@ -9,6 +9,7 @@ import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm
 import { BombPower, dev, serverIp } from './config.js';
 import { Equipments } from './equipments.js';
 import { EquipmentDisplayManager } from './equipmentDisplay.js';
+import { SPACE } from './utils.js';
 
 
 // global variables
@@ -40,7 +41,6 @@ export let player2
 
 // setInterval function id
 let updatePlayerPosEmit;
-let updateCameraEmit;
 
 // load skin and animation
 const animations = {}
@@ -205,9 +205,7 @@ function clear(){
         renderer.setAnimationLoop(null)
     }
     clearInterval(updatePlayerPosEmit)
-    clearInterval(updateCameraEmit)
     socket.off("playerStates")
-    socket.off("updateCamera")
     socket.off("updatePlayerPos")
     socket.off("plantBomb")
 }
@@ -262,12 +260,16 @@ function loadModel(){
 const keysPressed = {}
 
 function keyDownEvent(event){
-    socket.emit("playerMovementKeyDown", event.key)
+    // socket.emit("playerMovementKeyDown", event.key)
     keysPressed[event.key.toLowerCase()] = true
+    if (event.key == SPACE){
+        player.jump();
+        socket.emit("playerJump")
+    }
 }
 
 function keyUpEvent(event){
-    socket.emit("playerMovementKeyUp", event.key)
+    // socket.emit("playerMovementKeyUp", event.key)
     if (event.key == "e"){
         let throwable = false;
         throwable = player.plantBomb()
@@ -292,20 +294,10 @@ function playerStatesFunction(players){
     }
 }
 
-function updateCameraFunction(cameras){
-    let keys = Object.keys(cameras)
-    let cameraInfo;
-    if (keys.length == 2){
-        if (keys[0] == playerId){
-            cameraInfo = cameras[keys[1]]
-            updateCamera(camera2, cameraInfo)
-        }
-        else {
-            cameraInfo = cameras[keys[0]]
-            updateCamera(camera2, cameraInfo)
-        }
-    }
+function playerJump(){
+    player2.jump();
 }
+
 
 function updatePlayerPosEvent(playerPos){
     let keys = Object.keys(playerPos)
@@ -313,22 +305,21 @@ function updatePlayerPosEvent(playerPos){
     if (keys.length == 2){
         if (keys[0] == playerId){
             pos = playerPos[keys[1]]
-            player2.setBodyPos(pos);
+            player2.setDestination(pos)
+            // player2.setBodyPos(pos);
         }
         else {
             pos = playerPos[keys[0]]
-            player2.setBodyPos(pos);
+            player2.setDestination(pos)            
+            // player2.setBodyPos(pos);
         }
     }
 }
 
 function plantBombEvent(bombInfo){
-    let id = bombInfo.id;
-    if (id !== playerId){
-        let pos = bombInfo.pos;
-        let quaternion = bombInfo.quaternion;
-        let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[1]);
-    }
+    let pos = bombInfo.pos;
+    let quaternion = bombInfo.quaternion;
+    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[1]);
 }
 
 function makeEquip(equip){
@@ -352,18 +343,14 @@ function main(){
     
     // Listen events from server
     socket.on('playerStates', playerStatesFunction);
-    socket.on("updateCamera", updateCameraFunction)
     socket.on("updatePlayerPos", updatePlayerPosEvent)
     socket.on("plantBomb", plantBombEvent)
+    socket.on("playerJump", playerJump)
     socket.on("genEquip", makeEquip);
     
     updatePlayerPosEmit = setInterval(() => {
-        socket.emit('updatePlayerPos', player.getBodyPos());
+        socket.emit('updatePlayerPos', player.getPos());
     }, 30);
-    
-    updateCameraEmit = setInterval(() => {
-        socket.emit('updateCamera', ({"pos":camera.position, "rotation":camera.rotation}));
-    }, 10);
     
     
     // add light
@@ -455,14 +442,6 @@ window.addEventListener("resize", function(){
 })
 
 // other functions
-function updateCamera(camera, cameraInfo){
-    camera.position.x = cameraInfo.pos.x
-    camera.position.y = cameraInfo.pos.y
-    camera.position.z = cameraInfo.pos.z
-    camera.rotation._x = cameraInfo.rotation._x
-    camera.rotation._y = cameraInfo.rotation._y
-    camera.rotation._z = cameraInfo.rotation._z
-}
 
 // gameend: go back to start screen or directly join another game
 // a window to select

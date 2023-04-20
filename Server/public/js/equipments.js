@@ -79,18 +79,18 @@ export class Equipments {
     
     applyEquip(player){
 
-        function keyupQ(e){
-            if(e.key.toLocaleLowerCase() == 'q'){
-                player.jet = false;
-            }
-        };
+        // function keyupQ(e){
+        //     if(e.key.toLocaleLowerCase() == 'q'){
+        //         player.jet = false;
+        //     }
+        // };
 
-        function keydownQ(e){
-            if(e.key.toLocaleLowerCase() == 'q'){
-                player.jet = true;
-                equipmentDisplayManager.removeJet()
-            }
-        }; 
+        // function keydownQ(e){
+        //     if(e.key.toLocaleLowerCase() == 'q'){
+        //         player.jet = true;
+        //         equipmentDisplayManager.removeJet()
+        //     }
+        // }; 
 
         function keydownF(e){
             if(e.key.toLocaleLowerCase() == 'f'){
@@ -104,22 +104,23 @@ export class Equipments {
                 clearInterval(this.bootIntervalId)
                 this.bootIntervalIt = setTimeout(() => {
                     player.CharacterController.boost = false;
-                    console.log('stop boost');
+                    // console.log('stop boost');
                 }, 10000);
-                console.log('boosted');
+                // console.log('boosted');
                 break;
 
             case EQUIPMENT.JET:
-                document.addEventListener('keydown', keydownQ);
-                document.addEventListener('keyup', keyupQ);
+                player.jet = true;
+                // document.addEventListener('keydown', keydownQ);
+                // document.addEventListener('keyup', keyupQ);
                 clearInterval(this.jetIntervalId)
                 this.jetIntervalId = setTimeout(() => {
                     player.jet = false;
-                    document.removeEventListener('keydown', keydownQ);
-                    document.removeEventListener('keyup', keyupQ);
-                    console.log('stop jet');
-                }, 30000);
-                console.log('Jet');
+                    // document.removeEventListener('keydown', keydownQ);
+                    // document.removeEventListener('keyup', keyupQ);
+                    // console.log('stop jet');
+                }, 10000);
+                // console.log('Jet');
                 break;
             
             case EQUIPMENT.GLOVE:

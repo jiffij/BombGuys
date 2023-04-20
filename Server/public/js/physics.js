@@ -38,12 +38,6 @@ export class Player{
         this.jet = false;
         this.jetimpulse = new CANNON.Vec3(0, jetImpulse, 0)
         this.reverse = false;
-        // this.boost_speed = 0;
-        // this.body.addEventListener("collide", function(e){
-        //     if (e.body.mass == 0){
-                
-        //     }
-        // }.bind(this))
     }
 
     rotate(quarternion){
@@ -53,8 +47,6 @@ export class Player{
     move(x, z){
         this.fbx.position.x -= x;
         this.fbx.position.z -= z;
-        // this.CharacterController.camera.position.x -= x
-        // this.CharacterController.camera.position.z -= z
     }
 
     getPos(){

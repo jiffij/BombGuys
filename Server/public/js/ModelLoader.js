@@ -47,7 +47,7 @@ export class ModelLoader {
         this.mixer = new THREE.AnimationMixer(this.model);
         this.mixer.addEventListener("finished", ( /*event*/ ) => {
             this.characterController.finishJump = true
-            this.characterController.jump = false
+            this.characterController.isJumping = false
         
         } )
         this.model.scale.set(this.scale[0],this.scale[1],this.scale[2])
@@ -118,7 +118,16 @@ export class ModelLoader {
     }
 
     update(delta, keysPressed){
-        this.characterController.update(delta, keysPressed)
+        if (this.isPlayer){
+            this.characterController.update(delta, keysPressed)
+        }
+        else {
+            this.characterController.walkTowards(delta, keysPressed)
+        }
+    }
+
+    setDestination(pos){
+        this.characterController.destination = pos;
     }
 
     plantBomb(){
@@ -127,5 +136,10 @@ export class ModelLoader {
 
     isAlive(){
         return this.characterController.alive
+    }
+
+    jump(){
+        console.log(this.characterController)
+        this.characterController.jump()
     }
 }

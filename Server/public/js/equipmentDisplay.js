@@ -15,7 +15,7 @@ export class EquipmentDisplayManager{
     pickUp(type){
         switch(type){
             case EQUIPMENT.JET:
-                this.remainingTime["jet"] = 30;
+                this.remainingTime["jet"] = 10;
                 if (!this.lineOrder.includes("jet")){
                     this.lineOrder.push("jet")
                 }
