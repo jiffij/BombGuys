@@ -8,16 +8,28 @@ const BOMB = 3;
 const EQUIPMENT = 4;
 const RING = 5;
 
+const validTransitions = {
+  standing: ['jump', 'walk'],
+  jump: ['fall', 'bomb'],
+  fall: ['standing', 'walk'],
+  walk: ['jump', 'fall', 'standing', 'bomb'],
+  chase: ['chase', 'bomb', 'walk'],
+};
+
 export class stateMachine{
 
     ring;
     mesh;
     body;
     ringBody;
+    destination;
 
     constructor(physicsWorld, scene){
         this.physicsWorld = physicsWorld;
         this.scene = scene;
+        this.timeToReachDestination = 5;
+        this.maxForce = 10;
+        this.finished = true;
         this.init();
     }
 
@@ -96,21 +108,26 @@ export class stateMachine{
         }
     }
 
+    
+    moveTowardDestination(destination){
+      let currentPosition = this.body.position.clone();
+      let direction = new CANNON.Vec3().copy(destination).vsub(currentPosition).normalize();
+      let distanceToDestination = destination.distanceTo(currentPosition);
+
+      let forceMagnitude = Math.min(distanceToDestination / this.timeToReachDestination, this.maxForce);
+      let forceVector = direction.scale(forceMagnitude);
+      this.body.applyForce(forceVector, this.body.position);
+    }
+
 
     // Define the initial state
     currentState = 'standing';
   
     // Define the state transition function
-    transitionTo(newState) {
-      const validTransitions = {
-        standing: ['jump', 'walk'],
-        jump: ['fall'],
-        fall: ['standing', 'walk'],
-        walk: ['jump', 'fall', 'standing'],
-      };
-  
-      if (validTransitions[this.currentState].includes(newState)) {
-        this.currentState = newState;
+    transition() {      
+      var index = Math.floor(Math.random()*validTransitions[this.currentState].length)
+      if (validTransitions[this.currentState][index]) {
+        this.currentState = validTransitions[this.currentState][index];
         return true;
       } else {
         return false;
@@ -119,21 +136,37 @@ export class stateMachine{
   
     // Define the state update function
     update(player) {
-      switch (this.currentState) {
+
+      switch (this.currentState && this.finished) {
         case 'standing':
           // Player is standing still, do nothing
           break;
         case 'jump':
           // Player is jumping, apply an upwards force
-          player.applyForce(new CANNON.Vec3(0, 100, 0), player.position);
+          player.applyForce(new CANNON.Vec3(0, 15, 0), player.position);
           break;
         case 'fall':
           // Player is falling, apply a downwards force
-          player.applyForce(new CANNON.Vec3(0, -10, 0), player.position);
+          // player.applyForce(new CANNON.Vec3(0, -10, 0), player.position);
           break;
         case 'walk':
           // Player is walking, apply a forward force
-          player.applyForce(new CANNON.Vec3(10, 0, 0), player.position);
+          let xMin = -15;
+          let xMax = 15;
+          let yMin = 0;
+          let yMax = 0;
+          let zMin = -15;
+          let zMax = 15;
+          let dest = new CANNON.Vec3(
+            xMin + Math.random() * (xMax - xMin),
+            yMin + Math.random() * (yMax - yMin),
+            zMin + Math.random() * (zMax - zMin)
+          );
+          moveTowardDestination(dest);
+          // player.applyForce(new CANNON.Vec3(10, 0, 0), player.position);
+          break;
+        case 'chase':
+          
           break;
       }
       // Update the Creeper mesh position and rotation to match the sphere body
