@@ -134,6 +134,10 @@ export class ModelLoader {
         return this.characterController.plantBomb(this.scene)
     }
 
+    getPower(){
+        return this.characterController.power;
+    }
+
     isAlive(){
         return this.characterController.alive
     }

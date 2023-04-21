@@ -2,10 +2,10 @@ import http from 'http';
 import express from 'express';
 import { Server as socketIOServer } from 'socket.io';// import cors from 'cors';
 import path from 'path';
-import { life_1, life_2, life_3, playerNum } from './public/js/config.js';
+import { bodySphereRadius, life_1, life_2, life_3, playerNum } from './public/js/config.js';
 import { floorConfig } from './public/js/config.js';
 
-const publicPath = path.join(process.cwd(), './public');
+const publicPath = path.join(process.cwd(), './Server/public');
 const port = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
@@ -161,8 +161,13 @@ io.on('connection', (socket) => {
 function notifyPlayerNum(uuid) {
     const clientIds = waitingRoom[uuid]
     const gameMapInfo = generateMap()
+    const playerInitialPos = {}
     clientIds.forEach((clientId) => {
-        io.to(clientId).emit('startGame', gameMapInfo);
+        let pos = generateRandPos()
+        playerInitialPos[clientId] = pos
+    });
+    clientIds.forEach((clientId) => {
+        io.to(clientId).emit('startGame', [gameMapInfo,playerInitialPos,clientId]);
     });
 }
 
@@ -246,3 +251,9 @@ function generateMap(){
     return floorPieces;
 }
 
+function generateRandPos(){
+    let x = Math.random()*floorConfig.size*(floorConfig.mapSize-3) - floorConfig.size*(floorConfig.mapSize-3)/2
+    let z = Math.random()*floorConfig.size*(floorConfig.mapSize-3) - floorConfig.size*(floorConfig.mapSize-3)/2
+    let y = bodySphereRadius;
+    return [x,y,z]
+}

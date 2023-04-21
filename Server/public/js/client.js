@@ -55,6 +55,7 @@ export let rocket
 export let shoes
 export let bomb1
 export let bomb2
+export let star
 
 // html components
 let startButton;
@@ -70,9 +71,11 @@ let gameEndWords = "Game Over!"
 // equipments
 export let equipmentDisplayManager;
 
+let posSet = false
+
 
 // load animations
-function loadFBX(url) {
+function loadAnimation(url) {
     return new Promise((resolve, reject) => {
       const loader = new FBXLoader();
       loader.setPath("../../models/animation/")
@@ -89,7 +92,7 @@ function loadFBX(url) {
     });
 }
 
-function loadSkin(url) {
+function loadFBX(url) {
     return new Promise((resolve, reject) => {
         const loader = new FBXLoader();
         loader.setPath("../../models/static/")
@@ -106,7 +109,7 @@ function loadSkin(url) {
       });
 }
 
-function loadBomb(url){
+function loadGLB(url){
     return new Promise((resolve, reject) => {
         const loader = new GLTFLoader();
         loader.setPath("../../models/static/")
@@ -126,24 +129,26 @@ function loadBomb(url){
 async function loadAssets() {
     try {
       // Load animations and skins here
-        const fbx1 = await loadFBX('idle.fbx');
-        const fbx2 = await loadFBX('run.fbx');
-        const fbx3 = await loadFBX('jump.fbx');
-        skin1 = await loadSkin('mouse.fbx');
-        skin2 = await loadSkin('mouse.fbx');
+        const fbx1 = await loadAnimation('idle.fbx');
+        const fbx2 = await loadAnimation('run.fbx');
+        const fbx3 = await loadAnimation('jump.fbx');
+        skin1 = await loadFBX('mouse.fbx');
+        skin2 = await loadFBX('mouse.fbx');
         const textureLoader = new THREE.TextureLoader();
         texture = await textureLoader.load('../models/textures/bomb.jpg');
         bombMaterial = new THREE.MeshStandardMaterial({
             map: texture,
         });
-        rocket = await loadSkin('rocket.fbx');
-        shoes = await loadSkin('cartoonShoes.fbx');
-        bomb1 = await loadBomb('bomb1.glb')
-        bomb2 = await loadBomb('bomb2.glb')
+        rocket = await loadFBX('rocket.fbx');
+        shoes = await loadFBX('cartoonShoes.fbx');
+        bomb1 = await loadGLB('bomb1.glb')
+        bomb2 = await loadGLB('bomb2.glb')
+        star = await loadGLB('star.glb')
         rocket.scale.set(0.002,0.002,0.002)
         shoes.scale.set(0.3,0.3,0.3)
         bomb1.scale.set(0.025,0.025,0.025)
         bomb2.scale.set(0.005,0.005,0.005)
+        star.scale.set(0.3,0.3,0.3)
         animations["idle"] = fbx1
         animations["run"] = fbx2
         animations["jump"] = fbx3
@@ -258,25 +263,37 @@ function enterWaitRoom(){
     document.body.appendChild(centeredText);
     socket.on("playerId", (id) => {
         playerId = id;
-        console.log(playerId)
     })
     
-    socket.on("startGame", gameMapInfo => {
+    socket.on("startGame", ([gameMapInfo,playerInitialPos,id]) => {
+        playerId = id;
         initialize()
         // create map
         gameMap = new GameMap(scene, phy, gameMapInfo)
         gameMap.setup();
-        loadModel()
+        loadModel(playerInitialPos)
         main()
     })
     socket.emit("join",0)
 }
 
 // load model and animation
-function loadModel(){
-    player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, null, 'enemy')
+function loadModel(playerInitialPos){
+    let player1pos;
+    let player2pos;
+    let keys = Object.keys(playerInitialPos);
+    for (let key of keys){
+        if (key == playerId){
+            player1pos = playerInitialPos[key];
+        }
+        else {
+            player2pos = playerInitialPos[key];
+        }
+    }
+    console.log(playerInitialPos)
+    player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, player2pos, 'enemy')
     player2.load()
-    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, null, 'myself')
+    player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, player1pos, 'myself')
     player.load()
 }
 
@@ -297,7 +314,7 @@ function keyUpEvent(event){
         let throwable = false;
         throwable = player.plantBomb()
         if (throwable){
-            socket.emit("plantBomb", {pos:player.getPos(),quaternion:player.getQuaternion()})
+            socket.emit("plantBomb", {pos:player.getPos(),quaternion:player.getQuaternion(),power:player.getPower()})
         }
     }
     else {
@@ -315,13 +332,23 @@ function updatePlayerPosEvent(playerPos){
     if (keys.length == 2){
         if (keys[0] == playerId){
             pos = playerPos[keys[1]]
-            player2.setDestination(pos)
-            // player2.setBodyPos(pos);
+            if (posSet){
+                player2.setDestination(pos)
+            }
+            else {
+                player2.setBodyPos(pos)
+                posSet = true
+            }
         }
         else {
             pos = playerPos[keys[0]]
-            player2.setDestination(pos)            
-            // player2.setBodyPos(pos);
+            if (posSet){
+                player2.setDestination(pos)
+            }
+            else {
+                player2.setBodyPos(pos)
+                posSet = true
+            }            
         }
     }
 }
@@ -329,7 +356,8 @@ function updatePlayerPosEvent(playerPos){
 function plantBombEvent(bombInfo){
     let pos = bombInfo.pos;
     let quaternion = bombInfo.quaternion;
-    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[2]);
+    let power = bombInfo.power;
+    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[power]);
 }
 
 function makeEquip(equip){
@@ -374,22 +402,23 @@ function main(){
     // Pre-compile shaders for the scene
     renderer.compile(scene, camera);
     let firstRender = true;
+    posSet = false;
 
     // animation
     let clock = new THREE.Clock();
     
     function animate() {
         if (firstRender){
-            firstRender = false
             // let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
             // setTimeout(bomb.remove(), 1000)
             let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[1])
             let bomb2 = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[2])
             player2.setBodyPos(player.getBodyPos())
+            firstRender = false;
         }
         renderer.render(scene, camera)
+
         phy.update();
-        // phy.movePlayer();
         let updateDelta = clock.getDelta();
         if (player.characterController){
             player.update(updateDelta, keysPressed)
@@ -417,7 +446,15 @@ function main(){
                 inGame = false
             }
         }
-    
+
+        // equipment rotate
+        scene.traverse((object) => {
+            if (object.isEquipment === true){
+                object.rotation.y += 1 * updateDelta;
+            }
+        })
+
+        // explosion
         for (let i=0;i<explosions.length;i++){
             let explosion = explosions[i]
             const positions = explosion.geometry.attributes.position.array;

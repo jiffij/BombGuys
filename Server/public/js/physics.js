@@ -54,6 +54,7 @@ export class Player{
     }
 
     setPos(pos){
+        console.log(pos)
         if (pos.x !==undefined){
             this.fbx.position.x = pos.x;
             this.fbx.position.y = pos.y;

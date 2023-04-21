@@ -32,7 +32,7 @@ export class CharacterController {
     alive = true
 
     // tool
-    power = false
+    power = 1
     boost = false
 
     constructor(model,
@@ -69,7 +69,7 @@ export class CharacterController {
         if (this.throwability){
             const position = this.model.position
             const quaternion = this.model.quaternion
-            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[2])
+            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[this.power])
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true

@@ -42,7 +42,6 @@ export class Bomb {
 
     }
     init(){
-        let sphere;
         if (this.power == BombPower[1]){
             this.bomb = bomb1.clone()
         }

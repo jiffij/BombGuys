@@ -105,7 +105,7 @@ export class GameMap {
         }
 
         // remove floor
-        let checkRemove = this.getRemoveFloorIndex(pos);
+        let checkRemove = this.getRemoveFloorIndex(pos, power);
         let shouldRemove = []
         for (let [floor_l, floor_i, floor_j] of checkRemove){
             if (this.floorPiecesLife[floor_l][floor_i][floor_j] == 1){
@@ -162,13 +162,15 @@ export class GameMap {
                     var p = possible_positions[randomIndex];
                     var mesh = this.floorPieces[p.l][p.i][p.j];
                     console.log(mesh.position, mesh.quaternion);
-                    const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, Math.floor(Math.random()*3), false);
+                    let toolType = 2
+                    // let toolType = Math.floor(Math.random()*3)
+                    const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, toolType, false);
                 }
             }
         }
     }
 
-    getRemoveFloorIndex(pos){
+    getRemoveFloorIndex(pos, power){
         let floor_i;
         let floor_j;
         let floor_l;
@@ -179,7 +181,7 @@ export class GameMap {
                 let row = layer[i];
                 for (let j=0; j<this.mapSize; j++){
                     let piece = row[j];
-                    if (piece.checkFallingIn(pos)){
+                    if (piece.checkFallingIn(pos, power)){
                        floor_i = i;
                        floor_j = j; 
                        floor_l = l;
@@ -240,20 +242,16 @@ class Coord {
         this.z = z;
     }
 
-    checkFallingIn(pos){
+    checkFallingIn(pos, power){
         const x = pos[0];
         const y = pos[1];
         const z = pos[2];
 
         // when multiple layers of floor need to check z
         if (Math.abs(this.y-y)<0.2+bombConfig.radius){
-            if (Math.sqrt((x-this.x)**2+(z-this.z)**2) <= floorConfig.size){
+            if (Math.sqrt((x-this.x)**2+(z-this.z)**2) <= power*3/4){
                 return true;
             }
-            // if (x>=this.left && x<=this.right && z>=this.bottom && z<=this.top){
-            //     console.log(y)
-            //     return true;
-            // }
         }
         return false;
     }

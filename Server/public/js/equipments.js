@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { EQUIPMENT } from './config.js';
-import { equipmentDisplayManager, rocket, scene, shoes, socket } from './client.js';
+import { equipmentDisplayManager, rocket, scene, shoes, socket, star } from './client.js';
 import { generateUUID } from './utils.js';
 import './client.js';
 
@@ -43,9 +43,13 @@ export class Equipments {
         else if (this.tool == EQUIPMENT.JET){
             this.equipment = rocket;
         }
+        else if (this.tool == EQUIPMENT.POWER){
+            this.equipment = star;
+        }
         else {
             this.equipment = new THREE.Mesh(box, material)
         }
+        this.equipment.isEquipment = true;
         this.uuid = generateUUID()
         equipmentCollections[this.uuid] = this
         this.place()
@@ -62,10 +66,6 @@ export class Equipments {
         this.equipment.position.set(this.position.x, this.position.y + 0.5, this.position.z)
         this.physicsWorld.addEquipment(this.equipment, this.quaternion, this.uuid, this.position, this)
         scene.add(this.equipment)
-        // try {
-        //     this.remove()
-        // }
-        // catch{} 
     }
     remove(){
         scene.remove(this.equipment)
@@ -97,8 +97,9 @@ export class Equipments {
                 break;
             
             case EQUIPMENT.POWER:
+                player.CharacterController.power = 2;
                 setTimeout(() => {
-                    player.CharacterController.power = true;
+                    player.CharacterController.power = 1;
                 }, 10000);
                 break;
 
