@@ -47,7 +47,7 @@ export class ModelLoader {
         this.mixer = new THREE.AnimationMixer(this.model);
         this.mixer.addEventListener("finished", ( /*event*/ ) => {
             this.characterController.finishJump = true
-            this.characterController.jump = false
+            this.characterController.isJumping = false
         
         } )
         this.model.scale.set(this.scale[0],this.scale[1],this.scale[2])
@@ -82,6 +82,10 @@ export class ModelLoader {
         this.characterController = new CharacterController(this.model, this.mixer, this.animationMap, this.orbitControls, this.camera, "idle", this.physicsWorld, this.gameMap, this.isPlayer, this.playerId)
     }
 
+    affectByBomb(){
+        this.characterController.freezeByBomb();
+    }
+
     getPos(){
         if (this.characterController !== undefined){
             return this.model.position;
@@ -114,14 +118,32 @@ export class ModelLoader {
     }
 
     update(delta, keysPressed){
-        this.characterController.update(delta, keysPressed)
+        if (this.isPlayer){
+            this.characterController.update(delta, keysPressed)
+        }
+        else {
+            this.characterController.walkTowards(delta, keysPressed)
+        }
+    }
+
+    setDestination(pos){
+        this.characterController.destination = pos;
     }
 
     plantBomb(){
         return this.characterController.plantBomb(this.scene)
     }
 
+    getPower(){
+        return this.characterController.power;
+    }
+
     isAlive(){
         return this.characterController.alive
+    }
+
+    jump(){
+        console.log(this.characterController)
+        this.characterController.jump()
     }
 }

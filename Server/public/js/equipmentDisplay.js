@@ -10,13 +10,17 @@ export class EquipmentDisplayManager{
         this.jetIntervalID
         this.bootTag;
         this.bootIntervalID
+        this.powerTag;
+        this.powerIntervalID
         this.lineOrder = []
     }
     pickUp(type){
         switch(type){
             case EQUIPMENT.JET:
-                this.remainingTime["jet"] = 60;
-                this.lineOrder.push("jet")
+                this.remainingTime["jet"] = 10;
+                if (!this.lineOrder.includes("jet")){
+                    this.lineOrder.push("jet")
+                }
                 if (this.jetTag == undefined){
                     this.createJetTag()
                 }
@@ -25,12 +29,25 @@ export class EquipmentDisplayManager{
                 break
             case EQUIPMENT.BOOT:
                 this.remainingTime["boot"] = 10;
-                this.lineOrder.push("boot")
+                if (!this.lineOrder.includes("boot")){
+                    this.lineOrder.push("boot")
+                }
                 if (this.bootTag == undefined){
                     this.createBootTag()
                 }
                 clearInterval(this.bootIntervalID)
                 this.bootIntervalID = setInterval(this.updateBootTime.bind(this), 1000)
+                break
+            case EQUIPMENT.POWER:
+                this.remainingTime["power"] = 10;
+                if (!this.lineOrder.includes("power")){
+                    this.lineOrder.push("power")
+                }
+                if (this.powerTag == undefined){
+                    this.createPowerTag()
+                }
+                clearInterval(this.powerIntervalID)
+                this.powerIntervalID = setInterval(this.updatePowerTime.bind(this), 1000)
                 break
         }
     }
@@ -45,13 +62,25 @@ export class EquipmentDisplayManager{
         if (this.remainingTime["boot"]<=0){
             let index = this.lineOrder.indexOf("boot");
             this.lineOrder.splice(index,1);
-            clearInterval(this.bootIntervalID)
-            this.bootTag.remove()
+            clearInterval(this.bootIntervalID);
+            this.bootTag.remove();
             this.bootTag = undefined
             this.updateOtherTag()
         }
         this.remainingTime["boot"] -= 1;
         this.updateBootTag()  
+    }
+    updatePowerTime(){
+        if (this.remainingTime["power"]<=0){
+            let index = this.lineOrder.indexOf("power");
+            this.lineOrder.splice(index,1);
+            clearInterval(this.powerIntervalID);
+            this.powerTag.remove();
+            this.powerTag = undefined
+            this.updateOtherTag()
+        }
+        this.remainingTime["boot"] -= 1;
+        this.updatePowerTag()  
     }
     createJetTag(){
         let otherBuff = this.checkBuffNum()
@@ -78,6 +107,19 @@ export class EquipmentDisplayManager{
     }
     updateBootTag(){
         this.bootTag.textContent = `boot time remaining: ${this.remainingTime["boot"]}`
+    }
+    createPowerTag(){
+        let otherBuff = this.checkBuffNum()
+        this.powerTag = document.createElement("div")
+        this.powerTag.setAttribute("class", "toolInfo")
+        this.powerTag.textContent = `power time remaining: ${this.remainingTime["power"]}`
+        let index = this.lineOrder.indexOf("power");
+        this.powerTag.style["margin-top"] = `${index * 25+20}px`
+        console.log(otherBuff)
+        document.body.appendChild(this.powerTag)
+    }
+    updatePowerTag(){
+        this.powerTag.textContent = `power time remaining: ${this.remainingTime["power"]}`
     }
     removeJet(){
         this.remainingTime["jet"] = 0;

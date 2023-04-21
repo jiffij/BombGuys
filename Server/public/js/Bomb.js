@@ -4,8 +4,8 @@
 // after fixed amount of time the bomb will explode
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
-import { bombConfig } from './config.js';
-import { scene } from './client.js';
+import { BombPower, bombConfig } from './config.js';
+import { bomb1, bomb2, scene } from './client.js';
 import { explosions } from './client.js';
 import { generateUUID } from './utils.js';
 import { createExplosion } from './explosion.js';
@@ -28,7 +28,7 @@ export class Bomb {
     timeInterval;
     uuid;
     quaternion;
-    constructor(position, quaternion, physicsWorld, gameMap, generateByServer){
+    constructor(position, quaternion, physicsWorld, gameMap, generateByServer, power){
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
@@ -37,12 +37,19 @@ export class Bomb {
         this.gameMap = gameMap
         this.exploded = false
         this.generateByServer = generateByServer
+        this.power = power
         this.init()
 
     }
     init(){
-        let sphere = new THREE.SphereGeometry(this.radius,45,30);
-        this.bomb = new THREE.Mesh(sphere, bombMaterial)
+        if (this.power == BombPower[1]){
+            this.bomb = bomb1.clone()
+        }
+        else if (this.power == BombPower[2]) {
+            // sphere = new THREE.SphereGeometry(this.radius*1.5,45,30);
+            this.bomb = bomb2.clone()
+        }
+
         // this.bomb.frustumCulled = false;
         this.uuid = generateUUID()
         bombCollections[this.uuid] = this
@@ -66,11 +73,10 @@ export class Bomb {
         if (this.exploded == false){
             let explosion = createExplosion(pos)
             explosions.push(explosion)
-            console.log(explosions)
             scene.add(explosion)
             this.exploded = true
             let posReconstuct = [pos.x, pos.y, pos.z]
-            this.gameMap.removeFloor(posReconstuct, this.generateByServer)
+            this.gameMap.removeFloor(posReconstuct, this.generateByServer, this.power)
             scene.remove(this.bomb)
             this.physicsWorld.removeBomb(this.uuid)
             // get position of exploded floors and check if there is other bombs on those floors

@@ -3,6 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.mod
 
 import { bombConfig, floorConfig, life_1, life_2 } from "./config.js";
 import {Equipments} from "./equipments.js";
+import { player, player2 } from './client.js';
 
 export class GameMap {
     floorPieces = [];
@@ -91,8 +92,20 @@ export class GameMap {
         }
     }
 
-    removeFloor(pos, generateByServer){
-        let checkRemove = this.getRemoveFloorIndex(pos);
+    removeFloor(pos, generateByServer, power){
+        // affect player
+        let pos1 = player.getPos();
+        let pos2 = player2.getPos();
+        console.log(Math.sqrt((pos1.x-pos[0])*(pos1.x-pos[0])+(pos1.y-pos[1])*(pos1.y-pos[1])+(pos1.z-pos[2])*(pos1.z-pos[2])))
+        if (Math.sqrt((pos1.x-pos[0])*(pos1.x-pos[0])+(pos1.y-pos[1])*(pos1.y-pos[1])+(pos1.z-pos[2])*(pos1.z-pos[2])) < power){
+            player.affectByBomb()
+        }
+        if (Math.sqrt((pos2.x-pos[0])*(pos2.x-pos[0])+(pos2.y-pos[1])*(pos2.y-pos[1])+(pos2.z-pos[2])*(pos2.z-pos[2])) < power){
+            player2.affectByBomb()
+        }
+
+        // remove floor
+        let checkRemove = this.getRemoveFloorIndex(pos, power);
         let shouldRemove = []
         for (let [floor_l, floor_i, floor_j] of checkRemove){
             if (this.floorPiecesLife[floor_l][floor_i][floor_j] == 1){
@@ -113,6 +126,7 @@ export class GameMap {
                 }
             }
         }
+        // equipment generation
         if (!generateByServer){
             const possible_positions = [];
             for (let t = 0; t < shouldRemove.length; t++) {
@@ -148,13 +162,15 @@ export class GameMap {
                     var p = possible_positions[randomIndex];
                     var mesh = this.floorPieces[p.l][p.i][p.j];
                     console.log(mesh.position, mesh.quaternion);
-                    const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, Math.floor(Math.random()*3), false);
+                    let toolType = 2
+                    // let toolType = Math.floor(Math.random()*3)
+                    const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, toolType, false);
                 }
             }
         }
     }
 
-    getRemoveFloorIndex(pos){
+    getRemoveFloorIndex(pos, power){
         let floor_i;
         let floor_j;
         let floor_l;
@@ -165,7 +181,7 @@ export class GameMap {
                 let row = layer[i];
                 for (let j=0; j<this.mapSize; j++){
                     let piece = row[j];
-                    if (piece.checkFallingIn(pos)){
+                    if (piece.checkFallingIn(pos, power)){
                        floor_i = i;
                        floor_j = j; 
                        floor_l = l;
@@ -226,20 +242,16 @@ class Coord {
         this.z = z;
     }
 
-    checkFallingIn(pos){
+    checkFallingIn(pos, power){
         const x = pos[0];
         const y = pos[1];
         const z = pos[2];
 
         // when multiple layers of floor need to check z
         if (Math.abs(this.y-y)<0.2+bombConfig.radius){
-            if (Math.sqrt((x-this.x)**2+(z-this.z)**2) <= floorConfig.size){
+            if (Math.sqrt((x-this.x)**2+(z-this.z)**2) <= power*3/4){
                 return true;
             }
-            // if (x>=this.left && x<=this.right && z>=this.bottom && z<=this.top){
-            //     console.log(y)
-            //     return true;
-            // }
         }
         return false;
     }

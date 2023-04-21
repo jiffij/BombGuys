@@ -1,14 +1,14 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { Bomb } from './Bomb.js';
 import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js';
-import { boostSpeed } from './config.js';
+import { BombPower, boostSpeed } from './config.js';
 
 export class CharacterController {
     // state
     toggleRun = true
     currentAction
-    jump = false
-    finishJump = false
+    isJumping = false
+    finishJump = true
 
     // freeze movement after jump
     freeze = false
@@ -30,6 +30,10 @@ export class CharacterController {
 
     // alive or not
     alive = true
+
+    // tool
+    power = 1
+    boost = false
 
     constructor(model,
         mixer, animationsMap,
@@ -54,7 +58,7 @@ export class CharacterController {
         this.player = physicsWorld.addPlayer(model, [model.position.x, model.position.y, model.position.z], playerId, this);
         this.gameMap = gameMap;
         this.isPlayer = isPlayer;
-        this.boost = false;
+        this.destination = this.model.position;
     }
 
     switchRunToggle() {
@@ -65,7 +69,7 @@ export class CharacterController {
         if (this.throwability){
             const position = this.model.position
             const quaternion = this.model.quaternion
-            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false)
+            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[this.power])
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true
@@ -75,6 +79,86 @@ export class CharacterController {
         return false;
     }
 
+    jump(){
+        const verticalVelocity = this.player.getVerticalVelocity();
+        const current = this.animationsMap.get(this.currentAction)
+        if ( this.finishJump && Math.abs(verticalVelocity) < 0.0001 && !this.freeze){
+            let toPlay;
+            toPlay = this.animationsMap.get("jump")
+            current.fadeOut(this.fadeDuration)
+            toPlay.reset().fadeIn(this.fadeDuration).play();
+            this.isJumping = true
+            this.finishJump = false
+            this.player.jump()
+            this.currentAction = "idle"
+            setTimeout(this.freezeMove.bind(this), 1100)
+        }
+    }
+    
+    walkTowards(delta, keysPressed) {        
+        var play = 'idle';
+        if ((Math.sqrt((this.model.position.x-this.destination.x)*(this.model.position.x-this.destination.x))>0.1 || Math.sqrt((this.model.position.z-this.destination.z)*(this.model.position.z-this.destination.z))>0.1)) {
+            play = 'run'
+        } else {
+            play = 'idle'
+        }
+        const current = this.animationsMap.get(this.currentAction)
+
+        if ((this.currentAction != play && !this.isJumping) && !this.freeze) {
+            let toPlay;
+            toPlay = this.animationsMap.get(play)
+            current.fadeOut(this.fadeDuration)
+            toPlay.reset().fadeIn(this.fadeDuration).play();
+            this.currentAction = play
+        }
+
+        this.mixer.update(delta)
+
+        if ((this.currentAction != "idle") && !this.freeze){
+            const direction = new THREE.Vector3();
+            const rotateAngle = new THREE.Vector3(0, 1, 0);
+            const rotateQuarternion = new THREE.Quaternion();
+            
+            // Calculate the direction vector from the character to the destination
+            direction.subVectors(this.destination, this.model.position).normalize();
+        
+            // Calculate the angle between the character's forward direction and the direction vector
+            const angleYCameraDirection = Math.atan2(direction.x, direction.z);
+        
+            // Rotate the model towards the destination
+            rotateQuarternion.setFromAxisAngle(rotateAngle, angleYCameraDirection);
+            this.model.quaternion.rotateTowards(rotateQuarternion, 0.2);
+        
+            // Calculate the walk direction
+            this.walkDirection.copy(direction);
+            this.walkDirection.y = 0;
+        
+            // Set the appropriate velocity based on the current action
+            const velocity = this.currentAction === 'run' ? this.runVelocity : this.walkVelocity;
+        
+            // Add boost speed if the boost is active
+            if (this.boost) {
+                velocity += this.boostSpeed;
+            }
+        
+            // Calculate horizontal movement
+            const moveX = -this.walkDirection.x * velocity * delta;
+            const moveZ = -this.walkDirection.z * velocity * delta;
+        
+            // Update vertical velocity based on the player's vertical velocity
+            const verticalVelocity = this.player.getVerticalVelocity();
+            const moveY = verticalVelocity < 0.000000001 ? 0 : verticalVelocity * delta;
+        
+            // Move the character using the calculated movement vectors
+            this.player.move(moveX, moveZ);
+        }
+
+        if (this.model.position.y <= -25){
+            this.alive = false
+        }
+    }
+
+
     update(delta, keysPressed) {
         let moveX = 0
         let moveZ = 0
@@ -83,47 +167,26 @@ export class CharacterController {
         const directionPressed = DIRECTIONS.some(key => keysPressed[key] == true)
         
         var play = 'idle';
-        if (directionPressed && this.toggleRun) {
+        if (directionPressed) {
             play = 'run'
-        } else if (directionPressed) {
-            play = 'walk'
-        } else {
+        } else{
             play = 'idle'
         }
 
         const current = this.animationsMap.get(this.currentAction)
-        let flag = false
 
-        if ((this.currentAction != play || keysPressed[SPACE] || this.finishJump) && !this.freeze) {
+        if ((this.currentAction != play && !this.isJumping) && !this.freeze) {
             let toPlay;
-
-            if (keysPressed[SPACE]){
-                toPlay = this.animationsMap.get("jump")
-            }
-            else {
-                toPlay = this.animationsMap.get(play)
-            }
-            if (!this.jump){
-                // console.log(current)
-                current.fadeOut(this.fadeDuration)
-                toPlay.reset().fadeIn(this.fadeDuration).play();
-                this.currentAction = play
-                // console.log(play)
-                if (keysPressed[SPACE]) {
-                    flag = true
-                    this.jump = true
-                }
-            }
-            else {
-                this.currentAction = play
-            }
-            this.finishJump = false
+            toPlay = this.animationsMap.get(play)
+            current.fadeOut(this.fadeDuration)
+            toPlay.reset().fadeIn(this.fadeDuration).play();
+            this.currentAction = play
         }
 
         this.mixer.update(delta)
         
 
-        if (this.currentAction !== 'idle' && !this.freeze) {
+        if (directionPressed && !this.freeze) {
             // calculate towards camera direction
             var angleYCameraDirection = Math.atan2(
                 (this.camera.position.x - this.model.position.x), 
@@ -162,12 +225,6 @@ export class CharacterController {
 
         this.updateCameraTarget(moveX, moveZ, moveY)
 
-        if (flag && !this.freeze){
-
-            this.player.jump()
-            setTimeout(this.freezeMove.bind(this), 1100)
-        }
-
         if (this.model.position.y <= -25){
             this.alive = false
         }
@@ -177,7 +234,14 @@ export class CharacterController {
     freezeMove(){
         this.freeze = true
         var self = this
-        setTimeout(function(){self.freeze = false}, 600)
+        setTimeout(function(){self.freeze = false}, 500)
+    }
+
+    freezeByBomb(){
+        this.freeze = true
+        var self = this
+        console.log("being bombed")
+        setTimeout(function(){self.freeze = false}, 1000)
     }
 
 
@@ -191,9 +255,10 @@ export class CharacterController {
         this.cameraTarget.x = this.model.position.x
         this.cameraTarget.y = this.model.position.y + 0.5
         this.cameraTarget.z = this.model.position.z
-        if (this.isPlayer){
-            this.orbitControl.target = this.cameraTarget
+        if (this.isPlayer) {
+            this.orbitControl.target = this.cameraTarget;
         }
+
     }
 
     directionOffset(keysPressed) {
