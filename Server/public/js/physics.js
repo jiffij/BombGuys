@@ -17,13 +17,13 @@ export class Player{
         box.getSize(size);
         const halfExtents = new CANNON.Vec3(size.x / 4, size.y / 2, size.z / 4);
         const shape = new CANNON.Box(halfExtents);
-        this.height = size.y / 2
+        this.height = bodySphereRadius
         this.body = new CANNON.Body({
             mass: 5,
             // type: CANNON.Body.STATIC,
-            // shape: new CANNON.Sphere(bodySphereRadius),
+            shape: new CANNON.Sphere(bodySphereRadius),
             // shape: new CANNON.Cylinder(0.3,0.00001,0,20),
-            shape: shape,
+            // shape: shape,
             fixedRotation: true,
         });
         this.CharacterController = CharacterController;

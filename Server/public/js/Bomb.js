@@ -4,8 +4,8 @@
 // after fixed amount of time the bomb will explode
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
-import { bombConfig } from './config.js';
-import { scene } from './client.js';
+import { BombPower, bombConfig } from './config.js';
+import { bomb1, bomb2, scene } from './client.js';
 import { explosions } from './client.js';
 import { generateUUID } from './utils.js';
 import { createExplosion } from './explosion.js';
@@ -42,8 +42,15 @@ export class Bomb {
 
     }
     init(){
-        let sphere = new THREE.SphereGeometry(this.radius,45,30);
-        this.bomb = new THREE.Mesh(sphere, bombMaterial)
+        let sphere;
+        if (this.power == BombPower[1]){
+            this.bomb = bomb1.clone()
+        }
+        else if (this.power == BombPower[2]) {
+            // sphere = new THREE.SphereGeometry(this.radius*1.5,45,30);
+            this.bomb = bomb2.clone()
+        }
+
         // this.bomb.frustumCulled = false;
         this.uuid = generateUUID()
         bombCollections[this.uuid] = this

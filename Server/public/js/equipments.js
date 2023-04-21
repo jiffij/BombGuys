@@ -79,54 +79,26 @@ export class Equipments {
     
     applyEquip(player){
 
-        // function keyupQ(e){
-        //     if(e.key.toLocaleLowerCase() == 'q'){
-        //         player.jet = false;
-        //     }
-        // };
-
-        // function keydownQ(e){
-        //     if(e.key.toLocaleLowerCase() == 'q'){
-        //         player.jet = true;
-        //         equipmentDisplayManager.removeJet()
-        //     }
-        // }; 
-
-        function keydownF(e){
-            if(e.key.toLocaleLowerCase() == 'f'){
-                player.reverseGravity();
-            }
-        }
-
         switch (this.tool) {
             case EQUIPMENT.BOOT:
                 player.CharacterController.boost = true;
                 clearInterval(this.bootIntervalId)
                 this.bootIntervalIt = setTimeout(() => {
                     player.CharacterController.boost = false;
-                    // console.log('stop boost');
                 }, 10000);
-                // console.log('boosted');
                 break;
 
             case EQUIPMENT.JET:
                 player.jet = true;
-                // document.addEventListener('keydown', keydownQ);
-                // document.addEventListener('keyup', keyupQ);
                 clearInterval(this.jetIntervalId)
                 this.jetIntervalId = setTimeout(() => {
                     player.jet = false;
-                    // document.removeEventListener('keydown', keydownQ);
-                    // document.removeEventListener('keyup', keyupQ);
-                    // console.log('stop jet');
                 }, 10000);
-                // console.log('Jet');
                 break;
             
-            case EQUIPMENT.GLOVE:
-                document.addEventListener('keypress', keydownF);
+            case EQUIPMENT.POWER:
                 setTimeout(() => {
-                    document.removeEventListener('keypress', keydownF);
+                    player.CharacterController.power = true;
                 }, 10000);
                 break;
 

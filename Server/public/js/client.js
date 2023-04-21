@@ -5,7 +5,8 @@ import { GameMap } from './GameMap.js';
 import { Physics } from './physics.js';
 import { io } from 'https://cdn.skypack.dev/socket.io-client@4.4.1';
 import { Bomb } from './Bomb.js';
-import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
+import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
 import { BombPower, dev, serverIp } from './config.js';
 import { Equipments } from './equipments.js';
 import { EquipmentDisplayManager } from './equipmentDisplay.js';
@@ -52,6 +53,8 @@ let texture;
 export let bombMaterial
 export let rocket
 export let shoes
+export let bomb1
+export let bomb2
 
 // html components
 let startButton;
@@ -103,6 +106,23 @@ function loadSkin(url) {
       });
 }
 
+function loadBomb(url){
+    return new Promise((resolve, reject) => {
+        const loader = new GLTFLoader();
+        loader.setPath("../../models/static/")
+        loader.load(
+          url,
+          (glb) => {
+            resolve(glb.scene);
+          },
+          undefined,
+          (error) => {
+            reject(error);
+          }
+        );
+      });
+}
+
 async function loadAssets() {
     try {
       // Load animations and skins here
@@ -118,8 +138,12 @@ async function loadAssets() {
         });
         rocket = await loadSkin('rocket.fbx');
         shoes = await loadSkin('cartoonShoes.fbx');
-        rocket.scale.set(0.003,0.003,0.003)
+        bomb1 = await loadBomb('bomb1.glb')
+        bomb2 = await loadBomb('bomb2.glb')
+        rocket.scale.set(0.002,0.002,0.002)
         shoes.scale.set(0.3,0.3,0.3)
+        bomb1.scale.set(0.025,0.025,0.025)
+        bomb2.scale.set(0.005,0.005,0.005)
         animations["idle"] = fbx1
         animations["run"] = fbx2
         animations["jump"] = fbx3
@@ -205,7 +229,6 @@ function clear(){
         renderer.setAnimationLoop(null)
     }
     clearInterval(updatePlayerPosEmit)
-    socket.off("playerStates")
     socket.off("updatePlayerPos")
     socket.off("plantBomb")
 }
@@ -282,22 +305,9 @@ function keyUpEvent(event){
     }
 }
 
-function playerStatesFunction(players){
-    let keys = Object.keys(players)
-    if (keys.length == 2){
-      if (keys[0] == playerId){
-          keysPressedFromServer = players[keys[1]]
-      }
-      else {
-          keysPressedFromServer = players[keys[0]]
-      }
-    }
-}
-
 function playerJump(){
     player2.jump();
 }
-
 
 function updatePlayerPosEvent(playerPos){
     let keys = Object.keys(playerPos)
@@ -319,7 +329,7 @@ function updatePlayerPosEvent(playerPos){
 function plantBombEvent(bombInfo){
     let pos = bombInfo.pos;
     let quaternion = bombInfo.quaternion;
-    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[1]);
+    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[2]);
 }
 
 function makeEquip(equip){
@@ -342,7 +352,6 @@ function main(){
     document.addEventListener("keyup", keyUpEvent)
     
     // Listen events from server
-    socket.on('playerStates', playerStatesFunction);
     socket.on("updatePlayerPos", updatePlayerPosEvent)
     socket.on("plantBomb", plantBombEvent)
     socket.on("playerJump", playerJump)
@@ -364,8 +373,6 @@ function main(){
     
     // Pre-compile shaders for the scene
     renderer.compile(scene, camera);
-
-
     let firstRender = true;
 
     // animation
@@ -377,6 +384,7 @@ function main(){
             // let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
             // setTimeout(bomb.remove(), 1000)
             let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[1])
+            let bomb2 = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[2])
             player2.setBodyPos(player.getBodyPos())
         }
         renderer.render(scene, camera)

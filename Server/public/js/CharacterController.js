@@ -31,6 +31,10 @@ export class CharacterController {
     // alive or not
     alive = true
 
+    // tool
+    power = false
+    boost = false
+
     constructor(model,
         mixer, animationsMap,
         orbitControl, camera,
@@ -54,7 +58,6 @@ export class CharacterController {
         this.player = physicsWorld.addPlayer(model, [model.position.x, model.position.y, model.position.z], playerId, this);
         this.gameMap = gameMap;
         this.isPlayer = isPlayer;
-        this.boost = false;
         this.destination = this.model.position;
     }
 
@@ -66,7 +69,7 @@ export class CharacterController {
         if (this.throwability){
             const position = this.model.position
             const quaternion = this.model.quaternion
-            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[1])
+            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[2])
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true
@@ -78,9 +81,6 @@ export class CharacterController {
 
     jump(){
         const verticalVelocity = this.player.getVerticalVelocity();
-
-        // console.log(this.finishJump)
-        // console.log(verticalVelocity)
         const current = this.animationsMap.get(this.currentAction)
         if ( this.finishJump && Math.abs(verticalVelocity) < 0.0001 && !this.freeze){
             let toPlay;
