@@ -42,7 +42,7 @@ export class GameMap {
                     let life = this.gameMapInfo[l][i][j]["life"]
                     rowLife.push(life)
                     const geometry = new THREE.BoxGeometry( this.size, this.thickness, this.size );
-                    const material = new THREE.MeshLambertMaterial( {
+                    const material = new THREE.MeshPhongMaterial( {
                         color: color,
                         aoMapIntensity: 0.5,
                         refractionRatio: 0.5

@@ -255,6 +255,9 @@ export class CharacterController {
         this.cameraTarget.x = this.model.position.x
         this.cameraTarget.y = this.model.position.y + 0.5
         this.cameraTarget.z = this.model.position.z
+
+        this.camera.updateMatrix();
+        this.camera.updateMatrixWorld();
         if (this.isPlayer) {
             this.orbitControl.target = this.cameraTarget;
         }

@@ -143,7 +143,6 @@ export class ModelLoader {
     }
 
     jump(){
-        console.log(this.characterController)
         this.characterController.jump()
     }
 }

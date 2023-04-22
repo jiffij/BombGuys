@@ -329,27 +329,21 @@ function playerJump(){
 function updatePlayerPosEvent(playerPos){
     let keys = Object.keys(playerPos)
     let pos;
+    let actualPos = player2.getBodyPos()
     if (keys.length == 2){
         if (keys[0] == playerId){
             pos = playerPos[keys[1]]
-            if (posSet){
-                player2.setDestination(pos)
-            }
-            else {
-                player2.setBodyPos(pos)
-                posSet = true
-            }
         }
         else {
             pos = playerPos[keys[0]]
-            if (posSet){
-                player2.setDestination(pos)
-            }
-            else {
-                player2.setBodyPos(pos)
-                posSet = true
-            }            
         }
+        if (posSet && (Math.abs(pos.y-actualPos.y)<0.4)){
+            player2.setDestination(pos)
+        }
+        else {
+            player2.setBodyPos(pos)
+            posSet = true
+        }    
     }
 }
 
@@ -393,7 +387,29 @@ function main(){
     // add light
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
-    
+
+    // Add DirectionalLight
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // Set color and intensity
+    directionalLight.position.set(1, 1, 1); // Set light position (x, y, z)
+    scene.add(directionalLight);
+
+    // Add PointLight
+    const pointLight = new THREE.PointLight(0xffffff, 0.8, 100); // Set color, intensity, and distance
+
+    const ambientLightIntensity = 0.6;
+    const directionalLightIntensity = 0.3;
+    const pointLightIntensity = 0.4;
+
+    ambientLight.intensity = ambientLightIntensity;
+    directionalLight.intensity = directionalLightIntensity;
+    pointLight.intensity = pointLightIntensity;
+
+    pointLight.position.set(0, 10, 0);
+    // Set the PointLight position relative to the camera
+
+    // Add the PointLight to the scene
+    scene.add(pointLight);
+
     // test area
     // const explosionPosition = new THREE.Vector3(0, 0, 0);
     // let explosion = createExplosion(explosionPosition);
@@ -408,6 +424,10 @@ function main(){
     let clock = new THREE.Clock();
     
     function animate() {
+
+        pointLight.position.copy(camera.position);
+        pointLight.position.y += 20; // Adjust the Y-offset as needed
+
         if (firstRender){
             // let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
             // setTimeout(bomb.remove(), 1000)
