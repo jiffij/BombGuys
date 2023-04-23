@@ -79,7 +79,7 @@ export class EquipmentDisplayManager{
             this.powerTag = undefined
             this.updateOtherTag()
         }
-        this.remainingTime["boot"] -= 1;
+        this.remainingTime["power"] -= 1;
         this.updatePowerTag()  
     }
     createJetTag(){

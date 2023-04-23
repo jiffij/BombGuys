@@ -114,7 +114,7 @@ export class CharacterController {
 
         this.mixer.update(delta)
 
-        if ((this.currentAction != "idle") && !this.freeze){
+        if ((play != "idle") && !this.freeze){
             const direction = new THREE.Vector3();
             const rotateAngle = new THREE.Vector3(0, 1, 0);
             const rotateQuarternion = new THREE.Quaternion();
@@ -134,11 +134,14 @@ export class CharacterController {
             this.walkDirection.y = 0;
         
             // Set the appropriate velocity based on the current action
-            const velocity = this.currentAction === 'run' ? this.runVelocity : this.walkVelocity;
+            let velocity = this.currentAction === 'run' ? this.runVelocity : this.walkVelocity;
         
             // Add boost speed if the boost is active
             if (this.boost) {
                 velocity += this.boostSpeed;
+            }
+            if (this.isJumping){
+                velocity += velocity / 2
             }
         
             // Calculate horizontal movement
@@ -209,6 +212,9 @@ export class CharacterController {
             var velocity = this.currentAction == 'run' ? this.runVelocity : this.walkVelocity
             if(this.boost){
                 velocity += boostSpeed;
+            }
+            if (this.isJumping){
+                velocity += velocity / 2
             }
             let verticalVelocity = this.player.getVerticalVelocity()
             if (verticalVelocity < 0.000000001){

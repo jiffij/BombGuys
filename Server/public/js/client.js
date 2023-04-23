@@ -47,14 +47,23 @@ let updatePlayerPosEmit;
 const animations = {}
 let skin1;
 let skin2;
-// Load the bomb texture
-let texture;
+let fbx1
+let fbx2
+let fbx3
+
+// Load floor texture
+export let stoneTexture;
+export let woodTexture;
+export let metalTexture;
+
 // Create a material for the bomb using the texture
 export let bombMaterial
-export let rocket
-export let shoes
 export let bomb1
 export let bomb2
+
+// equipment
+export let rocket
+export let shoes
 export let star
 
 // html components
@@ -128,34 +137,49 @@ function loadGLB(url){
 
 async function loadAssets() {
     try {
-      // Load animations and skins here
-        const fbx1 = await loadAnimation('idle.fbx');
-        const fbx2 = await loadAnimation('run.fbx');
-        const fbx3 = await loadAnimation('jump.fbx');
-        skin1 = await loadFBX('mouse.fbx');
-        skin2 = await loadFBX('mouse.fbx');
+        // Load animations and skins here
         const textureLoader = new THREE.TextureLoader();
-        texture = await textureLoader.load('../models/textures/bomb.jpg');
-        bombMaterial = new THREE.MeshStandardMaterial({
-            map: texture,
-        });
-        rocket = await loadFBX('rocket.fbx');
-        shoes = await loadFBX('cartoonShoes.fbx');
-        bomb1 = await loadGLB('bomb1.glb')
-        bomb2 = await loadGLB('bomb2.glb')
-        star = await loadGLB('star.glb')
-        rocket.scale.set(0.002,0.002,0.002)
-        shoes.scale.set(0.3,0.3,0.3)
-        bomb1.scale.set(0.025,0.025,0.025)
-        bomb2.scale.set(0.005,0.005,0.005)
-        star.scale.set(0.3,0.3,0.3)
-        animations["idle"] = fbx1
-        animations["run"] = fbx2
-        animations["jump"] = fbx3
-      // Process and store the loaded animations and skins
-    } catch (error) {
-      console.error('Error loading assets:', error);
-    }
+        [
+            fbx1,
+            fbx2,
+            fbx3,
+            skin1,
+            skin2,
+            stoneTexture,
+            woodTexture,
+            metalTexture,
+            rocket,
+            shoes,
+            bomb1,
+            bomb2,
+            star,
+        ] = await Promise.all([
+            loadAnimation('idle.fbx'),
+            loadAnimation('run.fbx'),
+            loadAnimation('jump.fbx'),
+            loadFBX('mouse.fbx'),
+            loadFBX('mouse.fbx'),
+            textureLoader.load('../models/textures/stone.jpg'),
+            textureLoader.load('../models/textures/wood.jpg'),
+            textureLoader.load('../models/textures/metal.jpg'),
+            loadFBX('rocket.fbx'),
+            loadFBX('cartoonShoes.fbx'),
+            loadGLB('bomb1.glb'),
+            loadGLB('bomb2.glb'),
+            loadGLB('star.glb'),
+        ]);
+            rocket.scale.set(0.002,0.002,0.002)
+            shoes.scale.set(0.3,0.3,0.3)
+            bomb1.scale.set(0.025,0.025,0.025)
+            bomb2.scale.set(0.005,0.005,0.005)
+            star.scale.set(0.3,0.3,0.3)
+            animations["idle"] = fbx1
+            animations["run"] = fbx2
+            animations["jump"] = fbx3
+        // Process and store the loaded animations and skins
+        } catch (error) {
+        console.error('Error loading assets:', error);
+        }
 }
 
 await loadAssets()
@@ -426,7 +450,9 @@ function main(){
     function animate() {
 
         pointLight.position.copy(camera.position);
-        pointLight.position.y += 20; // Adjust the Y-offset as needed
+        pointLight.position.y += 10; // Adjust the Y-offset as needed
+        pointLight.position.z += 5; // Adjust the Y-offset as needed
+        pointLight.position.x += 5; // Adjust the Y-offset as needed
 
         if (firstRender){
             // let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)

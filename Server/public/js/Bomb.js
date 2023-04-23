@@ -42,6 +42,7 @@ export class Bomb {
 
     }
     init(){
+        console.log(this.power)
         if (this.power == BombPower[1]){
             this.bomb = bomb1.clone()
         }

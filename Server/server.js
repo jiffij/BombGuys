@@ -40,7 +40,7 @@ let bombs = []
 
 
 // update frequency
-const updatePosFreq = 100;
+const updatePosFreq = 30;
 const updateKeyboardFreq = 100;
 const randomBombFreq = 10000;
 

@@ -3,7 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.mod
 
 import { bombConfig, floorConfig, life_1, life_2 } from "./config.js";
 import {Equipments} from "./equipments.js";
-import { player, player2 } from './client.js';
+import { metalTexture, player, player2, stoneTexture, woodTexture } from './client.js';
 
 export class GameMap {
     floorPieces = [];
@@ -42,11 +42,19 @@ export class GameMap {
                     let life = this.gameMapInfo[l][i][j]["life"]
                     rowLife.push(life)
                     const geometry = new THREE.BoxGeometry( this.size, this.thickness, this.size );
-                    const material = new THREE.MeshPhongMaterial( {
-                        color: color,
-                        aoMapIntensity: 0.5,
-                        refractionRatio: 0.5
+                    let material = new THREE.MeshPhongMaterial( {
+                        map: metalTexture
                     } );
+                    if (life == 1){
+                        material = new THREE.MeshPhongMaterial({
+                            map: woodTexture
+                          });
+                    }
+                    else if (life == 2){
+                        material = new THREE.MeshPhongMaterial({
+                            map: stoneTexture
+                          });
+                    }
                     const cube = new THREE.Mesh( geometry, material );
                     const coord = this.getFloorCoordFromCenter([posX, posY, posZ]);
                     rowPos.push(coord);
@@ -117,12 +125,13 @@ export class GameMap {
             else {
                 const piece = this.floorPieces[floor_l][floor_i][floor_j]
                 this.floorPiecesLife[floor_l][floor_i][floor_j] -= 1;
-                console.log("changing color")
                 if (this.floorPiecesLife[floor_l][floor_i][floor_j] == 1){
-                    piece.material.color.set(life_1)
+                    piece.material.map = woodTexture
+                    piece.material.needsUpdate = true
                 }
                 else {
-                    piece.material.color.set(life_2)
+                    piece.material.map = stoneTexture
+                    piece.material.needsUpdate = true
                 }
             }
         }
