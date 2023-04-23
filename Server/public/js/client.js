@@ -361,7 +361,7 @@ function updatePlayerPosEvent(playerPos){
         else {
             pos = playerPos[keys[0]]
         }
-        if (posSet && (Math.abs(pos.y-actualPos.y)<0.4)){
+        if (posSet && (Math.abs(pos.y-actualPos.y)<2)){
             player2.setDestination(pos)
         }
         else {

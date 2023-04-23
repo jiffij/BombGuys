@@ -171,8 +171,8 @@ export class GameMap {
                     var p = possible_positions[randomIndex];
                     var mesh = this.floorPieces[p.l][p.i][p.j];
                     console.log(mesh.position, mesh.quaternion);
-                    let toolType = 2
-                    // let toolType = Math.floor(Math.random()*3)
+                    // let toolType = 2
+                    let toolType = Math.floor(Math.random()*3)
                     const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, toolType, false);
                 }
             }
