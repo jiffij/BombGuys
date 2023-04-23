@@ -5,7 +5,7 @@ export const floorConfig = {
     thickness: 0.1,
     size: 1.5,
     layers: 4,
-    height: 4,
+    height: 4.5,
     mapSize: 15,
 }
 
