@@ -135,6 +135,7 @@ export class Physics{
         this.equipments = {};
     }
 
+
     addPlayer(fbx, position, playerId, CharacterController){
         const player = new Player(fbx, position, playerId, CharacterController)
         this.players.push(player);

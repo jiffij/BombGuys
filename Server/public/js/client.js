@@ -11,6 +11,7 @@ import { BombPower, dev, serverIp } from './config.js';
 import { Equipments } from './equipments.js';
 import { EquipmentDisplayManager } from './equipmentDisplay.js';
 import { SPACE } from './utils.js';
+import { stateMachine } from './StateMachine.js';
 
 
 // global variables
@@ -39,6 +40,7 @@ let gameMap;
 // players
 export let player
 export let player2
+let machine;
 
 // setInterval function id
 let updatePlayerPosEmit;
@@ -319,6 +321,7 @@ function loadModel(playerInitialPos){
     player2.load()
     player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, player1pos, 'myself')
     player.load()
+    machine = new stateMachine(phy, scene)
 }
 
 const keysPressed = {}
@@ -465,6 +468,7 @@ function main(){
         renderer.render(scene, camera)
 
         phy.update();
+        machine.update();
         let updateDelta = clock.getDelta();
         if (player.characterController){
             player.update(updateDelta, keysPressed)
