@@ -73,7 +73,7 @@ export class CharacterController {
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true
-            }.bind(this), 500)
+            }.bind(this), 1500)
             return true;
         }
         return false;
