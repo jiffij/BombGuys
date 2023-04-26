@@ -141,35 +141,35 @@ async function loadAssets() {
     try {
         // Load animations and skins here
         const textureLoader = new THREE.TextureLoader();
-        [
-            fbx1,
-            fbx2,
-            fbx3,
-            skin1,
-            skin2,
-            stoneTexture,
-            woodTexture,
-            metalTexture,
-            rocket,
-            shoes,
-            bomb1,
-            bomb2,
-            star,
-        ] = await Promise.all([
-            loadAnimation('idle.fbx'),
-            loadAnimation('run.fbx'),
-            loadAnimation('jump.fbx'),
-            loadFBX('mouse.fbx'),
-            loadFBX('mouse.fbx'),
-            textureLoader.load('../models/textures/stone.jpg'),
-            textureLoader.load('../models/textures/wood.jpg'),
-            textureLoader.load('../models/textures/metal.jpg'),
-            loadFBX('rocket.fbx'),
-            loadFBX('cartoonShoes.fbx'),
-            loadGLB('bomb1.glb'),
-            loadGLB('bomb2.glb'),
-            loadGLB('star.glb'),
-        ]);
+        
+            fbx1 = await loadAnimation('idle.fbx'),
+            fbx2 = await loadAnimation('run.fbx'),
+            fbx3 = await loadAnimation('jump.fbx'),
+            skin1 = await loadFBX('mouse.fbx'),
+            skin2 = await loadFBX('mouse.fbx'),
+            stoneTexture = await textureLoader.load('../models/textures/stone.jpg'),
+            woodTexture = await textureLoader.load('../models/textures/wood.jpg'),
+            metalTexture = await textureLoader.load('../models/textures/metal.jpg'),
+            rocket = await loadFBX('rocket.fbx'),
+            shoes = await loadFBX('cartoonShoes.fbx'),
+            bomb1 = await loadGLB('bomb1.glb'),
+            bomb2 = await loadGLB('bomb2.glb'),
+            star = loadGLB('star.glb'),
+        //  = await Promise.all([
+        //     ,
+        //     ,
+        //     ,
+        //     ,
+        //     loadFBX('mouse.fbx'),
+        //     ,
+        //     textureLoader.load('../models/textures/wood.jpg'),
+        //     textureLoader.load('../models/textures/metal.jpg'),
+        //     loadFBX('rocket.fbx'),
+        //     loadFBX('cartoonShoes.fbx'),
+        //     loadGLB('bomb1.glb'),
+        //     loadGLB('bomb2.glb'),
+        //     loadGLB('star.glb'),
+        // ]);
             rocket.scale.set(0.002,0.002,0.002)
             shoes.scale.set(0.3,0.3,0.3)
             bomb1.scale.set(0.025,0.025,0.025)
