@@ -50,6 +50,7 @@ export class ModelLoader {
             this.characterController.isJumping = false
         
         } )
+        console.log(this.scale)
         this.model.scale.set(this.scale[0],this.scale[1],this.scale[2])
         this.model.position.set(this.pos[0], this.pos[1], this.pos[2])
         this.loadAnimation(this.animations)     
