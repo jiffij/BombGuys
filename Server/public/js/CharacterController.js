@@ -2,6 +2,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.mod
 import { Bomb } from './Bomb.js';
 import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js';
 import { BombPower, boostSpeed } from './config.js';
+import { socket } from './client.js';
 
 export class CharacterController {
     // state
@@ -83,6 +84,9 @@ export class CharacterController {
         const verticalVelocity = this.player.getVerticalVelocity();
         const current = this.animationsMap.get(this.currentAction)
         if ( this.finishJump && Math.abs(verticalVelocity) < 0.0001 && !this.freeze){
+            if (this.isPlayer){
+                socket.emit("playerJump")
+            }
             let toPlay;
             toPlay = this.animationsMap.get("jump")
             current.fadeOut(this.fadeDuration)

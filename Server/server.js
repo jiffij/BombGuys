@@ -173,9 +173,13 @@ function notifyPlayerNum(uuid) {
 
 function notifyPlayerJump(uuid, id){
     const clientIds = waitingRoom[uuid]
+    const pos = {}
+        clientIds.forEach((clientId) => {
+            pos[clientId] = playersPos[clientId]
+        });
     clientIds.forEach((clientId) => {
         if (id != clientId){
-            io.to(clientId).emit("playerJump");
+            io.to(clientId).emit("playerJump", pos);
         }
     });
 }

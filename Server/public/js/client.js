@@ -331,7 +331,6 @@ function keyDownEvent(event){
     keysPressed[event.key.toLowerCase()] = true
     if (event.key == SPACE){
         player.jump();
-        socket.emit("playerJump")
     }
 }
 
@@ -349,8 +348,22 @@ function keyUpEvent(event){
     }
 }
 
-function playerJump(){
-    player2.jump();
+function playerJump(playerPos){
+    let keys = Object.keys(playerPos)
+    let pos;
+    if (keys.length == 2){
+        if (keys[0] == playerId){
+            pos = playerPos[keys[1]]
+        }
+        else {
+            pos = playerPos[keys[0]]
+        }
+
+        if (!player2.isJumping()){
+            player2.setBodyPos(pos)    
+            player2.jump();     
+        }
+    }
 }
 
 function updatePlayerPosEvent(playerPos){
@@ -408,7 +421,7 @@ function main(){
     
     updatePlayerPosEmit = setInterval(() => {
         socket.emit('updatePlayerPos', player.getPos());
-    }, 30);
+    }, 50);
     
     
     // add light
