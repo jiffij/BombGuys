@@ -139,6 +139,10 @@ export class EquipmentDisplayManager{
             let index = this.lineOrder.indexOf("boot");
             this.bootTag.style["margin-top"] = `${index * 25+20}px`
         }
+        if (this.remainingTime["power"] > 0){
+            let index = this.lineOrder.indexOf("power");
+            this.powerTag.style["margin-top"] = `${index * 25+20}px`
+        }
     }
     checkBuffNum(){
         let keys = Object.keys(this.remainingTime)
