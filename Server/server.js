@@ -5,7 +5,7 @@ import path from 'path';
 import { bodySphereRadius, life_1, life_2, life_3, playerNum } from './public/js/config.js';
 import { floorConfig } from './public/js/config.js';
 
-const publicPath = path.join(process.cwd(), './Server/public');
+const publicPath = path.join(process.cwd(), './public');
 const port = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
@@ -31,6 +31,7 @@ function generateUUID() {
 // A basic example of storing player states on the server
 const players = {};
 const playersPos = {};
+const MachinePos = {};
 const cameras = {};
 const waitingRoom = {};
 const playerWaitingRoom = {};
@@ -130,6 +131,10 @@ io.on('connection', (socket) => {
         playersPos[socket.id] = pos
     })
 
+    socket.on("updateMachinePos", (pos) => {
+        MachinePos[socket.id] = pos
+    })
+
     socket.on("plantBomb", (bombInfo) => {
         let uuid = playerWaitingRoom[socket.id];
         notifyPlayerBomb(uuid, bombInfo, socket.id);
@@ -185,11 +190,14 @@ function notifyPlayerPos(){
     for (let uuid of uuids){
         const clientIds = waitingRoom[uuid]
         const pos = {}
+        const Mpos = {}
         clientIds.forEach((clientId) => {
             pos[clientId] = playersPos[clientId]
+            Mpos[clientId] = MachinePos[clientId]
         });
         clientIds.forEach((clientId) => {
             io.to(clientId).emit("updatePlayerPos", pos);
+            io.to(clientId).emit("updateMachinePos", Mpos);
         });
     }
 

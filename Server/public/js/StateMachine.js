@@ -117,6 +117,10 @@ export class stateMachine{
         console.log('finish statemachine init')
     }
 
+    getPos(){
+      return this.body.position;
+    }
+
     rotate(quarternion){
         this.body.quaternion.copy(quarternion)
     }

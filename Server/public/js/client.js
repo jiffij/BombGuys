@@ -41,6 +41,7 @@ let gameMap;
 export let player
 export let player2
 let machine;
+let machine2
 
 // setInterval function id
 let updatePlayerPosEmit;
@@ -322,6 +323,11 @@ function loadModel(playerInitialPos){
     player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, player1pos, 'myself')
     player.load()
     machine = new stateMachine(phy, scene)
+
+    const creeperGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const creeperMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    machine2 = new THREE.Mesh(creeperGeometry, creeperMaterial);
+    scene.add(machine2);
 }
 
 const keysPressed = {}
@@ -351,6 +357,22 @@ function keyUpEvent(event){
 
 function playerJump(){
     player2.jump();
+}
+
+function updateMachinePosEvent(MachinePos){
+    let keys = Object.keys(MachinePos)
+    let pos;
+    if(keys.length == 2){
+        if (keys[0] == playerId){
+            pos = MachinePos[keys[1]]
+        }
+        else {
+            pos = MachinePos[keys[0]]
+        }
+        machine2.position.x = pos.x;
+        machine2.position.y = pos.y;
+        machine2.position.z = pos.z;
+    }
 }
 
 function updatePlayerPosEvent(playerPos){
@@ -402,12 +424,14 @@ function main(){
     
     // Listen events from server
     socket.on("updatePlayerPos", updatePlayerPosEvent)
+    socket.on("updateMachinePos", updateMachinePosEvent)
     socket.on("plantBomb", plantBombEvent)
     socket.on("playerJump", playerJump)
     socket.on("genEquip", makeEquip);
     
     updatePlayerPosEmit = setInterval(() => {
         socket.emit('updatePlayerPos', player.getPos());
+        socket.emit('updateMachinePos', machine.getPos())
     }, 30);
     
     
