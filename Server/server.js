@@ -5,7 +5,7 @@ import path from 'path';
 import { bodySphereRadius, life_1, life_2, life_3, playerNum } from './public/js/config.js';
 import { floorConfig } from './public/js/config.js';
 
-const publicPath = path.join(process.cwd(), './public');
+const publicPath = path.join(process.cwd(), './Server/public');
 const port = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
@@ -178,9 +178,13 @@ function notifyPlayerNum(uuid) {
 
 function notifyPlayerJump(uuid, id){
     const clientIds = waitingRoom[uuid]
+    const pos = {}
+        clientIds.forEach((clientId) => {
+            pos[clientId] = playersPos[clientId]
+        });
     clientIds.forEach((clientId) => {
         if (id != clientId){
-            io.to(clientId).emit("playerJump");
+            io.to(clientId).emit("playerJump", pos);
         }
     });
 }

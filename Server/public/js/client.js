@@ -45,6 +45,7 @@ let machine2
 
 // setInterval function id
 let updatePlayerPosEmit;
+let updateMachinePosEmit;
 
 // load skin and animation
 const animations = {}
@@ -261,6 +262,7 @@ function clear(){
         renderer.setAnimationLoop(null)
     }
     clearInterval(updatePlayerPosEmit)
+    clearInterval(updateMachinePosEmit)
     socket.off("updatePlayerPos")
     socket.off("plantBomb")
 }
@@ -317,7 +319,6 @@ function loadModel(playerInitialPos){
             player2pos = playerInitialPos[key];
         }
     }
-    console.log(playerInitialPos)
     player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, player2pos, 'enemy')
     player2.load()
     player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, player1pos, 'myself')
@@ -337,7 +338,6 @@ function keyDownEvent(event){
     keysPressed[event.key.toLowerCase()] = true
     if (event.key == SPACE){
         player.jump();
-        socket.emit("playerJump")
     }
 }
 
@@ -355,8 +355,20 @@ function keyUpEvent(event){
     }
 }
 
-function playerJump(){
-    player2.jump();
+function playerJump(playerPos){
+    let keys = Object.keys(playerPos)
+    let pos;
+    if (keys.length == 2){
+        if (keys[0] == playerId){
+            pos = playerPos[keys[1]]
+        }
+        else {
+            pos = playerPos[keys[0]]
+        }
+        player2.setBodyPos(pos)  
+        player2.setDestination(pos)  
+        player2.jump();     
+    }
 }
 
 function updateMachinePosEvent(MachinePos){
@@ -390,6 +402,7 @@ function updatePlayerPosEvent(playerPos){
             player2.setDestination(pos)
         }
         else {
+            player2.setDestination(pos)
             player2.setBodyPos(pos)
             posSet = true
         }    
@@ -431,6 +444,9 @@ function main(){
     
     updatePlayerPosEmit = setInterval(() => {
         socket.emit('updatePlayerPos', player.getPos());
+    }, 50);
+
+    updateMachinePosEmit = setInterval(() => {
         socket.emit('updateMachinePos', machine.getPos())
     }, 30);
     

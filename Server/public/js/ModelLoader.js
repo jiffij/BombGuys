@@ -146,4 +146,8 @@ export class ModelLoader {
     jump(){
         this.characterController.jump()
     }
+
+    isJumping(){
+        return this.characterController.isJumping
+    }
 }

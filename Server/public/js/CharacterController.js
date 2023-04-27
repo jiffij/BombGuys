@@ -2,6 +2,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.mod
 import { Bomb } from './Bomb.js';
 import { A, D, DIRECTIONS, S, SPACE, W } from './utils.js';
 import { BombPower, boostSpeed } from './config.js';
+import { socket } from './client.js';
 
 export class CharacterController {
     // state
@@ -82,7 +83,10 @@ export class CharacterController {
     jump(){
         const verticalVelocity = this.player.getVerticalVelocity();
         const current = this.animationsMap.get(this.currentAction)
-        if ( this.finishJump && Math.abs(verticalVelocity) < 0.0001 && !this.freeze){
+        if ( (this.finishJump && Math.abs(verticalVelocity) < 0.0001 && !this.freeze) || !this.isPlayer ){
+            if (this.isPlayer){
+                socket.emit("playerJump")
+            }
             let toPlay;
             toPlay = this.animationsMap.get("jump")
             current.fadeOut(this.fadeDuration)
@@ -95,7 +99,7 @@ export class CharacterController {
         }
     }
     
-    walkTowards(delta, keysPressed) {        
+    walkTowards(delta, keysPressed) {    
         var play = 'idle';
         if ((Math.sqrt((this.model.position.x-this.destination.x)*(this.model.position.x-this.destination.x))>0.1 || Math.sqrt((this.model.position.z-this.destination.z)*(this.model.position.z-this.destination.z))>0.1)) {
             play = 'run'
@@ -114,7 +118,7 @@ export class CharacterController {
 
         this.mixer.update(delta)
 
-        if ((play != "idle") && !this.freeze){
+        if ((play != "idle")){
             const direction = new THREE.Vector3();
             const rotateAngle = new THREE.Vector3(0, 1, 0);
             const rotateQuarternion = new THREE.Quaternion();
@@ -134,14 +138,14 @@ export class CharacterController {
             this.walkDirection.y = 0;
         
             // Set the appropriate velocity based on the current action
-            let velocity = this.currentAction === 'run' ? this.runVelocity : this.walkVelocity;
+            let velocity = this.runVelocity;
         
             // Add boost speed if the boost is active
             if (this.boost) {
-                velocity += this.boostSpeed;
+                velocity += boostSpeed;
             }
             if (this.isJumping){
-                velocity += velocity / 2
+                velocity = velocity+1
             }
         
             // Calculate horizontal movement
@@ -149,8 +153,13 @@ export class CharacterController {
             const moveZ = -this.walkDirection.z * velocity * delta;
         
             // Update vertical velocity based on the player's vertical velocity
-            const verticalVelocity = this.player.getVerticalVelocity();
-            const moveY = verticalVelocity < 0.000000001 ? 0 : verticalVelocity * delta;
+            let verticalVelocity = this.player.getVerticalVelocity()
+            if (verticalVelocity < 0.000000001){
+                verticalVelocity = 0
+            }
+            if (verticalVelocity !== 0){
+                console.log(verticalVelocity)    
+            }
         
             // Move the character using the calculated movement vectors
             this.player.move(moveX, moveZ);
@@ -209,16 +218,19 @@ export class CharacterController {
             
 
             // run/walk velocity
-            var velocity = this.currentAction == 'run' ? this.runVelocity : this.walkVelocity
+            let velocity = this.runVelocity;
             if(this.boost){
                 velocity += boostSpeed;
             }
             if (this.isJumping){
-                velocity += velocity / 2
+                velocity = velocity+1
             }
             let verticalVelocity = this.player.getVerticalVelocity()
             if (verticalVelocity < 0.000000001){
                 verticalVelocity = 0
+            }
+            if (verticalVelocity !== 0){
+                console.log(verticalVelocity)    
             }
 
             // move model & camera
