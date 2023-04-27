@@ -41,9 +41,11 @@ let gameMap;
 export let player
 export let player2
 let machine;
+let machine2
 
 // setInterval function id
 let updatePlayerPosEmit;
+let updateMachinePosEmit;
 
 // load skin and animation
 const animations = {}
@@ -260,6 +262,7 @@ function clear(){
         renderer.setAnimationLoop(null)
     }
     clearInterval(updatePlayerPosEmit)
+    clearInterval(updateMachinePosEmit)
     socket.off("updatePlayerPos")
     socket.off("plantBomb")
 }
@@ -316,12 +319,16 @@ function loadModel(playerInitialPos){
             player2pos = playerInitialPos[key];
         }
     }
-    console.log(playerInitialPos)
     player2 = new ModelLoader(scene, skin2, animations, orbit, camera2, phy, gameMap, false, player2pos, 'enemy')
     player2.load()
     player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, player1pos, 'myself')
     player.load()
     machine = new stateMachine(phy, scene)
+
+    const creeperGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const creeperMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    machine2 = new THREE.Mesh(creeperGeometry, creeperMaterial);
+    scene.add(machine2);
 }
 
 const keysPressed = {}
@@ -358,11 +365,25 @@ function playerJump(playerPos){
         else {
             pos = playerPos[keys[0]]
         }
+        player2.setBodyPos(pos)  
+        player2.setDestination(pos)  
+        player2.jump();     
+    }
+}
 
-        if (!player2.isJumping()){
-            player2.setBodyPos(pos)    
-            player2.jump();     
+function updateMachinePosEvent(MachinePos){
+    let keys = Object.keys(MachinePos)
+    let pos;
+    if(keys.length == 2){
+        if (keys[0] == playerId){
+            pos = MachinePos[keys[1]]
         }
+        else {
+            pos = MachinePos[keys[0]]
+        }
+        machine2.position.x = pos.x;
+        machine2.position.y = pos.y;
+        machine2.position.z = pos.z;
     }
 }
 
@@ -381,6 +402,7 @@ function updatePlayerPosEvent(playerPos){
             player2.setDestination(pos)
         }
         else {
+            player2.setDestination(pos)
             player2.setBodyPos(pos)
             posSet = true
         }    
@@ -415,6 +437,7 @@ function main(){
     
     // Listen events from server
     socket.on("updatePlayerPos", updatePlayerPosEvent)
+    socket.on("updateMachinePos", updateMachinePosEvent)
     socket.on("plantBomb", plantBombEvent)
     socket.on("playerJump", playerJump)
     socket.on("genEquip", makeEquip);
@@ -422,6 +445,10 @@ function main(){
     updatePlayerPosEmit = setInterval(() => {
         socket.emit('updatePlayerPos', player.getPos());
     }, 50);
+
+    updateMachinePosEmit = setInterval(() => {
+        socket.emit('updateMachinePos', machine.getPos())
+    }, 30);
     
     
     // add light

@@ -83,6 +83,7 @@ export class Player{
         if(this.jet){
             this.body.applyImpulse(this.jetimpulse, this.body.position);
         }else{
+            console.log("jump!")
             this.body.applyImpulse(this.impulse, this.body.position);
         }
         

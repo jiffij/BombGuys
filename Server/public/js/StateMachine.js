@@ -101,20 +101,24 @@ export class stateMachine{
             if(e.body.mass == 5){
                 this.currentState = "chase";
                 let id = e.body.userData.id;
-                console.log(id);
+                // console.log(id);
                 var target = this.phy.players.find(function(obj){
                     return obj.playerId === id;
                 });
                 // var target = this.phy.findPlayer(id);
-                console.log("chasing");
+                // console.log("chasing");
                 // this.destination = target.body.position;
                 this.currentTarget = target;
-                console.log(this.destination); 
+                // console.log(this.destination); 
                 
                 // this.destination = e.contact.bi.position.clone();
             }
         }.bind(this))
         console.log('finish statemachine init')
+    }
+
+    getPos(){
+      return this.body.position;
     }
 
     rotate(quarternion){
@@ -167,7 +171,7 @@ export class stateMachine{
         0,
         normalizeZ* force,// this.maxForce,
       );
-      console.log(forceVector);
+      // console.log(forceVector);
       // console.log(direction.x, direction.z);
       // this.move(direction.x,direction.z);
       
@@ -213,7 +217,7 @@ export class stateMachine{
         0,
         zMin + Math.random() * (zMax - zMin)
       );
-      console.log('walk');
+      // console.log('walk');
       this.moveTowardDestination(dest, isjumping);
     }
   
@@ -225,7 +229,7 @@ export class stateMachine{
           case 'standing':
             // Player is standing still, do nothing
             // this.body.velocity.set(new CANNON.Vec3(0,0,0));
-            console.log('standing');
+            // console.log('standing');
             break;
           case 'jump':
             // Player is jumping, apply an upwards force
@@ -235,12 +239,12 @@ export class stateMachine{
             this.body.applyImpulse(new CANNON.Vec3(0, 5, 0), this.body.position);
             // setTimeout(() => {
             // }, 200);
-            console.log('jump');
+            // console.log('jump');
             break;
           case 'bomb':
             // Player is falling, apply a downwards force
             // player.applyForce(new CANNON.Vec3(0, -10, 0), player.position);
-            console.log("bomb");
+            // console.log("bomb");
             break;
           case 'walk':
             // Player is walking, apply a forward force
@@ -250,7 +254,7 @@ export class stateMachine{
             // player.applyForce(new CANNON.Vec3(10, 0, 0), player.position);
             break;
           case 'chase':
-            console.log('chase');
+            // console.log('chase');
             this.destination = this.currentTarget.body.position;
             this.moveTowardDestination(this.destination, false);
             break;
