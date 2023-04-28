@@ -259,7 +259,13 @@ export class stateMachine{
             this.moveTowardDestination(this.destination, false);
             break;
           case 'fall':
-            
+            this.body.velocity.x = 0;
+            this.body.velocity.y = 0;
+            this.body.velocity.z = 0;
+            this.body.position.x = 0;
+            this.body.position.y = this.currentTarget.body.position.y + 0.5;
+            this.body.position.z = 0;
+            this.body.velocity.set(0,0,0);
             break;
         }
         this.transition();
@@ -267,6 +273,12 @@ export class stateMachine{
           let currentPosition = this.body.position;
           let distanceToDestination = this.currentTarget.body.position.distanceTo(currentPosition);
           this.currentState = distanceToDestination > 6 ? 'standing' : 'chase';
+        }
+        if(this.body.position.y < -13.5){
+          this.currentState = 'fall';
+        }
+        if(Math.abs(this.body.position.y - this.currentTarget.body.position.y) > 4.25 ){
+          this.currentState = 'fall';
         }
       }
       // Update the Creeper mesh position and rotation to match the sphere body
