@@ -74,6 +74,7 @@ export let star
 let startButton;
 let centeredText;
 let modal;
+let reverseTag
 
 // in game
 let inGame = false;
@@ -245,8 +246,8 @@ function initialize(){
     orbit.minDistance = 4
     orbit.maxDistance = 4
     // // Disable rotation in the z direction
-    orbit.minPolarAngle = Math.PI / 6; // Set minimum vertical rotation to 90 degrees (pointing upwards)
-    orbit.maxPolarAngle = Math.PI / 2; // Set maximum vertical rotation to 90 degrees (pointing downwards)
+    orbit.minPolarAngle = Math.PI / 8; // Set minimum vertical rotation to 90 degrees (pointing upwards)
+    orbit.maxPolarAngle = Math.PI / 9*5; // Set maximum vertical rotation to 90 degrees (pointing downwards)
     orbit.update()
 
     // physics
@@ -277,7 +278,7 @@ function enterWaitRoom(){
         socket = io(`http://localhost:3000`);
     }
     else {
-        socket = io(`http://64.226.64.79`);
+        socket = io(`http://${serverIp}`);
     }
 
     // send request to the server to create a room or to join a room
@@ -334,21 +335,17 @@ function loadModel(playerInitialPos){
 const keysPressed = {}
 
 function keyDownEvent(event){
-    // socket.emit("playerMovementKeyDown", event.key)
     keysPressed[event.key.toLowerCase()] = true
-    if (event.key == SPACE){
-        player.jump();
-    }
 }
 
 function keyUpEvent(event){
-    // socket.emit("playerMovementKeyUp", event.key)
-    if (event.key == "e"){
-        let throwable = false;
-        throwable = player.plantBomb()
-        if (throwable){
-            socket.emit("plantBomb", {pos:player.getPos(),quaternion:player.getQuaternion(),power:player.getPower()})
-        }
+    if (event.key.toLowerCase() == "e"){
+        player.plantBomb()
+    }
+    else if (event.key.toLowerCase() == "shift"){
+        player.characterController.switchReverseToggle()
+        let text = player.getUseReverse() ? "off" : "on"
+        reverseTag.textContent = `press "Shift" to turn ${text} bomb reverse gravity`
     }
     else {
         keysPressed[event.key.toLowerCase()] = false
@@ -365,8 +362,6 @@ function playerJump(playerPos){
         else {
             pos = playerPos[keys[0]]
         }
-        player2.setBodyPos(pos)  
-        player2.setDestination(pos)  
         player2.jump();     
     }
 }
@@ -413,7 +408,8 @@ function plantBombEvent(bombInfo){
     let pos = bombInfo.pos;
     let quaternion = bombInfo.quaternion;
     let power = bombInfo.power;
-    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[power]);
+    let reverse = bombInfo.reverse;
+    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[power], reverse);
 }
 
 function makeEquip(equip){
@@ -427,6 +423,11 @@ function main(){
         document.body.innerHTML = ""
         renderer.domElement.setAttribute('id', 'scene');
         document.body.appendChild(renderer.domElement)
+        reverseTag = document.createElement("div")
+        reverseTag.setAttribute("class", "reverse")
+        let text = player.getUseReverse() ? "off" : "on"
+        reverseTag.textContent = `press "Shift" to turn ${text} bomb reverse gravity`
+        document.body.appendChild(reverseTag)
     }, 3000)
 
     // keyboard event listener
@@ -492,6 +493,10 @@ function main(){
     
     function animate() {
 
+        if (keysPressed[SPACE]){
+            player.jump();
+        }
+
         pointLight.position.copy(camera.position);
         pointLight.position.y += 10; // Adjust the Y-offset as needed
         pointLight.position.z += 5; // Adjust the Y-offset as needed
@@ -500,8 +505,8 @@ function main(){
         if (firstRender){
             // let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
             // setTimeout(bomb.remove(), 1000)
-            let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[1])
-            let bomb2 = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[2])
+            let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[1], false)
+            let bomb2 = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[2], false)
             player2.setBodyPos(player.getBodyPos())
             firstRender = false;
         }

@@ -28,7 +28,7 @@ export class Bomb {
     timeInterval;
     uuid;
     quaternion;
-    constructor(position, quaternion, physicsWorld, gameMap, generateByServer, power){
+    constructor(position, quaternion, physicsWorld, gameMap, generateByServer, power, reverse){
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
@@ -38,16 +38,15 @@ export class Bomb {
         this.exploded = false
         this.generateByServer = generateByServer
         this.power = power
+        this.reverse = reverse
         this.init()
 
     }
     init(){
-        console.log(this.power)
         if (this.power == BombPower[1]){
             this.bomb = bomb1.clone()
         }
         else if (this.power == BombPower[2]) {
-            // sphere = new THREE.SphereGeometry(this.radius*1.5,45,30);
             this.bomb = bomb2.clone()
         }
 
@@ -58,7 +57,7 @@ export class Bomb {
     }
     place(){
         this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius + 0.5, this.position.z + 0.5)
-        this.physicsWorld.addBomb(this.bomb, this.quaternion, this.uuid, this.position, this)
+        this.physicsWorld.addBomb(this.bomb, this.reverse, this.quaternion, this.uuid, this.position, this)
         scene.add(this.bomb)
         setTimeout(
             function (){

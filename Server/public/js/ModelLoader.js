@@ -132,7 +132,7 @@ export class ModelLoader {
     }
 
     plantBomb(){
-        return this.characterController.plantBomb(this.scene)
+        return this.characterController.plantBomb()
     }
 
     getPower(){
@@ -149,5 +149,13 @@ export class ModelLoader {
 
     isJumping(){
         return this.characterController.isJumping
+    }
+
+    getReverse(){
+        return this.characterController.reverse
+    }
+
+    getUseReverse(){
+        return this.characterController.useReverse
     }
 }

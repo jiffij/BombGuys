@@ -28,9 +28,6 @@ export class Equipments {
         this.tool = tool; // randomly select an equipment
         this.generateByServer = generateByServer
         this.removed = false
-        this.bootIntervalId;
-        this.gloveIntervalId;
-        this.jetIntervalId;
         this.init()
 
     }
@@ -46,6 +43,9 @@ export class Equipments {
         else if (this.tool == EQUIPMENT.POWER){
             this.equipment = star;
         }
+        // else if (this.tool == EQUIPMENT.POWER){
+        //     this.equipment = star;
+        // }
         else {
             this.equipment = new THREE.Mesh(box, material)
         }
@@ -53,7 +53,6 @@ export class Equipments {
         this.uuid = generateUUID()
         equipmentCollections[this.uuid] = this
         this.place()
-        console.log('equipment init');
         if (!this.generateByServer){
             socket.emit("createEquip", {
                 position: this.position,
@@ -78,29 +77,39 @@ export class Equipments {
 
     
     applyEquip(player){
-
         switch (this.tool) {
             case EQUIPMENT.BOOT:
                 player.CharacterController.boost = true;
-                clearInterval(this.bootIntervalId)
-                this.bootIntervalIt = setTimeout(() => {
+                clearTimeout(player.bootTimeoutId)
+                player.bootTimeoutId = setTimeout(() => {
                     player.CharacterController.boost = false;
                 }, 10000);
                 break;
 
             case EQUIPMENT.JET:
                 player.jet = true;
-                clearInterval(this.jetIntervalId)
-                this.jetIntervalId = setTimeout(() => {
+                clearTimeout(player.jetTimeoutId)
+                player.jetTimeoutId = setTimeout(() => {
                     player.jet = false;
                 }, 10000);
                 break;
             
             case EQUIPMENT.POWER:
                 player.CharacterController.power = 2;
-                setTimeout(() => {
+                clearTimeout(player.powerTimeoutId)
+                player.powerTimeoutId = setTimeout(() => {
                     player.CharacterController.power = 1;
                 }, 10000);
+                break;
+
+            case EQUIPMENT.REVERSE:
+                player.CharacterController.reverse = true;
+                if (player.reverseTimeoutId !== undefined) {
+                    clearTimeout(player.reverseTimeoutId)
+                  }
+                player.reverseTimeoutId = setTimeout(() => {
+                    player.CharacterController.reverse = false;
+                }, 15000);
                 break;
 
             default:

@@ -104,7 +104,6 @@ export class GameMap {
         // affect player
         let pos1 = player.getPos();
         let pos2 = player2.getPos();
-        console.log(Math.sqrt((pos1.x-pos[0])*(pos1.x-pos[0])+(pos1.y-pos[1])*(pos1.y-pos[1])+(pos1.z-pos[2])*(pos1.z-pos[2])))
         if (Math.sqrt((pos1.x-pos[0])*(pos1.x-pos[0])+(pos1.y-pos[1])*(pos1.y-pos[1])+(pos1.z-pos[2])*(pos1.z-pos[2])) < power){
             player.affectByBomb()
         }
@@ -166,13 +165,13 @@ export class GameMap {
                 }
               }
             if(possible_positions.length > 0){
-                if(Math.random() > 0.5){
+                if(Math.random() > 0.1){
                     const randomIndex = Math.floor(Math.random()*possible_positions.length);
                     var p = possible_positions[randomIndex];
                     var mesh = this.floorPieces[p.l][p.i][p.j];
                     console.log(mesh.position, mesh.quaternion);
-                    // let toolType = 2
-                    let toolType = Math.floor(Math.random()*3)
+                    let toolType = 3
+                    // let toolType = Math.floor(Math.random()*4)
                     const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, toolType, false);
                 }
             }
