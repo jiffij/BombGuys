@@ -324,7 +324,7 @@ function loadModel(playerInitialPos){
     player2.load()
     player = new ModelLoader(scene, skin1, animations, orbit, camera, phy, gameMap, true, player1pos, 'myself')
     player.load()
-    machine = new stateMachine(phy, scene)
+    machine = new stateMachine(phy, scene, gameMap)
 
     const creeperGeometry = new THREE.BoxGeometry(1, 1, 1);
     const creeperMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });

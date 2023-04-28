@@ -1,6 +1,8 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es/dist/cannon-es.js';
-
+import { BombPower } from './config.js';
+import { Bomb } from './Bomb.js';
+import { socket } from './client.js';
 // Define the state machine object
 const PLAYER = 1;
 const FLOOR = 2;
@@ -27,8 +29,10 @@ export class stateMachine{
     forcePerUnit = 5;
     onGround = true;
     currentTarget;
+    power = 1;
+    throwability = true;
 
-    constructor(phy, scene){
+    constructor(phy, scene, gameMap){
         this.physicsWorld = phy.physicsWorld;
         this.phy = phy;
         this.scene = scene;
@@ -37,6 +41,7 @@ export class stateMachine{
         this.finished = true;
         this.destination = new CANNON.Vec3(5,0,5);
         this.currentTarget = this.phy.players[0];
+        this.gameMap = gameMap;
         this.init();
     }
 
@@ -220,6 +225,30 @@ export class stateMachine{
       // console.log('walk');
       this.moveTowardDestination(dest, isjumping);
     }
+
+    plantBomb(){
+      if (this.throwability){
+          const position = this.mesh.position
+          // let r = this.reverse && this.useReverse
+          // console.log(this.reverse)
+          const quaternion = new THREE.Quaternion();
+          quaternion.set(
+            Math.random() - 0.5,
+            Math.random() - 0.5,
+            Math.random() - 0.5,
+            Math.random() - 0.5
+          );
+          quaternion.normalize();
+          const bomb = new Bomb(position, quaternion, this.phy, this.gameMap, false, BombPower[this.power], false)
+          socket.emit("plantBomb", {pos:position,quaternion:quaternion,power:this.power, reverse:false})
+          this.throwability = false
+          setTimeout(function(){
+              this.throwability = true
+          }.bind(this), 1500)
+          return true;
+        }
+      return false;
+    }
   
     // Define the state update function
     update() {
@@ -245,6 +274,7 @@ export class stateMachine{
             // Player is falling, apply a downwards force
             // player.applyForce(new CANNON.Vec3(0, -10, 0), player.position);
             // console.log("bomb");
+            this.plantBomb();
             break;
           case 'walk':
             // Player is walking, apply a forward force
