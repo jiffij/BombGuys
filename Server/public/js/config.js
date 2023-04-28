@@ -31,7 +31,7 @@ export const bodySphereRadius = 0.3;
 
 export const shootInterval = 0.8;
 export const serverIp = "157.245.56.113";
-export const dev = true;
+export const dev = false;
 export const playerNum = 2;
 
 export const EQUIPMENT = {
