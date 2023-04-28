@@ -165,13 +165,13 @@ export class GameMap {
                 }
               }
             if(possible_positions.length > 0){
-                if(Math.random() > 0.1){
+                if(Math.random() > 0.3){
                     const randomIndex = Math.floor(Math.random()*possible_positions.length);
                     var p = possible_positions[randomIndex];
                     var mesh = this.floorPieces[p.l][p.i][p.j];
                     console.log(mesh.position, mesh.quaternion);
-                    let toolType = 3
-                    // let toolType = Math.floor(Math.random()*4)
+                    // let toolType = 3
+                    let toolType = Math.floor(Math.random()*4)
                     const equip = new Equipments(mesh.position, mesh.quaternion, this.physicsWorld, this, toolType, false);
                 }
             }
