@@ -119,6 +119,14 @@ export class stateMachine{
                 // this.destination = e.contact.bi.position.clone();
             }
         }.bind(this))
+        let xMin = -15;
+        let xMax = 15;
+        let zMin = -15;
+        let zMax = 15;
+        let random_x = xMin + Math.random() * (xMax - xMin);
+        let random_z = zMin + Math.random() * (zMax - zMin);
+        this.body.position.set(random_x, 1, random_z);
+        
         console.log('finish statemachine init')
     }
 
@@ -289,12 +297,23 @@ export class stateMachine{
             this.moveTowardDestination(this.destination, false);
             break;
           case 'fall':
+            let xMin = -15;
+            let xMax = 15;
+            let yMin = 0;
+            let yMax = 0;
+            let zMin = -15;
+            let zMax = 15;
+            
+            let random_x = xMin + Math.random() * (xMax - xMin);
+            
+            let random_z = zMin + Math.random() * (zMax - zMin);
+            
             this.body.velocity.x = 0;
             this.body.velocity.y = 0;
             this.body.velocity.z = 0;
-            this.body.position.x = 0;
+            this.body.position.x = random_x;
             this.body.position.y = this.currentTarget.body.position.y + 0.5;
-            this.body.position.z = 0;
+            this.body.position.z = random_z;
             this.body.velocity.set(0,0,0);
             break;
         }
