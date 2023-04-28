@@ -37,7 +37,6 @@ export class Player{
         this.impulse = new CANNON.Vec3(0, jumpImpulse, 0)
         this.jet = false;
         this.jetimpulse = new CANNON.Vec3(0, jetImpulse, 0)
-        this.reverse = false;
     }
 
     rotate(quarternion){
@@ -70,7 +69,7 @@ export class Player{
 
     reverseGravity(){
         if(this.reverse) return;
-        console.log('reverse gravity');
+        // console.log('reverse gravity');
         this.reverse = true;
         this.body.velocity.y += 10;
         setTimeout(() => {
@@ -83,7 +82,7 @@ export class Player{
         if(this.jet){
             this.body.applyImpulse(this.jetimpulse, this.body.position);
         }else{
-            console.log("jump!")
+            // console.log("jump!")
             this.body.applyImpulse(this.impulse, this.body.position);
         }
         
@@ -134,6 +133,15 @@ export class Physics{
         this.bombs = {};
         this.bombsShouldRemove = [];
         this.equipments = {};
+        // Set reverse gravity for bombs
+        this.physicsWorld.addEventListener('postStep', () => {
+            for (let id in this.bombs) {
+                const bomb = this.bombs[id];
+                if (bomb.body.reverse){
+                    bomb.body.force.set(0, bomb.body.mass * 9.81 * 2, 0);
+                }
+            }
+        });
     }
 
 
@@ -164,7 +172,7 @@ export class Physics{
         this.floorpieces.push(new FloorTile(mesh, body));
     }
 
-    addBomb(mesh, quaternion, uuid, playerBodyPos, bombObject){
+    addBomb(mesh, reverse, quaternion, uuid, playerBodyPos, bombObject){
         const body = new CANNON.Body({
             mass: 1,
             shape: new CANNON.Sphere(bombConfig.bodyRadious),
@@ -175,37 +183,33 @@ export class Physics{
         body.position.x = playerBodyPos.x;
         body.position.y = mesh.position.y + 0.3; // it will touch the player otherwise
         body.position.z = playerBodyPos.z;
+        body.reverse = reverse
         this.physicsWorld.addBody(body);
 
         // todo: add up and forward impulse
-        const bombUpImpul = new CANNON.Vec3(0,bombUpImpulse,0)
-        body.applyImpulse(bombUpImpul, body.position)
+        if (!body.reverse){
+            const bombUpImpul = new CANNON.Vec3(0,bombUpImpulse,0)
+            body.applyImpulse(bombUpImpul, body.position)
 
-        //calculate the direction in physics world
-        const euler = new THREE.Euler().setFromQuaternion(quaternion);
-        var yRotation = euler.y;
-        if(euler.x < -1.5){
-            yRotation = -yRotation
-            yRotation = yRotation + Math.PI
-        } else if (yRotation < 0){
-            yRotation = Math.PI * 2 + yRotation
+                    //calculate the direction in physics world
+            const euler = new THREE.Euler().setFromQuaternion(quaternion);
+            var yRotation = euler.y;
+            if(euler.x < -1.5){
+                yRotation = -yRotation
+                yRotation = yRotation + Math.PI
+            } else if (yRotation < 0){
+                yRotation = Math.PI * 2 + yRotation
+            }
+            const length = bombForwardImpulse;
+            const Z = Math.cos(yRotation) * length;
+            const X = Math.sin(yRotation) * length;        
+            const bombForwardImpul = new CANNON.Vec3(X, 0, Z);
+
+            body.applyImpulse(bombForwardImpul, body.position)
         }
-        const length = bombForwardImpulse;
-        const Z = Math.cos(yRotation) * length;
-        const X = Math.sin(yRotation) * length;
-        // console.log(X, Z)
-      
-        const bombForwardImpul = new CANNON.Vec3(X, 0, Z);
-
-        body.applyImpulse(bombForwardImpul, body.position)
-
 
         body.addEventListener("collide", function(e){
             if (e.body.mass == 0){
-                // if (!this.bombsShouldRemove.includes(uuid)){
-                //     this.bombsShouldRemove.push(uuid)
-                // }
-                // body.type = CANNON.Body.STATIC
                 body.velocity.set(0, 0, 0);
                 setTimeout(
                     function (){
@@ -215,7 +219,6 @@ export class Physics{
                         catch{}
                     }
                 ,1500)
-
             }
         }.bind(this))
         this.bombs[uuid] = new PhysicsBomb(mesh, body);
@@ -238,14 +241,13 @@ export class Physics{
             setTimeout(function(){
                 if (Object.removed == false){
                     if (e.body.mass === 5){
-                        console.log(e.body.mass)
                         if (e.body.userData !== undefined){
                             Object.removed = true
-                            console.log('equipment collision');
+                            // console.log('equipment collision');
 
-                            console.log(e.body)
+                            // console.log(e.body)
                             if(e.body.userData.id != 'enemy'){
-                                console.log('hit equip');
+                                // console.log('hit equip');
                                 var myself = this.players.find(function(obj){
                                     return obj.playerId === 'myself';
                                 });

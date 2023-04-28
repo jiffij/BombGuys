@@ -12,3 +12,17 @@
     overflow: auto;
     pointer-events: none;
 }
+.reverse {
+    position: fixed;
+    z-index: 1000;
+    font-size: 20px;
+    right: 20px;
+    top: 20px;
+    padding: 5px;
+    background-color: #fff;
+    color: #f50c7a;
+    font-weight: bold;
+    overflow: auto;
+    pointer-events: none;
+    border-radius: 5px;
+}

@@ -12,6 +12,8 @@ export class EquipmentDisplayManager{
         this.bootIntervalID
         this.powerTag;
         this.powerIntervalID
+        this.reverseTag;
+        this.reverseIntervalID
         this.lineOrder = []
     }
     pickUp(type){
@@ -49,17 +51,28 @@ export class EquipmentDisplayManager{
                 clearInterval(this.powerIntervalID)
                 this.powerIntervalID = setInterval(this.updatePowerTime.bind(this), 1000)
                 break
+            case EQUIPMENT.REVERSE:
+                this.remainingTime["reverse"] = 15;
+                if (!this.lineOrder.includes("reverse")){
+                    this.lineOrder.push("reverse")
+                }
+                if (this.reverseTag == undefined){
+                    this.createReverseTag()
+                }
+                clearInterval(this.reverseIntervalID)
+                this.reverseIntervalID = setInterval(this.updateReverseTime.bind(this), 1000)
+                break
         }
     }
     updateJetTime(){
-        if (this.remainingTime["jet"]<=0){
+        if (this.remainingTime["jet"]<=1){
             this.removeJet()
         }
         this.remainingTime["jet"] -= 1;
         this.updateJetTag()
     }
     updateBootTime(){
-        if (this.remainingTime["boot"]<=0){
+        if (this.remainingTime["boot"]<=1){
             let index = this.lineOrder.indexOf("boot");
             this.lineOrder.splice(index,1);
             clearInterval(this.bootIntervalID);
@@ -71,7 +84,7 @@ export class EquipmentDisplayManager{
         this.updateBootTag()  
     }
     updatePowerTime(){
-        if (this.remainingTime["power"]<=0){
+        if (this.remainingTime["power"]<=1){
             let index = this.lineOrder.indexOf("power");
             this.lineOrder.splice(index,1);
             clearInterval(this.powerIntervalID);
@@ -81,6 +94,18 @@ export class EquipmentDisplayManager{
         }
         this.remainingTime["power"] -= 1;
         this.updatePowerTag()  
+    }
+    updateReverseTime(){
+        if (this.remainingTime["reverse"]<=1){
+            let index = this.lineOrder.indexOf("reverse");
+            this.lineOrder.splice(index,1);
+            clearInterval(this.reverseIntervalID);
+            this.reverseTag.remove();
+            this.reverseTag = undefined
+            this.updateOtherTag()
+        }
+        this.remainingTime["reverse"] -= 1;
+        this.updateReverseTag()  
     }
     createJetTag(){
         let otherBuff = this.checkBuffNum()
@@ -121,6 +146,19 @@ export class EquipmentDisplayManager{
     updatePowerTag(){
         this.powerTag.textContent = `power time remaining: ${this.remainingTime["power"]}`
     }
+    createReverseTag(){
+        let otherBuff = this.checkBuffNum()
+        this.reverseTag = document.createElement("div")
+        this.reverseTag.setAttribute("class", "toolInfo")
+        this.reverseTag.textContent = `reverse bomb gravity time remaining: ${this.remainingTime["reverse"]}`
+        let index = this.lineOrder.indexOf("reverse");
+        this.reverseTag.style["margin-top"] = `${index * 25+20}px`
+        console.log(otherBuff)
+        document.body.appendChild(this.reverseTag)
+    }
+    updateReverseTag(){
+        this.reverseTag.textContent = `reverse bomb gravity remaining: ${this.remainingTime["reverse"]}`
+    }
     removeJet(){
         this.remainingTime["jet"] = 0;
         let index = this.lineOrder.indexOf("jet");
@@ -142,6 +180,10 @@ export class EquipmentDisplayManager{
         if (this.remainingTime["power"] > 0){
             let index = this.lineOrder.indexOf("power");
             this.powerTag.style["margin-top"] = `${index * 25+20}px`
+        }
+        if (this.remainingTime["reverse"] > 0){
+            let index = this.lineOrder.indexOf("reverse");
+            this.reverseTag.style["margin-top"] = `${index * 25+20}px`
         }
     }
     checkBuffNum(){

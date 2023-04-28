@@ -35,6 +35,8 @@ export class CharacterController {
     // tool
     power = 1
     boost = false
+    reverse = false
+    useReverse = false
 
     constructor(model,
         mixer, animationsMap,
@@ -62,15 +64,18 @@ export class CharacterController {
         this.destination = this.model.position;
     }
 
-    switchRunToggle() {
-        this.toggleRun = !this.toggleRun
+    switchReverseToggle() {
+        this.useReverse = !this.useReverse
     }
 
-    plantBomb(scene){
+    plantBomb(){
         if (this.throwability){
             const position = this.model.position
-            const quaternion = this.model.quaternion
-            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[this.power])
+            let r = this.reverse && this.useReverse
+            console.log(this.reverse)
+            const quaternion = r ? new THREE.Quaternion() : this.model.quaternion
+            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[this.power], r)
+            socket.emit("plantBomb", {pos:this.model.position,quaternion:quaternion,power:this.power, reverse:r})
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true
@@ -157,9 +162,6 @@ export class CharacterController {
             if (verticalVelocity < 0.000000001){
                 verticalVelocity = 0
             }
-            if (verticalVelocity !== 0){
-                console.log(verticalVelocity)    
-            }
         
             // Move the character using the calculated movement vectors
             this.player.move(moveX, moveZ);
@@ -228,9 +230,6 @@ export class CharacterController {
             let verticalVelocity = this.player.getVerticalVelocity()
             if (verticalVelocity < 0.000000001){
                 verticalVelocity = 0
-            }
-            if (verticalVelocity !== 0){
-                console.log(verticalVelocity)    
             }
 
             // move model & camera
