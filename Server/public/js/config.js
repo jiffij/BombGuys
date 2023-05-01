@@ -27,11 +27,11 @@ export const jetImpulse = 60;
 export const bombUpImpulse = 1.5;
 export const bombForwardImpulse = 3;
 
-export const bodySphereRadius = 0.3;
+export const bodySphereRadius = 0.2;
 
 export const shootInterval = 0.8;
 export const serverIp = "157.245.56.113";
-export const dev = false;
+export const dev = true;
 export const playerNum = 2;
 
 export const EQUIPMENT = {

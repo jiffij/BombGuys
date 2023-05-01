@@ -74,8 +74,8 @@ export class CharacterController {
             let r = this.reverse && this.useReverse
             console.log(this.reverse)
             const quaternion = r ? new THREE.Quaternion() : this.model.quaternion
-            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[this.power], r)
-            socket.emit("plantBomb", {pos:this.model.position,quaternion:quaternion,power:this.power, reverse:r})
+            const bomb = new Bomb(position, quaternion, this.physicsWorld, this.gameMap, false, BombPower[this.power], r, true)
+            socket.emit("plantBomb", {pos:this.model.position,quaternion:quaternion,power:this.power, reverse:r, byPlayer:true})
             this.throwability = false
             setTimeout(function(){
                 this.throwability = true

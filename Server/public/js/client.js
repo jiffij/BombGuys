@@ -69,6 +69,7 @@ export let bomb2
 export let rocket
 export let shoes
 export let star
+export let arrow
 
 // html components
 let startButton;
@@ -158,6 +159,7 @@ async function loadAssets() {
             bomb1,
             bomb2,
             star,
+            arrow,
         ] = await Promise.all([
             loadAnimation('idle.fbx'),
             loadAnimation('run.fbx'),
@@ -172,9 +174,12 @@ async function loadAssets() {
             loadGLB('bomb1.glb'),
             loadGLB('bomb2.glb'),
             loadGLB('star.glb'),
+            loadFBX('arrow.fbx')
         ]);
             rocket.scale.set(0.002,0.002,0.002)
             shoes.scale.set(0.3,0.3,0.3)
+            arrow.scale.set(0.004,0.004,0.004)
+            arrow.rotateZ(Math.PI/2)
             bomb1.scale.set(0.025,0.025,0.025)
             bomb2.scale.set(0.005,0.005,0.005)
             star.scale.set(0.3,0.3,0.3)
@@ -409,7 +414,8 @@ function plantBombEvent(bombInfo){
     let quaternion = bombInfo.quaternion;
     let power = bombInfo.power;
     let reverse = bombInfo.reverse;
-    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[power], reverse);
+    let byPlayer = bombInfo.byPlayer
+    let bomb = new Bomb(pos, quaternion, phy, gameMap, true, BombPower[power], reverse, byPlayer);
 }
 
 function makeEquip(equip){
@@ -503,10 +509,8 @@ function main(){
         pointLight.position.x += 5; // Adjust the Y-offset as needed
 
         if (firstRender){
-            // let bomb = new Bomb(player.getBodyPos(), player.model.quaternion, phy, gameMap, true)
-            // setTimeout(bomb.remove(), 1000)
-            let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[1], false)
-            let bomb2 = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[2], false)
+            let bomb = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[1], false, false)
+            let bomb2 = new Bomb([1000,1000,1000], player.model.quaternion, phy, gameMap, true, BombPower[2], false, false)
             player2.setBodyPos(player.getBodyPos())
             firstRender = false;
         }

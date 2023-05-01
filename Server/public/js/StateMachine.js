@@ -247,8 +247,8 @@ export class stateMachine{
             Math.random() - 0.5
           );
           quaternion.normalize();
-          const bomb = new Bomb(position, quaternion, this.phy, this.gameMap, false, BombPower[this.power], false)
-          socket.emit("plantBomb", {pos:position,quaternion:quaternion,power:this.power, reverse:false})
+          const bomb = new Bomb(position, quaternion, this.phy, this.gameMap, false, BombPower[this.power], false, false)
+          socket.emit("plantBomb", {pos:position,quaternion:quaternion,power:this.power, reverse:false, byPlayer: false})
           this.throwability = false
           setTimeout(function(){
               this.throwability = true

@@ -172,7 +172,7 @@ export class Physics{
         this.floorpieces.push(new FloorTile(mesh, body));
     }
 
-    addBomb(mesh, reverse, quaternion, uuid, playerBodyPos, bombObject){
+    addBomb(mesh, reverse, quaternion, uuid, playerBodyPos, bombObject, byPlayer){
         const body = new CANNON.Body({
             mass: 1,
             shape: new CANNON.Sphere(bombConfig.bodyRadious),
@@ -187,7 +187,7 @@ export class Physics{
         this.physicsWorld.addBody(body);
 
         // todo: add up and forward impulse
-        if (!body.reverse){
+        if (!body.reverse && byPlayer){
             const bombUpImpul = new CANNON.Vec3(0,bombUpImpulse,0)
             body.applyImpulse(bombUpImpul, body.position)
 

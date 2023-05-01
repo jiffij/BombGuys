@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
 import { EQUIPMENT } from './config.js';
-import { equipmentDisplayManager, rocket, scene, shoes, socket, star } from './client.js';
+import { arrow, rocket, scene, shoes, socket, star } from './client.js';
 import { generateUUID } from './utils.js';
 import './client.js';
 
@@ -35,17 +35,18 @@ export class Equipments {
         const box = new THREE.BoxGeometry(0.5,0.5,0.5);
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         if (this.tool == EQUIPMENT.BOOT){
-            this.equipment = shoes;
+            this.equipment = shoes.clone();
         }
         else if (this.tool == EQUIPMENT.JET){
-            this.equipment = rocket;
+            this.equipment = rocket.clone();
         }
         else if (this.tool == EQUIPMENT.POWER){
-            this.equipment = star;
+            this.equipment = star.clone();
         }
-        // else if (this.tool == EQUIPMENT.POWER){
-        //     this.equipment = star;
-        // }
+        else if (this.tool == EQUIPMENT.REVERSE){
+            this.equipment = arrow.clone();
+            this.equipment.isArrow = true
+        }
         else {
             this.equipment = new THREE.Mesh(box, material)
         }
