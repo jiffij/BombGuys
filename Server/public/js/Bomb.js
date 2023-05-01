@@ -28,7 +28,7 @@ export class Bomb {
     timeInterval;
     uuid;
     quaternion;
-    constructor(position, quaternion, physicsWorld, gameMap, generateByServer, power, reverse){
+    constructor(position, quaternion, physicsWorld, gameMap, generateByServer, power, reverse, byPlayer){
         this.position = position
         this.radius = bombConfig.radius
         this.timeInterval = bombConfig.bufferTime
@@ -39,6 +39,7 @@ export class Bomb {
         this.generateByServer = generateByServer
         this.power = power
         this.reverse = reverse
+        this.byPlayer = byPlayer
         this.init()
 
     }
@@ -57,7 +58,7 @@ export class Bomb {
     }
     place(){
         this.bomb.position.set(this.position.x+0.5, this.position.y + this.radius + 0.5, this.position.z + 0.5)
-        this.physicsWorld.addBomb(this.bomb, this.reverse, this.quaternion, this.uuid, this.position, this)
+        this.physicsWorld.addBomb(this.bomb, this.reverse, this.quaternion, this.uuid, this.position, this, this.byPlayer)
         scene.add(this.bomb)
         setTimeout(
             function (){
