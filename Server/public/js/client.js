@@ -248,8 +248,8 @@ function initialize(){
 
     // orbit control
     orbit = new OrbitControls(camera, renderer.domElement)
-    orbit.minDistance = 4
-    orbit.maxDistance = 4
+    orbit.minDistance = 3
+    orbit.maxDistance = 3
     // // Disable rotation in the z direction
     orbit.minPolarAngle = Math.PI / 8; // Set minimum vertical rotation to 90 degrees (pointing upwards)
     orbit.maxPolarAngle = Math.PI / 9*5; // Set maximum vertical rotation to 90 degrees (pointing downwards)
